@@ -1,11 +1,11 @@
 import "./App.css";
-import { Button } from "@/components/ui/button";
+import CTA from "@/pages/cta/CTA";
 
 function App() {
   return (
-    <div>
-      <Button>hi</Button>
-    </div>
+    <>
+      <CTA />
+    </>
   );
 }
 
