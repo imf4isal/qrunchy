@@ -1,0 +1,23 @@
+services:
+  mono:
+    container_name: qrunchy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "pnpm install && pnpm dev"
+    ports:
+      - target: 5173
+        published: 5173
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      ROLLUP_SKIP_NATIVE: "true"
+    volumes:
+      - ./:/app
+    networks:
+      - qrunchy-network
+
+networks:
+  qrunchy-network:
+    driver: bridge
