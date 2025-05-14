@@ -41,6 +41,16 @@ const ImprovedSortableImages = () => {
     }
   };
 
+  const handleDragEnd = (): void => {
+    dragItem.current = null;
+    dragOverItem.current = null;
+    setDraggedIndex(null);
+  };
+
+  const handleDrop = (): void => {
+    handleDragEnd();
+  };
+
   return (
     <div className="flex flex-col w-full max-w-xl mx-auto p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-xl font-bold mb-4 text-center">
@@ -62,6 +72,8 @@ const ImprovedSortableImages = () => {
             onDragOver={(e: React.DragEvent<HTMLDivElement>) =>
               e.preventDefault()
             }
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
           >
             <div className="mr-3 text-gray-500">
               <Move size={20} />
