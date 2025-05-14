@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Camera, MenuSquare } from "lucide-react";
+import { Link } from "wouter";
 
 const CTA = () => {
   return (
@@ -11,10 +12,12 @@ const CTA = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center">
-          <Button className="flex items-center gap-2 px-6" variant="outline">
-            <Camera size={20} />
-            <span>Photo Menu</span>
-          </Button>
+          <Link href="/photomenu">
+            <Button className="flex items-center gap-2 px-6" variant="outline">
+              <Camera size={20} />
+              <span>Photo Menu</span>
+            </Button>
+          </Link>
 
           <Button className="flex items-center gap-2 px-6">
             <MenuSquare size={20} />

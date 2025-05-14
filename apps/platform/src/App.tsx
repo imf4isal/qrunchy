@@ -1,8 +1,8 @@
 import "./App.css";
 import CTA from "@/pages/cta/CTA";
-import SortableImages from "./components/micro/SortableImages";
 import { Switch, Route } from "wouter";
 import { ROUTES } from "./router";
+import SortableImages from "./pages/photomenu/SortableImages";
 
 function App() {
   return (

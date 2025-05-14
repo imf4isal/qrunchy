@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Move } from "lucide-react";
+import ImageUploader from "./ImageUploader";
 
 interface ImageItem {
   id: number;
@@ -7,7 +8,7 @@ interface ImageItem {
   alt: string;
 }
 
-const ImprovedSortableImages = () => {
+const SortableImages = () => {
   const [images, setImages] = useState<ImageItem[]>([
     { id: 1, url: "/api/placeholder/600/400", alt: "Image 1" },
     { id: 2, url: "/api/placeholder/600/400", alt: "Image 2" },
@@ -53,6 +54,7 @@ const ImprovedSortableImages = () => {
 
   return (
     <div className="flex flex-col w-full max-w-xl mx-auto p-4 bg-white rounded-lg shadow-md">
+      <ImageUploader />
       <h2 className="text-xl font-bold mb-4 text-center">
         Sortable Image Gallery
       </h2>
@@ -97,4 +99,4 @@ const ImprovedSortableImages = () => {
   );
 };
 
-export default ImprovedSortableImages;
+export default SortableImages;
