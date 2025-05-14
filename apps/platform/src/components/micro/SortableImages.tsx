@@ -1,43 +1,44 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Move } from "lucide-react";
 
-const SortableImages = () => {
-  const [images, setImages] = useState([
+interface ImageItem {
+  id: number;
+  url: string;
+  alt: string;
+}
+
+const ImprovedSortableImages = () => {
+  const [images, setImages] = useState<ImageItem[]>([
     { id: 1, url: "/api/placeholder/600/400", alt: "Image 1" },
     { id: 2, url: "/api/placeholder/600/400", alt: "Image 2" },
     { id: 3, url: "/api/placeholder/600/400", alt: "Image 3" },
     { id: 4, url: "/api/placeholder/600/400", alt: "Image 4" },
   ]);
 
-  const [draggedItem, setDraggedItem] = useState<null | number>();
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
-  const handleDragStart = (e: any, index: any) => {
-    setDraggedItem(index);
-    // This makes the dragged item transparent for better UX
-    e.currentTarget.style.opacity = "0.4";
+  const handleDragStart = (index: number): void => {
+    dragItem.current = index;
+    setDraggedIndex(index);
   };
 
-  const handleDragOver = (e: any, index: any) => {
-    e.preventDefault();
-    const draggedOverItem = images[index];
+  const handleDragEnter = (index: number): void => {
+    dragOverItem.current = index;
 
-    // If item is dragged over itself, ignore
-    if (draggedItem === index) return;
+    const imagesCopy = [...images];
 
-    // Filter out the currently dragged item
-    let newItems = images.filter((_, idx) => idx !== draggedItem);
+    if (dragItem.current !== null) {
+      const draggedItemContent = imagesCopy[dragItem.current];
 
-    // Add the dragged item after the dragged over item
-    draggedItem && newItems.splice(index, 0, images[draggedItem]);
+      imagesCopy.splice(dragItem.current, 1);
+      imagesCopy.splice(dragOverItem.current, 0, draggedItemContent);
 
-    setDraggedItem(index);
-    setImages(newItems);
-  };
+      dragItem.current = dragOverItem.current;
 
-  const handleDragEnd = (e: any) => {
-    // Reset the opacity
-    e.currentTarget.style.opacity = "1";
-    setDraggedItem(null);
+      setImages(imagesCopy);
+    }
   };
 
   return (
@@ -50,11 +51,17 @@ const SortableImages = () => {
         {images.map((image, index) => (
           <div
             key={image.id}
-            className="flex items-center p-2 bg-gray-50 rounded-lg border border-gray-200 cursor-move"
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDragEnd={handleDragEnd}
+            className={`flex items-center p-2 rounded-lg border transition-all duration-200 ${
+              draggedIndex === index
+                ? "border-blue-500 bg-blue-50 shadow-lg"
+                : "border-gray-200 bg-gray-50"
+            } cursor-move`}
+            draggable={true}
+            onDragStart={() => handleDragStart(index)}
+            onDragEnter={() => handleDragEnter(index)}
+            onDragOver={(e: React.DragEvent<HTMLDivElement>) =>
+              e.preventDefault()
+            }
           >
             <div className="mr-3 text-gray-500">
               <Move size={20} />
@@ -64,6 +71,7 @@ const SortableImages = () => {
                 src={image.url}
                 alt={image.alt}
                 className="w-full h-48 object-cover rounded"
+                draggable={false}
               />
             </div>
           </div>
@@ -77,4 +85,4 @@ const SortableImages = () => {
   );
 };
 
-export default SortableImages;
+export default ImprovedSortableImages;
