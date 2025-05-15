@@ -8,8 +8,15 @@ interface UploadedImage {
   preview: string;
 }
 
-const ImageUploader = () => {
-  const [images, setImages] = useState<UploadedImage[]>([]);
+interface ImageUploaderProps {
+  onImagesAdded: (images: UploadedImage[]) => void;
+  existingImages?: UploadedImage[];
+}
+
+const ImageUploader = ({
+  onImagesAdded,
+  existingImages = [],
+}: ImageUploaderProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,17 +38,18 @@ const ImageUploader = () => {
       preview: URL.createObjectURL(file),
     }));
 
-    setImages((prev) => [...prev, ...newImages]);
+    onImagesAdded(newImages);
   };
 
   const removeImage = (id: string) => {
-    setImages((prev) => {
-      const imageToRemove = prev.find((img) => img.id === id);
-      if (imageToRemove) {
-        URL.revokeObjectURL(imageToRemove.preview);
-      }
-      return prev.filter((img) => img.id !== id);
-    });
+    const updatedImages = existingImages.filter((img) => img.id !== id);
+    const removedImage = existingImages.find((img) => img.id === id);
+
+    if (removedImage) {
+      URL.revokeObjectURL(removedImage.preview);
+    }
+
+    onImagesAdded(updatedImages);
   };
 
   const handleAreaClick = () => {
@@ -69,13 +77,18 @@ const ImageUploader = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Upload Images</h2>
+    <div className="w-full">
+      <h2 className="text-xl font-bold mb-4">Upload Menu Images</h2>
+      <p className="text-gray-600 mb-6">
+        Upload photos of your restaurant menu. You can add multiple images if
+        your menu has several pages.
+      </p>
 
-      {/* Upload Area */}
       <div
-        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${
-          isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
+        className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors ${
+          isDragging
+            ? "border-blue-500 bg-blue-50"
+            : "border-gray-300 hover:border-gray-400"
         }`}
         onClick={handleAreaClick}
         onDragOver={handleDragOver}
@@ -92,7 +105,7 @@ const ImageUploader = () => {
         />
 
         <Upload className="mx-auto h-12 w-12 text-gray-400" />
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-3 text-sm text-gray-600">
           Drag and drop images here, or click to select files
         </p>
         <p className="mt-1 text-xs text-gray-500">
@@ -100,30 +113,34 @@ const ImageUploader = () => {
         </p>
       </div>
 
-      {images.length > 0 && (
-        <div className="mt-6">
+      {existingImages.length > 0 && (
+        <div className="mt-8">
           <h3 className="font-medium mb-3">
-            Uploaded Images ({images.length})
+            Uploaded Images ({existingImages.length})
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {images.map((image) => (
-              <div key={image.id} className="relative group">
+            {existingImages.map((image) => (
+              <div
+                key={image.id}
+                className="relative group overflow-hidden rounded-lg"
+              >
                 <img
                   src={image.preview}
                   alt={image.file.name}
-                  className="h-32 w-full object-cover rounded border border-gray-200"
+                  className="h-32 w-full object-cover transition-transform group-hover:scale-105"
                 />
 
                 <button
                   type="button"
                   onClick={() => removeImage(image.id)}
-                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 bg-white text-red-500 rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Remove image"
                 >
                   <X size={16} />
                 </button>
 
-                <p className="text-xs mt-1 truncate">{image.file.name}</p>
+                <p className="text-xs mt-1 truncate px-1">{image.file.name}</p>
               </div>
             ))}
           </div>
