@@ -1,143 +1,151 @@
 // src/pages/photomenu/PhotoMenu.tsx
-import React, { useState } from "react";
+import { useState } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import MainLayout from "@/components/layout/MainLayout";
 import ImageUploader from "./ImageUploader";
 import SortableImages from "./SortableImages";
 
-export default function PhotoMenu() {
-  const [images, setImages] = useState<string[]>([]);
-  const [step, setStep] = useState<"upload" | "arrange" | "qr">("upload");
+interface UploadedImage {
+  id: string;
+  file: File;
+  preview: string;
+}
 
-  const handleImagesUploaded = (newImages: string[]) => {
+// We'll maintain the flow state in the parent component
+export default function PhotoMenu() {
+  const [step, setStep] = useState<"upload" | "sort" | "generate">("upload");
+  const [images, setImages] = useState<UploadedImage[]>([]);
+
+  const handleImagesUploaded = (newImages: UploadedImage[]) => {
     setImages((prev) => [...prev, ...newImages]);
-    if (images.length > 0 || newImages.length > 0) {
-      setStep("arrange");
+  };
+
+  const handleNext = () => {
+    if (step === "upload") {
+      setStep("sort");
+    } else if (step === "sort") {
+      setStep("generate");
     }
   };
 
-  const handleImageOrderChange = (newOrder: string[]) => {
-    setImages(newOrder);
-  };
-
-  const handleProceedToQR = () => {
-    setStep("qr");
+  const handleBack = () => {
+    if (step === "sort") {
+      setStep("upload");
+    } else if (step === "generate") {
+      setStep("sort");
+    }
   };
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-center">
-          Create Photo Menu
-        </h1>
-
-        {/* Step indicator */}
-        <div className="flex items-center justify-center mb-12">
-          <div
-            className={`flex items-center ${
-              step === "upload" ? "text-blue-600" : "text-gray-400"
-            }`}
-          >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-current">
-              1
-            </div>
-            <span className="ml-2">Upload</span>
-          </div>
-          <div className="w-12 h-0.5 mx-2 bg-gray-300"></div>
-          <div
-            className={`flex items-center ${
-              step === "arrange" ? "text-blue-600" : "text-gray-400"
-            }`}
-          >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-current">
-              2
-            </div>
-            <span className="ml-2">Arrange</span>
-          </div>
-          <div className="w-12 h-0.5 mx-2 bg-gray-300"></div>
-          <div
-            className={`flex items-center ${
-              step === "qr" ? "text-blue-600" : "text-gray-400"
-            }`}
-          >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-current">
-              3
-            </div>
-            <span className="ml-2">Generate QR</span>
-          </div>
-        </div>
-
-        {/* Content based on current step */}
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <div className="container mx-auto px-4 py-12">
         <div className="max-w-3xl mx-auto">
-          {step === "upload" && (
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Upload Menu Images</h2>
-              <p className="text-gray-600 mb-6">
-                Upload photos of your menu. You can upload multiple images if
-                your menu has multiple pages.
-              </p>
-              <ImageUploader onImagesUploaded={handleImagesUploaded} />
-            </Card>
-          )}
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-3xl font-bold text-gray-800">
+              Create Photo Menu
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Upload and arrange your menu photos to create a QR code menu for
+              your restaurant
+            </p>
+          </div>
 
-          {step === "arrange" && (
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Arrange Images</h2>
-              <p className="text-gray-600 mb-6">
-                Drag and drop to arrange your menu images in the correct order.
-              </p>
-              <SortableImages
-                images={images}
-                onOrderChange={handleImageOrderChange}
-              />
-              <div className="flex justify-between mt-8">
-                <Button variant="outline" onClick={() => setStep("upload")}>
-                  Back to Upload
-                </Button>
-                <Button onClick={handleProceedToQR}>Continue</Button>
+          {/* Progress Steps */}
+          <div className="flex justify-between items-center mb-12 relative">
+            <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-200 -z-10"></div>
+
+            <div
+              className={`flex flex-col items-center ${step === "upload" ? "text-blue-600" : "text-gray-400"}`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${step === "upload" ? "bg-blue-600 text-white" : "bg-white border-2 border-current"}`}
+              >
+                1
               </div>
-            </Card>
-          )}
+              <span className="mt-2 text-sm font-medium">Upload</span>
+            </div>
 
-          {step === "qr" && (
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Generate QR Code</h2>
-              <p className="text-gray-600 mb-6">
-                You're ready to create your QR code! Choose how you want to
-                proceed.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="p-4 border-2 border-blue-100 hover:border-blue-500 cursor-pointer">
-                  <h3 className="font-semibold mb-2">Self-Serve QR</h3>
-                  <p className="text-sm text-gray-600">
-                    Generate a QR code instantly. You'll need to create an
-                    account to keep it active.
-                  </p>
-                </Card>
-
-                <Card className="p-4 border-2 border-blue-100 hover:border-blue-500 cursor-pointer">
-                  <h3 className="font-semibold mb-2">Request QR</h3>
-                  <p className="text-sm text-gray-600">
-                    We'll set up your QR code and send you your login details.
-                  </p>
-                </Card>
+            <div
+              className={`flex flex-col items-center ${step === "sort" ? "text-blue-600" : "text-gray-400"}`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${step === "sort" ? "bg-blue-600 text-white" : "bg-white border-2 border-current"}`}
+              >
+                2
               </div>
+              <span className="mt-2 text-sm font-medium">Arrange</span>
+            </div>
 
-              <div className="mt-8">
-                <Button
-                  variant="outline"
-                  onClick={() => setStep("arrange")}
-                  className="mr-4"
-                >
-                  Back
-                </Button>
+            <div
+              className={`flex flex-col items-center ${step === "generate" ? "text-blue-600" : "text-gray-400"}`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${step === "generate" ? "bg-blue-600 text-white" : "bg-white border-2 border-current"}`}
+              >
+                3
               </div>
-            </Card>
-          )}
+              <span className="mt-2 text-sm font-medium">Generate QR</span>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="bg-white rounded-xl shadow-sm border p-8">
+            {step === "upload" && (
+              <div>
+                <ImageUploader
+                  onImagesAdded={handleImagesUploaded}
+                  existingImages={images}
+                />
+                <div className="mt-8 flex justify-end">
+                  <Button
+                    onClick={handleNext}
+                    disabled={images.length === 0}
+                    className="flex items-center gap-2"
+                  >
+                    Continue <ArrowRight size={16} />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {step === "sort" && (
+              <div>
+                <SortableImages images={images} setImages={setImages} />
+                <div className="mt-8 flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={handleBack}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeft size={16} /> Back
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    className="flex items-center gap-2"
+                  >
+                    Continue <ArrowRight size={16} />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {step === "generate" && (
+              <div>
+                <div className="mt-8 flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={handleBack}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeft size={16} /> Back
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }
