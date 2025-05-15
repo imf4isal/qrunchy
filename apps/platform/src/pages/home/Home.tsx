@@ -9,13 +9,11 @@ export default function Home() {
     <MainLayout>
       <div className="bg-gradient-to-b from-white to-gray-100">
         <div className="container mx-auto px-4 py-12 md:py-24">
-          {/* Hero Section */}
           <div className="text-center mb-16">
             <div className="mb-8">
-              {/* Replace with your logo */}
-              <div className="mx-auto w-36 h-12 bg-blue-600 flex items-center justify-center text-white text-xl font-bold rounded-md">
+              {/* <div className="mx-auto w-36 h-12 bg-blue-600 flex items-center justify-center text-white text-xl font-bold rounded-md">
                 Qrunchy
-              </div>
+              </div> */}
             </div>
 
             <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
