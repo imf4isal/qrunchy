@@ -42,6 +42,21 @@ export default function PhotoMenu() {
     }
   };
 
+  const handleImageRemoved = (id: string) => {
+    setImages((prev) => {
+      // Find the image to be removed
+      const imageToRemove = prev.find((img) => img.id === id);
+
+      // Revoke the object URL to prevent memory leaks
+      if (imageToRemove) {
+        URL.revokeObjectURL(imageToRemove.preview);
+      }
+
+      // Return the filtered array
+      return prev.filter((img) => img.id !== id);
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-4 py-12">
@@ -56,13 +71,10 @@ export default function PhotoMenu() {
             </p>
           </div>
 
-          {/* Refined Progress Steps UI */}
           <div className="mb-16">
             <div className="relative">
-              {/* Background Track */}
               <div className="absolute left-5 right-5 top-7 h-1 bg-gray-100 rounded-full"></div>
 
-              {/* Animated Fill Track */}
               <div
                 className="absolute left-5 top-7 h-1 bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
                 style={{
@@ -72,13 +84,14 @@ export default function PhotoMenu() {
                       : step === "sort"
                         ? "50%"
                         : qrGenerated
-                          ? "100%"
+                          ? "calc(100% - 25px)"
                           : "67%",
+                  maxWidth: "calc(100% - 25px)",
                 }}
               ></div>
 
               <div className="relative flex justify-between">
-                {/* Step 1 - Upload */}
+                {/* upload */}
                 <div className="flex flex-col items-center z-10">
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
@@ -130,7 +143,7 @@ export default function PhotoMenu() {
                   </span>
                 </div>
 
-                {/* Step 2 - Arrange */}
+                {/* arange */}
                 <div className="flex flex-col items-center z-10">
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
@@ -182,7 +195,7 @@ export default function PhotoMenu() {
                   </span>
                 </div>
 
-                {/* Step 3 - Generate QR */}
+                {/* generate QR */}
                 <div className="flex flex-col items-center z-10">
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
@@ -256,6 +269,7 @@ export default function PhotoMenu() {
               <div>
                 <ImageUploader
                   onImagesAdded={handleImagesUploaded}
+                  onImageRemoved={handleImageRemoved}
                   existingImages={images}
                 />
                 <div className="mt-8 flex justify-end">

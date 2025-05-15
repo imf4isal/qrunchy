@@ -10,11 +10,13 @@ interface UploadedImage {
 
 interface ImageUploaderProps {
   onImagesAdded: (images: UploadedImage[]) => void;
+  onImageRemoved: (id: string) => void; // New prop for removing images
   existingImages?: UploadedImage[];
 }
 
 const ImageUploader = ({
   onImagesAdded,
+  onImageRemoved, // Add this prop
   existingImages = [],
 }: ImageUploaderProps) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -42,14 +44,9 @@ const ImageUploader = ({
   };
 
   const removeImage = (id: string) => {
-    const updatedImages = existingImages.filter((img) => img.id !== id);
-    const removedImage = existingImages.find((img) => img.id === id);
-
-    if (removedImage) {
-      URL.revokeObjectURL(removedImage.preview);
-    }
-
-    onImagesAdded(updatedImages);
+    // Instead of trying to update the images array here,
+    // just notify the parent component to remove this image
+    onImageRemoved(id);
   };
 
   const handleAreaClick = () => {
