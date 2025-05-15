@@ -1,4 +1,3 @@
-// src/pages/photomenu/PhotoMenu.tsx
 import { useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,9 +14,14 @@ interface UploadedImage {
 export default function PhotoMenu() {
   const [step, setStep] = useState<"upload" | "sort" | "generate">("upload");
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const [qrGenerated, setQrGenerated] = useState(false);
 
   const handleImagesUploaded = (newImages: UploadedImage[]) => {
     setImages((prev) => [...prev, ...newImages]);
+  };
+
+  const handleQrGenerated = () => {
+    setQrGenerated(true);
   };
 
   const handleNext = () => {
@@ -33,6 +37,8 @@ export default function PhotoMenu() {
       setStep("upload");
     } else if (step === "generate") {
       setStep("sort");
+      // Reset QR generation state when going back from generate step
+      setQrGenerated(false);
     }
   };
 
@@ -50,44 +56,6 @@ export default function PhotoMenu() {
             </p>
           </div>
 
-          {/* Progress Steps
-          <div className="flex justify-between items-center mb-12 relative">
-            <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-200 -z-10"></div>
-
-            <div
-              className={`flex flex-col items-center ${step === "upload" ? "text-blue-600" : "text-gray-400"}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${step === "upload" ? "bg-blue-600 text-white" : "bg-white border-2 border-current"}`}
-              >
-                1
-              </div>
-              <span className="mt-2 text-sm font-medium">Upload</span>
-            </div>
-
-            <div
-              className={`flex flex-col items-center ${step === "sort" ? "text-blue-600" : "text-gray-400"}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${step === "sort" ? "bg-blue-600 text-white" : "bg-white border-2 border-current"}`}
-              >
-                2
-              </div>
-              <span className="mt-2 text-sm font-medium">Arrange</span>
-            </div>
-
-            <div
-              className={`flex flex-col items-center ${step === "generate" ? "text-blue-600" : "text-gray-400"}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${step === "generate" ? "bg-blue-600 text-white" : "bg-white border-2 border-current"}`}
-              >
-                3
-              </div>
-              <span className="mt-2 text-sm font-medium">Generate QR</span>
-            </div>
-          </div> */}
-
           {/* Refined Progress Steps UI */}
           <div className="mb-16">
             <div className="relative">
@@ -99,7 +67,13 @@ export default function PhotoMenu() {
                 className="absolute left-5 top-7 h-1 bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
                 style={{
                   width:
-                    step === "upload" ? "0%" : step === "sort" ? "50%" : "100%",
+                    step === "upload"
+                      ? "0%"
+                      : step === "sort"
+                        ? "50%"
+                        : qrGenerated
+                          ? "100%"
+                          : "67%",
                 }}
               ></div>
 
@@ -108,13 +82,13 @@ export default function PhotoMenu() {
                 <div className="flex flex-col items-center z-10">
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
-            ${
-              step === "upload"
-                ? "border-blue-500 bg-white text-blue-500"
-                : step === "sort" || step === "generate"
-                  ? "border-blue-500 bg-blue-500 text-white"
-                  : "border-gray-200 bg-white text-gray-400"
-            }`}
+                      ${
+                        step === "upload"
+                          ? "border-blue-500 bg-white text-blue-500"
+                          : step === "sort" || step === "generate"
+                            ? "border-blue-500 bg-blue-500 text-white"
+                            : "border-gray-200 bg-white text-gray-400"
+                      }`}
                   >
                     {step === "sort" || step === "generate" ? (
                       <svg
@@ -150,7 +124,7 @@ export default function PhotoMenu() {
                   </div>
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300
-          ${step === "upload" || step === "sort" || step === "generate" ? "text-blue-600" : "text-gray-500"}`}
+                      ${step === "upload" || step === "sort" || step === "generate" ? "text-blue-600" : "text-gray-500"}`}
                   >
                     Upload
                   </span>
@@ -160,13 +134,13 @@ export default function PhotoMenu() {
                 <div className="flex flex-col items-center z-10">
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
-            ${
-              step === "sort"
-                ? "border-blue-500 bg-white text-blue-500"
-                : step === "generate"
-                  ? "border-blue-500 bg-blue-500 text-white"
-                  : "border-gray-200 bg-white text-gray-400"
-            }`}
+                      ${
+                        step === "sort"
+                          ? "border-blue-500 bg-white text-blue-500"
+                          : step === "generate"
+                            ? "border-blue-500 bg-blue-500 text-white"
+                            : "border-gray-200 bg-white text-gray-400"
+                      }`}
                   >
                     {step === "generate" ? (
                       <svg
@@ -202,7 +176,7 @@ export default function PhotoMenu() {
                   </div>
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300
-          ${step === "sort" || step === "generate" ? "text-blue-600" : "text-gray-500"}`}
+                      ${step === "sort" || step === "generate" ? "text-blue-600" : "text-gray-500"}`}
                   >
                     Arrange
                   </span>
@@ -212,13 +186,15 @@ export default function PhotoMenu() {
                 <div className="flex flex-col items-center z-10">
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
-      ${
-        step === "generate"
-          ? "border-blue-500 bg-blue-500 text-white"
-          : "border-gray-200 bg-white text-gray-400"
-      }`}
+                      ${
+                        qrGenerated
+                          ? "border-blue-500 bg-blue-500 text-white"
+                          : step === "generate"
+                            ? "border-blue-500 bg-white text-blue-500"
+                            : "border-gray-200 bg-white text-gray-400"
+                      }`}
                   >
-                    {step === "generate" ? (
+                    {qrGenerated ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6"
@@ -252,7 +228,7 @@ export default function PhotoMenu() {
                   </div>
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300
-    ${step === "generate" ? "text-blue-600" : "text-gray-500"}`}
+                      ${step === "generate" ? "text-blue-600" : "text-gray-500"}`}
                   >
                     QR Code
                   </span>
@@ -267,10 +243,13 @@ export default function PhotoMenu() {
                   ? "Upload photos of your menu - you can add multiple pages"
                   : step === "sort"
                     ? "Drag and drop to arrange your menu in the correct order"
-                    : "Generate your QR code and make it available to customers"}
+                    : qrGenerated
+                      ? "Your QR code is ready to share with customers"
+                      : "Generate your QR code and make it available to customers"}
               </p>
             </div>
           </div>
+
           {/* Content */}
           <div className="bg-white rounded-xl shadow-sm border p-8">
             {step === "upload" && (
@@ -314,7 +293,10 @@ export default function PhotoMenu() {
 
             {step === "generate" && (
               <div>
-                <QRCodeGenerator images={images} />
+                <QRCodeGenerator
+                  images={images}
+                  onQrGenerated={handleQrGenerated}
+                />
                 <div className="mt-8 flex justify-between">
                   <Button
                     variant="outline"
