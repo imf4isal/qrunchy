@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ImageUploader from "./ImageUploader";
 import SortableImages from "./SortableImages";
+import QRCodeGenerator from "./QRCodeGenerator";
 
 interface UploadedImage {
   id: string;
@@ -132,6 +133,7 @@ export default function PhotoMenu() {
 
             {step === "generate" && (
               <div>
+                <QRCodeGenerator images={images} />
                 <div className="mt-8 flex justify-between">
                   <Button
                     variant="outline"
