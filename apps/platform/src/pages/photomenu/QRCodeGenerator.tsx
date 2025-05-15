@@ -1,3 +1,4 @@
+// src/pages/photomenu/QRCodeGenerator.tsx
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { QrCode, Download, Copy, Check } from "lucide-react";
@@ -10,9 +11,10 @@ interface UploadedImage {
 
 interface QRCodeGeneratorProps {
   images: UploadedImage[];
+  onQrGenerated?: () => void;
 }
 
-const QRCodeGenerator = ({ images }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({ images, onQrGenerated }: QRCodeGeneratorProps) => {
   const [qrType, setQrType] = useState<"self" | "assisted" | null>(null);
   const [qrGenerated, setQrGenerated] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -34,19 +36,24 @@ const QRCodeGenerator = ({ images }: QRCodeGeneratorProps) => {
       setShowForm(true);
     } else {
       setShowForm(false);
-      // demo
-      setQrGenerated(true);
+      // For self-serve, we'll show a button to generate QR
     }
   };
 
-  const handleGenerateQR = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGenerateQR = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
     setQrGenerated(true);
     setShowForm(false);
+
+    // Call the parent's callback to update the step indicator
+    if (onQrGenerated) {
+      onQrGenerated();
+    }
   };
 
   const handleCopyLink = () => {
-    // copy the actual qr
+    // In a real app, you'd copy the actual QR code URL
     navigator.clipboard.writeText("https://qrunchy.com/menu/sample-qr-code");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -160,9 +167,9 @@ const QRCodeGenerator = ({ images }: QRCodeGeneratorProps) => {
             </div>
           )}
 
-          {qrType === "self" && (
+          {qrType === "self" && !showForm && (
             <div className="mt-6 flex justify-center">
-              <Button onClick={() => setQrGenerated(true)}>
+              <Button onClick={() => handleGenerateQR()}>
                 Generate QR Code
               </Button>
             </div>
