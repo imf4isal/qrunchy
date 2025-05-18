@@ -6,8 +6,8 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "node --loader ts-node/esm src/index.ts",
-    "dev:watch": "nodemon --watch src --ext ts --exec \"node --loader ts-node/esm src/index.ts\"",
+    "dev": "node --loader ts-node/esm src/index.mts",
+    "dev:watch": "nodemon --watch src --ext ts --exec \"node --loader ts-node/esm src/index.mts\"",
     "build": "tsc"
   },
   "keywords": [],
