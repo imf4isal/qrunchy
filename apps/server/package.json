@@ -14,11 +14,13 @@
   "author": "Faisal",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "pg": "^8.16.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.2",
     "@types/node": "^20.17.47",
+    "@types/pg": "^8.15.2",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3"
