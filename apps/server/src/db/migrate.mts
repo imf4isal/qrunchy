@@ -22,3 +22,25 @@ async function runLatestMigrations() {
 
   await db.destroy();
 }
+
+async function migrateDown() {
+  const migrator = getMigrator(db);
+
+  const { error, results } = await migrator.migrateDown();
+
+  if (error) {
+    console.error("Failed to migrate down");
+    console.error(error);
+    process.exit(1);
+  }
+
+  if (results?.length) {
+    results.forEach((it) => {
+      console.log(`Migration "${it.migrationName}" was reverted successfully`);
+    });
+  } else {
+    console.log("No migrations were executed");
+  }
+
+  await db.destroy();
+}
