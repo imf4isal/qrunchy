@@ -1,0 +1,17 @@
+import { Kysely, PostgresDialect } from "kysely";
+import { Pool } from "pg";
+import { Database } from "../types/database.mjs";
+
+const dialect = new PostgresDialect({
+  pool: new Pool({
+    host: process.env.DB_HOST || "postgres",
+    port: Number(process.env.DB_PORT || 5432),
+    database: process.env.DB_NAME || "qrunchy_db",
+    user: process.env.DB_USER || "qrunchy",
+    password: process.env.DB_PASSWORD || "qrunchy_password",
+  }),
+});
+
+export const db = new Kysely<Database>({
+  dialect,
+});
