@@ -1,7 +1,8 @@
+import { fileURLToPath } from "url";
 import { db } from "./index.mjs";
 import { getMigrator } from "./migrator.mjs";
 
-async function runLatestMigrations() {
+async function migrateToLatest() {
   const migrator = getMigrator(db);
 
   const { error, results } = await migrator.migrateToLatest();
@@ -44,3 +45,16 @@ async function migrateDown() {
 
   await db.destroy();
 }
+
+//  if this file was executed directly from the cli
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const command = process.argv[2];
+
+  if (command === "down") {
+    migrateDown().catch(console.error);
+  } else {
+    migrateToLatest().catch(console.error);
+  }
+}
+
+export { migrateToLatest, migrateDown };
