@@ -14,11 +14,11 @@ services:
         published: 3000
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: qrunchy_db
-      DB_USER: qrunchy
-      DB_PASSWORD: qrunchy_password
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./:/app
     networks:
@@ -31,9 +31,9 @@ services:
     container_name: qrunchy-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: qrunchy
-      POSTGRES_PASSWORD: qrunchy_password
-      POSTGRES_DB: qrunchy_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - target: 5432
