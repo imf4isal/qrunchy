@@ -11,6 +11,8 @@ const trpcApiEndpoint = "/api/trpc";
 export async function setupTrpcServer(app: express.Express) {
   app.use(cors());
 
+  console.log("Router keys:", Object.keys(appRouter._def.record));
+
   app.use(
     trpcApiEndpoint,
     createExpressMiddleware({
@@ -19,7 +21,7 @@ export async function setupTrpcServer(app: express.Express) {
     })
   );
 
-  if (process.env.NODE_ENV === "development") {
+  if (true || process.env.NODE_ENV === "development") {
     app.use(
       playgroundEndpoint,
       await expressHandler({

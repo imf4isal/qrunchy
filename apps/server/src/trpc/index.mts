@@ -7,7 +7,7 @@ export const createContext = async (): Promise<Context> => {
   return {};
 };
 
-const t = initTRPC.context<Context>().create({
+const t = initTRPC.context<Context>().meta().create({
   transformer: SuperJSON,
 });
 
