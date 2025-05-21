@@ -3,8 +3,13 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import MainLayout from "@/components/layout/MainLayout";
+import { trpc } from "@/utils/trpc";
 
 export default function Home() {
+  const { data: test } = trpc.hello.hello.useQuery({ name: "faisal" });
+
+  console.log(test);
+
   return (
     <MainLayout>
       <div className="bg-gradient-to-b from-white to-gray-100">

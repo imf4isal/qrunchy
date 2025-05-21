@@ -26,6 +26,18 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.6
         version: 4.1.6(vite@6.3.5(@types/node@22.15.17)(jiti@2.4.2)(lightningcss@1.29.2))
+      '@tanstack/react-query':
+        specifier: ^5.76.1
+        version: 5.76.1(react@19.1.0)
+      '@trpc/client':
+        specifier: ^11.1.2
+        version: 11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3)
+      '@trpc/react-query':
+        specifier: ^11.1.2
+        version: 11.1.2(@tanstack/react-query@5.76.1(react@19.1.0))(@trpc/client@11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.1.2(typescript@5.8.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)
+      '@trpc/server':
+        specifier: ^11.1.2
+        version: 11.1.2(typescript@5.8.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -47,6 +59,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.6
         version: 4.1.6
+      trpc-client-devtools-link:
+        specifier: ^0.1.1
+        version: 0.1.1(@trpc/client@11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.1.2(typescript@5.8.3))
       wouter:
         specifier: ^3.7.0
         version: 3.7.0(react@19.1.0)
@@ -978,6 +993,14 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6
 
+  '@tanstack/query-core@5.76.0':
+    resolution: {integrity: sha512-FN375hb8ctzfNAlex5gHI6+WDXTNpe0nbxp/d2YJtnP+IBM6OUm7zcaoCW6T63BawGOYZBbKC0iPvr41TteNVg==}
+
+  '@tanstack/react-query@5.76.1':
+    resolution: {integrity: sha512-YxdLZVGN4QkT5YT1HKZQWiIlcgauIXEIsMOTSjvyD5wLYK8YVvKZUPAysMqossFJJfDpJW3pFn7WNZuPOqq+fw==}
+    peerDependencies:
+      react: ^18 || ^19
+
   '@tootallnate/quickjs-emscripten@0.23.0':
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
 
@@ -988,6 +1011,22 @@ packages:
     resolution: {integrity: sha512-Ap5aNaVlglfM9WLkPLKF2rHDZ8CwHcqK32A8YaqTyHUuoEFTSOh6oSgVU6Cv8toxClKiTXFvbWmE4aZxIoh4Zg==}
     peerDependencies:
       '@trpc/server': ^10
+
+  '@trpc/client@11.1.2':
+    resolution: {integrity: sha512-RpifJOAv+ql9gF3oafa3dLCF01AzWu2DzejvehAPG2IlwHxopKoYXaImJ8zPwRkZokuWiKz5v65HjElmi8TlrQ==}
+    peerDependencies:
+      '@trpc/server': 11.1.2
+      typescript: '>=5.7.2'
+
+  '@trpc/react-query@11.1.2':
+    resolution: {integrity: sha512-Ws3oIaj0qqbVIUyfYd9uFBwqk7eRqsxaLhLKN7grskoBo8wkh/CUADcN6ZD+GGogC3Dsg9S4WhgU1jVgfc/ahg==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.67.1
+      '@trpc/client': 11.1.2
+      '@trpc/server': 11.1.2
+      react: '>=18.2.0'
+      react-dom: '>=18.2.0'
+      typescript: '>=5.7.2'
 
   '@trpc/server@11.1.2':
     resolution: {integrity: sha512-Oi9zWHG0ZDkbDo4sYkduoV7q4sIe6UwjrRLC91vNMYQK+PVgpbTCmK1laRwewAGu0zaayqcGDosANjceOIC3GA==}
@@ -3071,6 +3110,10 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
+  superjson@1.13.3:
+    resolution: {integrity: sha512-mJiVjfd2vokfDxsQPOwJ/PtanO87LhpYY88ubI5dUB1Ab58Txbyje3+jpm+/83R/fevaq/107NNhtYBLuoTrFg==}
+    engines: {node: '>=10'}
+
   superjson@2.2.2:
     resolution: {integrity: sha512-5JRxVqC8I8NuOUjzBbvVJAKNM8qoVuH0O77h4WInc/qC2q5IreqKxYwgkga3PfA22OayK2ikceb/B26dztPl+Q==}
     engines: {node: '>=16'}
@@ -3135,6 +3178,12 @@ packages:
   touch@3.1.1:
     resolution: {integrity: sha512-r0eojU4bI8MnHr8c5bNo7lJDdI2qXlWWJk6a9EAFG7vbhTjElYhBVS3/miuE0uOuoLdb8Mc/rVfsmm6eo5o9GA==}
     hasBin: true
+
+  trpc-client-devtools-link@0.1.1:
+    resolution: {integrity: sha512-/KXczcvdbd0TVjj4Tm3irFi3hyxYwUtJ038v0rN9taxmFkkTO2nHnu/aKXBLFUopxmFuHQuIzBN7Nse3eWVT1w==}
+    peerDependencies:
+      '@trpc/client': ^9.27.2
+      '@trpc/server': ^9.27.2
 
   trpc-playground@1.0.4:
     resolution: {integrity: sha512-6nVf1o2LNoo1g6oTS24yajoH7xV4CFjxGAbAH7qLXqa3yo9qB5QHsWLbrm1hNt51SyCG++P0zHJaCdVfgvEVDg==}
@@ -4066,6 +4115,13 @@ snapshots:
       tailwindcss: 4.1.6
       vite: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(lightningcss@1.29.2)
 
+  '@tanstack/query-core@5.76.0': {}
+
+  '@tanstack/react-query@5.76.1(react@19.1.0)':
+    dependencies:
+      '@tanstack/query-core': 5.76.0
+      react: 19.1.0
+
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
   '@trpc-playground/html@1.0.4(@types/node@20.17.47)(lightningcss@1.29.2)':
@@ -4087,6 +4143,20 @@ snapshots:
       ts-essentials: 9.4.2(typescript@5.8.3)
     transitivePeerDependencies:
       - typescript
+
+  '@trpc/client@11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3)':
+    dependencies:
+      '@trpc/server': 11.1.2(typescript@5.8.3)
+      typescript: 5.8.3
+
+  '@trpc/react-query@11.1.2(@tanstack/react-query@5.76.1(react@19.1.0))(@trpc/client@11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.1.2(typescript@5.8.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)':
+    dependencies:
+      '@tanstack/react-query': 5.76.1(react@19.1.0)
+      '@trpc/client': 11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3)
+      '@trpc/server': 11.1.2(typescript@5.8.3)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      typescript: 5.8.3
 
   '@trpc/server@11.1.2(typescript@5.8.3)':
     dependencies:
@@ -6552,6 +6622,10 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
+  superjson@1.13.3:
+    dependencies:
+      copy-anything: 3.0.5
+
   superjson@2.2.2:
     dependencies:
       copy-anything: 3.0.5
@@ -6616,6 +6690,12 @@ snapshots:
   toidentifier@1.0.1: {}
 
   touch@3.1.1: {}
+
+  trpc-client-devtools-link@0.1.1(@trpc/client@11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3))(@trpc/server@11.1.2(typescript@5.8.3)):
+    dependencies:
+      '@trpc/client': 11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3)
+      '@trpc/server': 11.1.2(typescript@5.8.3)
+      superjson: 1.13.3
 
   trpc-playground@1.0.4(@trpc/server@11.1.2(typescript@5.8.3))(@types/node@20.17.47)(express@5.1.0)(lightningcss@1.29.2)(typescript@5.8.3)(zod@3.25.7):
     dependencies:
