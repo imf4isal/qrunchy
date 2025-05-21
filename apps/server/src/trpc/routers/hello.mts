@@ -6,7 +6,7 @@ export const helloRouter = router({
     .input(z.object({ name: z.string().optional() }))
     .query(({ input }) => {
       return {
-        greeting: `Hello ${input.name}!`,
+        greeting: `Hello ${input.name || "world"}!`,
         time: new Date().toISOString(),
       };
     }),
