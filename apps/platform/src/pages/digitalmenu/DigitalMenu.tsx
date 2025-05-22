@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 import QRCodeGenerator from "../photomenu/QRCodeGenerator";
 import MenuBuilder from "./MenuBuilder";
+import MenuPreview from "./MenuPreview";
 
 export default function DigitalMenu() {
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
@@ -375,7 +376,7 @@ export default function DigitalMenu() {
                     <div
                       className={`${showPreview ? "block" : "hidden lg:block"}`}
                     >
-                      {/* <MenuPreview menu={menu} /> */}
+                      <MenuPreview menu={menu} />
                     </div>
                   </div>
                 </div>
