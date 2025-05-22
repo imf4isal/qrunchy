@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
+import ItemEditor from "./ItemEditor";
 
 interface MenuBuilderProps {
   menu: DigitalMenu;
@@ -275,14 +276,14 @@ export default function MenuBuilder({
       </div>
 
       {/* Item Editor Modal */}
-      {/* {showItemEditor && editingItem && (
+      {showItemEditor && editingItem && (
         <ItemEditor
           item={editingItem}
           categories={menu.categories}
           onSave={handleSaveItem}
           onClose={handleCloseItemEditor}
         />
-      )} */}
+      )}
     </div>
   );
 }
