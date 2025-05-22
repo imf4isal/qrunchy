@@ -31,7 +31,7 @@ export default function PhotoMenuPreview({
 
       setTimeout(() => {
         setCurrentPage((prev) => prev + 1);
-        setTimeout(() => setIsFlipping(false), 300);
+        setTimeout(() => setIsFlipping(false), 600);
       }, 300);
     }
   };
@@ -43,7 +43,7 @@ export default function PhotoMenuPreview({
 
       setTimeout(() => {
         setCurrentPage((prev) => prev - 1);
-        setTimeout(() => setIsFlipping(false), 300);
+        setTimeout(() => setIsFlipping(false), 600);
       }, 300);
     }
   };
@@ -55,7 +55,7 @@ export default function PhotoMenuPreview({
 
       setTimeout(() => {
         setCurrentPage(pageIndex);
-        setTimeout(() => setIsFlipping(false), 300);
+        setTimeout(() => setIsFlipping(false), 600);
       }, 300);
     }
   };
@@ -96,7 +96,87 @@ export default function PhotoMenuPreview({
   }
 
   return (
-    <div className="w-full max-w-sm mx-auto photo-menu-preview">
+    <div className="w-full max-w-sm mx-auto">
+      {/* Custom CSS for page flip animation */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          .page-flip-container {
+            perspective: 1000px;
+            height: 320px;
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .page-flip-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease-in-out;
+          }
+          
+          .page-flip-wrapper.flipping-next {
+            transform: rotateY(-180deg);
+            transform-origin: right center;
+          }
+          
+          .page-flip-wrapper.flipping-prev {
+            transform: rotateY(180deg);
+            transform-origin: left center;
+          }
+          
+          .page-current, .page-next {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            overflow: hidden;
+          }
+          
+          .page-current {
+            z-index: 2;
+          }
+          
+          .page-next {
+            transform: rotateY(180deg);
+            z-index: 1;
+          }
+          
+          .page-flip-wrapper.flipping-next .page-current::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+              rgba(0,0,0,0) 0%, 
+              rgba(0,0,0,0.1) 50%, 
+              rgba(0,0,0,0.3) 100%);
+            z-index: 3;
+            pointer-events: none;
+          }
+          
+          .page-flip-wrapper.flipping-next .page-current::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(225deg, 
+              rgba(255,255,255,0.8) 0%, 
+              rgba(0,0,0,0.1) 100%);
+            box-shadow: -2px -2px 4px rgba(0,0,0,0.2);
+            z-index: 4;
+            pointer-events: none;
+          }
+        `,
+        }}
+      />
+
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-xl">
         <div className="flex items-center justify-between">
@@ -114,30 +194,55 @@ export default function PhotoMenuPreview({
       </div>
 
       {/* Book Container */}
-      <div className="relative bg-white border-l border-r border-gray-200 overflow-hidden">
+      <div className="relative bg-white border-l border-r border-gray-200">
         <div
-          className="book-container"
+          className="page-flip-container"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Current Page */}
           <div
-            className={`page-wrapper ${isFlipping ? "flipping" : ""} ${flipDirection}`}
-            style={{
-              transform: isFlipping
+            className={`page-flip-wrapper ${
+              isFlipping
                 ? flipDirection === "next"
-                  ? "rotateY(-180deg)"
-                  : "rotateY(180deg)"
-                : "rotateY(0deg)",
-            }}
+                  ? "flipping-next"
+                  : "flipping-prev"
+                : ""
+            }`}
           >
-            <div className="page-content">
+            {/* Current Page */}
+            <div className="page-current bg-white shadow-lg">
               <img
                 src={images[currentPage]?.preview}
                 alt={`Menu page ${currentPage + 1}`}
                 className="w-full h-80 object-contain bg-gray-50"
               />
+            </div>
+
+            {/* Next Page (for flip effect) */}
+            <div className="page-next bg-white shadow-lg">
+              {flipDirection === "next" && currentPage < totalPages - 1 ? (
+                <img
+                  src={images[currentPage + 1]?.preview}
+                  alt={`Menu page ${currentPage + 2}`}
+                  className="w-full h-80 object-contain bg-gray-50"
+                />
+              ) : flipDirection === "prev" && currentPage > 0 ? (
+                <img
+                  src={images[currentPage - 1]?.preview}
+                  alt={`Menu page ${currentPage}`}
+                  className="w-full h-80 object-contain bg-gray-50"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-80 bg-gray-100">
+                  <div className="text-center text-gray-400">
+                    <div className="w-16 h-16 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gray-300 rounded"></div>
+                    </div>
+                    <p className="text-xs">Menu Page</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -149,7 +254,7 @@ export default function PhotoMenuPreview({
             variant="ghost"
             onClick={handlePrevPage}
             disabled={currentPage === 0 || isFlipping}
-            className="pointer-events-auto bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+            className="pointer-events-auto bg-white/80 hover:bg-white/90 backdrop-blur-sm shadow-sm"
           >
             <ChevronLeft size={16} />
           </Button>
@@ -159,7 +264,7 @@ export default function PhotoMenuPreview({
             variant="ghost"
             onClick={handleNextPage}
             disabled={currentPage === totalPages - 1 || isFlipping}
-            className="pointer-events-auto bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+            className="pointer-events-auto bg-white/80 hover:bg-white/90 backdrop-blur-sm shadow-sm"
           >
             <ChevronRight size={16} />
           </Button>
@@ -172,15 +277,16 @@ export default function PhotoMenuPreview({
       </div>
 
       {/* Page Dots */}
-      <div className="bg-white border-l border-r border-b border-gray-200 p-3 rounded-b-xl">
+      <div className="bg-white border-l border-r border-b border-gray-200 p-3">
         <div className="flex justify-center space-x-2">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => handlePageClick(index)}
+              disabled={isFlipping}
               className={`w-2 h-2 rounded-full transition-colors ${
                 index === currentPage ? "bg-blue-600" : "bg-gray-300"
-              }`}
+              } ${isFlipping ? "opacity-50" : "hover:bg-blue-400"}`}
             />
           ))}
         </div>
@@ -197,59 +303,6 @@ export default function PhotoMenuPreview({
           </div>
         </div>
       </div>
-
-      <style>{`
-        .photo-menu-preview .book-container {
-          perspective: 1000px;
-          height: 320px;
-        }
-        
-        .photo-menu-preview .page-wrapper {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          transform-style: preserve-3d;
-          transition: transform 0.6s ease-in-out;
-        }
-        
-        .photo-menu-preview .page-content {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          backface-visibility: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .photo-menu-preview .page-wrapper.flipping {
-          pointer-events: none;
-        }
-        
-        .photo-menu-preview .page-wrapper.next {
-          transform-origin: right center;
-        }
-        
-        .photo-menu-preview .page-wrapper.prev {
-          transform-origin: left center;
-        }
-        
-        .photo-menu-preview .page-wrapper::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(90deg, 
-            rgba(0,0,0,0.1) 0%, 
-            transparent 5%, 
-            transparent 95%, 
-            rgba(0,0,0,0.1) 100%);
-          pointer-events: none;
-          z-index: 1;
-        }
-      `}</style>
     </div>
   );
 }

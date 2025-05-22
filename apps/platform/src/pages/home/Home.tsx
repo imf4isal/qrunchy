@@ -139,7 +139,7 @@ export default function Home() {
 
               {/* Placeholder for video or demo */}
               <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">Demo Video</span>
+                <span className="text-gray-500">Ashbe, Wait...</span>
               </div>
             </div>
           </div>
