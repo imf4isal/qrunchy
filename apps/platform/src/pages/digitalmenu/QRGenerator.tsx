@@ -18,8 +18,6 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
   });
 
   const handleGenerateQR = () => {
-    // For now, we'll just show the generated state
-    // In a real app, this would call the backend
     setIsGenerated(true);
     if (onQrGenerated) {
       onQrGenerated();
@@ -64,7 +62,6 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
 
       {!isGenerated ? (
         <div className="space-y-6">
-          {/* Menu Summary */}
           <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="font-medium mb-2">Menu Summary</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -119,7 +116,7 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
             </div>
           </div>
 
-          {/* Account Form Modal */}
+          {/* form */}
           {showAuthForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
@@ -182,7 +179,7 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
           )}
         </div>
       ) : (
-        /* Generated QR Code */
+        /* qr */
         <div className="text-center space-y-6">
           <div className="inline-block p-8 bg-white border-2 border-gray-200 rounded-xl shadow-sm">
             <div className="w-48 h-48 bg-gray-100 flex items-center justify-center rounded-lg">
