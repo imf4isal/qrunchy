@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 import QRCodeGenerator from "../photomenu/QRCodeGenerator";
+import MenuBuilder from "./MenuBuilder";
 
 export default function DigitalMenu() {
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
@@ -304,11 +305,11 @@ export default function DigitalMenu() {
 
                 {step === "build" && (
                   <div>
-                    {/* <MenuBuilder
+                    <MenuBuilder
                       menu={menu}
                       onCategoriesChange={handleCategoriesChange}
                       onItemsChange={handleItemsChange}
-                    /> */}
+                    />
 
                     <div className="mt-8 flex justify-between">
                       <Button
