@@ -8,10 +8,7 @@ const NotFoundPage = () => {
         Page Not Found
       </h2>
 
-      <p className="text-xl text-gray-600 mb-8">
-        The page you are looking for might have been removed or is temporarily
-        unavailable.
-      </p>
+      <p className="text-xl text-gray-600 mb-8">Kaj choltese...</p>
 
       <Link href="/">
         <a className="px-6 py-3 bg-blue-500 text-white rounded-lg text-lg hover:bg-gray-600 transition-colors">
