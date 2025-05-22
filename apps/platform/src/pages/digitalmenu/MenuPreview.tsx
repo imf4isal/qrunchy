@@ -19,7 +19,15 @@ export default function MenuPreview({ menu }: MenuPreviewProps) {
 
   return (
     <div className="max-h-96 overflow-y-auto">
-      <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white relative">
+        <div className="absolute top-2 right-2">
+          <div className="flex items-center text-xs opacity-75">
+            <div className="w-4 h-4 bg-white bg-opacity-20 rounded mr-1 flex items-center justify-center text-white font-bold text-xs">
+              Q
+            </div>
+            qrunchy
+          </div>
+        </div>
         <h2 className="text-lg font-bold">
           {menu.restaurantName || "Restaurant Name"}
         </h2>
@@ -123,8 +131,15 @@ export default function MenuPreview({ menu }: MenuPreviewProps) {
         )}
       </div>
 
-      <div className="p-4 bg-gray-50 text-center text-xs text-gray-500">
-        Powered by Qrunchy
+      <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-t border-gray-100">
+        <div className="flex items-center justify-center text-xs text-gray-500">
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded mr-2 flex items-center justify-center text-white font-bold text-xs">
+              Q
+            </div>
+            <span className="font-medium">Powered by Qrunchy</span>
+          </div>
+        </div>
       </div>
     </div>
   );

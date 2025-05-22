@@ -1,12 +1,12 @@
+// src/pages/digitalmenu/DigitalMenu.tsx
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
-import QRCodeGenerator from "../photomenu/QRCodeGenerator";
 import MenuBuilder from "./MenuBuilder";
 import MenuPreview from "./MenuPreview";
+import QRGenerator from "./QRGenerator";
+import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function DigitalMenu() {
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
@@ -56,6 +56,12 @@ export default function DigitalMenu() {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-2xl font-bold rounded-xl mb-4">
+                Q
+              </div>
+              <div className="text-sm text-gray-500 font-medium">QRUNCHY</div>
+            </div>
             <h1 className="text-3xl font-bold text-gray-800">
               Create Digital Menu
             </h1>
@@ -65,6 +71,7 @@ export default function DigitalMenu() {
             </p>
           </div>
 
+          {/* Progress Bar */}
           <div className="mb-16">
             <div className="relative">
               <div className="absolute left-5 right-5 top-7 h-1 bg-gray-100 rounded-full"></div>
@@ -84,6 +91,7 @@ export default function DigitalMenu() {
               ></div>
 
               <div className="relative flex justify-between">
+                {/* Setup */}
                 <div className="flex flex-col items-center z-10">
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
@@ -138,6 +146,7 @@ export default function DigitalMenu() {
                   </span>
                 </div>
 
+                {/* Build */}
                 <div className="flex flex-col items-center z-10">
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
@@ -336,10 +345,10 @@ export default function DigitalMenu() {
 
                 {step === "generate" && (
                   <div>
-                    {/* <QRCodeGenerator
+                    <QRGenerator
                       menu={menu}
                       onQrGenerated={handleQrGenerated}
-                    /> */}
+                    />
 
                     <div className="mt-8 flex justify-between">
                       <Button
