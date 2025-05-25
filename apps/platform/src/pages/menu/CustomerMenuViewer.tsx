@@ -131,7 +131,13 @@ export default function CustomerMenuViewer({
           </div>
 
           <div className="px-6 pb-4 bg-white border-b">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <div
+              className="flex gap-2 overflow-x-auto category-scroll"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(156, 163, 175, 0.5) transparent",
+              }}
+            >
               <button
                 onClick={() => setSelectedCategory("all")}
                 className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
@@ -241,7 +247,7 @@ function MenuItemCard({ item }: MenuItemCardProps) {
           </div>
           <div className="ml-4 text-right">
             <div className="text-xl font-bold text-gray-900">
-              ${item.price.toFixed(2)}
+              ৳{item.price.toFixed(2)}
             </div>
           </div>
         </div>
@@ -292,7 +298,7 @@ function MenuItemCard({ item }: MenuItemCardProps) {
                           </span>
                           <span className="text-sm font-medium text-gray-900">
                             {option.price > 0
-                              ? `+$${option.price.toFixed(2)}`
+                              ? `+৳${option.price.toFixed(2)}`
                               : "No extra charge"}
                           </span>
                         </div>
@@ -314,7 +320,7 @@ function MenuItemCard({ item }: MenuItemCardProps) {
                             {addon.name}
                           </span>
                           <span className="text-sm font-medium text-gray-900">
-                            +${addon.price.toFixed(2)}
+                            +৳{addon.price.toFixed(2)}
                           </span>
                         </div>
                       ))}

@@ -118,3 +118,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+.category-scroll::-webkit-scrollbar {
+  height: 2px;
+}
+.category-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.category-scroll::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 1px;
+}
+.category-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
