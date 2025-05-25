@@ -1,6 +1,6 @@
-// apps/platform/src/data/dummyMenuData.ts
+import type { Restaurant, Menu, QrCodeData } from "@/types/digitalMenu";
 
-export const dummyRestaurant = {
+export const dummyRestaurant: Restaurant = {
   id: "rest_001",
   name: "Bella Vista Italiana",
   description: "Authentic Italian cuisine in the heart of the city",
@@ -13,7 +13,7 @@ export const dummyRestaurant = {
     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=400&fit=crop",
 };
 
-export const dummyMenu = {
+export const dummyMenu: Menu = {
   categories: [
     { id: "cat_1", name: "Appetizers", sortOrder: 0 },
     { id: "cat_2", name: "Pasta & Risotto", sortOrder: 1 },
@@ -205,7 +205,7 @@ export const dummyMenu = {
 };
 
 // QR Code dummy data
-export const dummyQrData = {
+export const dummyQrData: Record<string, QrCodeData> = {
   qr_001: {
     id: "qr_001",
     type: "digital",

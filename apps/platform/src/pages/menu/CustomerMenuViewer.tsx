@@ -1,38 +1,46 @@
 import React, { useState, useMemo } from "react";
 import { Search, Share2, MapPin, Phone, Clock, Star } from "lucide-react";
 import { dummyRestaurant, dummyMenu } from "@/data/dummyData";
-import type { MenuItem } from "@/types/digitalMenu";
+import type { Category, MenuItem } from "@/types/digitalMenu";
 
-export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+interface CustomerMenuViewerProps {
+  qrCode?: string;
+}
 
-  // Filter items based on search and category
+export default function CustomerMenuViewer({
+  qrCode,
+}: CustomerMenuViewerProps) {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
   const filteredItems = useMemo(() => {
     let items = dummyMenu.items;
 
-    // Filter by category
     if (selectedCategory !== "all") {
-      items = items.filter((item) => item.categoryId === selectedCategory);
+      items = items.filter(
+        (item: MenuItem) => item.categoryId === selectedCategory
+      );
     }
 
-    // Filter by search term
     if (searchTerm) {
       items = items.filter(
-        (item) =>
+        (item: MenuItem) =>
           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchTerm.toLowerCase())
+          (item.description &&
+            item.description.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
     return items;
   }, [searchTerm, selectedCategory]);
 
-  const getItemsForCategory = (categoryId: string) => {
-    return filteredItems.filter((item) => item.categoryId === categoryId);
+  const getItemsForCategory = (categoryId: string): MenuItem[] => {
+    return filteredItems.filter(
+      (item: MenuItem) => item.categoryId === categoryId
+    );
   };
 
-  const handleShare = async () => {
+  const handleShare = async (): Promise<void> => {
     if (navigator.share) {
       try {
         await navigator.share({
@@ -44,7 +52,6 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
         console.log("Error sharing:", err);
       }
     } else {
-      // Fallback - copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert("Menu link copied to clipboard!");
     }
@@ -52,10 +59,8 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with Restaurant Info */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="relative">
-          {/* Restaurant Image Header */}
           <div className="h-48 bg-gradient-to-r from-amber-500 to-orange-500 relative overflow-hidden">
             <div
               className="absolute inset-0 bg-cover bg-center opacity-80"
@@ -63,7 +68,6 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
             />
             <div className="absolute inset-0 bg-black bg-opacity-40" />
 
-            {/* Share Button */}
             <button
               onClick={handleShare}
               className="absolute top-4 right-4 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-2 rounded-full shadow-lg transition-all"
@@ -72,7 +76,6 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
             </button>
           </div>
 
-          {/* Restaurant Details */}
           <div className="px-6 py-6 bg-white">
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
@@ -110,7 +113,6 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
               </div>
             </div>
 
-            {/* Search Bar */}
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -120,13 +122,14 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
                 type="text"
                 placeholder="Search menu items..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchTerm(e.target.value)
+                }
                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
               />
             </div>
           </div>
 
-          {/* Category Filter */}
           <div className="px-6 pb-4 bg-white border-b">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               <button
@@ -139,7 +142,7 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
               >
                 All
               </button>
-              {dummyMenu.categories.map((category) => (
+              {dummyMenu.categories.map((category: Category) => (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
@@ -157,14 +160,12 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
         </div>
       </div>
 
-      {/* Menu Content */}
       <div className="px-6 py-6">
         {selectedCategory === "all" ? (
-          // Show all categories
           <div className="space-y-8">
             {dummyMenu.categories
-              .sort((a, b) => a.sortOrder - b.sortOrder)
-              .map((category) => {
+              .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
+              .map((category: Category) => {
                 const categoryItems = getItemsForCategory(category.id);
                 if (categoryItems.length === 0) return null;
 
@@ -183,9 +184,8 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
               })}
           </div>
         ) : (
-          // Show filtered category
           <div className="space-y-4">
-            {filteredItems.map((item) => (
+            {filteredItems.map((item: MenuItem) => (
               <MenuItemCard key={item.id} item={item} />
             ))}
           </div>
@@ -203,7 +203,6 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
         )}
       </div>
 
-      {/* Footer */}
       <div className="mt-12 bg-white border-t px-6 py-8">
         <div className="text-center">
           <div className="flex items-center justify-center mb-3">
@@ -221,8 +220,12 @@ export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
   );
 }
 
-function MenuItemCard({ item }: { item: MenuItem }) {
-  const [showDetails, setShowDetails] = useState(false);
+interface MenuItemCardProps {
+  item: MenuItem;
+}
+
+function MenuItemCard({ item }: MenuItemCardProps) {
+  const [showDetails, setShowDetails] = useState<boolean>(false);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
@@ -243,7 +246,6 @@ function MenuItemCard({ item }: { item: MenuItem }) {
           </div>
         </div>
 
-        {/* Variants and Add-ons Preview */}
         {(item.variants.length > 0 || item.addons.length > 0) && (
           <div className="flex flex-wrap gap-2 mb-3">
             {item.variants.map((variant) => (
@@ -263,7 +265,6 @@ function MenuItemCard({ item }: { item: MenuItem }) {
           </div>
         )}
 
-        {/* Expandable Details */}
         {(item.variants.length > 0 || item.addons.length > 0) && (
           <div>
             <button
@@ -275,7 +276,6 @@ function MenuItemCard({ item }: { item: MenuItem }) {
 
             {showDetails && (
               <div className="mt-4 pt-4 border-t border-gray-100">
-                {/* Variants */}
                 {item.variants.map((variant) => (
                   <div key={variant.id} className="mb-4">
                     <h4 className="font-medium text-gray-900 mb-2">
@@ -301,7 +301,6 @@ function MenuItemCard({ item }: { item: MenuItem }) {
                   </div>
                 ))}
 
-                {/* Add-ons */}
                 {item.addons.length > 0 && (
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Add-ons:</h4>

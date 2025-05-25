@@ -1,4 +1,3 @@
-// apps/platform/src/pages/menu/MenuHandler.tsx
 import React, { useState, useEffect } from "react";
 import { Loader2, AlertCircle, Clock } from "lucide-react";
 import { dummyQrData } from "@/data/dummyData";
@@ -8,10 +7,28 @@ interface MenuHandlerProps {
   qrCode: string;
 }
 
+interface Restaurant {
+  id: string;
+  name: string;
+  description: string;
+  address: string;
+  phone: string;
+}
+
+interface QrCodeData {
+  id: string;
+  type: "digital" | "photo";
+  status: "available" | "used" | "expired";
+  restaurant: Restaurant | null;
+  expiresAt: string | null;
+  isActive: boolean;
+  needsActivation?: boolean;
+}
+
 export default function MenuHandler({ qrCode }: MenuHandlerProps) {
   const [loading, setLoading] = useState(true);
-  const [qrData, setQrData] = useState(null);
-  const [error, setError] = useState(null);
+  const [qrData, setQrData] = useState<QrCodeData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchQrData = async () => {
@@ -22,7 +39,7 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
         // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 800));
 
-        const data = dummyQrData[qrCode];
+        const data = dummyQrData[qrCode as keyof typeof dummyQrData];
 
         if (!data) {
           throw new Error("QR code not found");
@@ -30,7 +47,7 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
 
         setQrData(data);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -39,7 +56,6 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
     fetchQrData();
   }, [qrCode]);
 
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
@@ -105,7 +121,6 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
     );
   }
 
-  // Expired QR code
   if (qrData.status === "expired" || !qrData.isActive) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center px-4">
@@ -153,7 +168,6 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
     );
   }
 
-  // Self-serve QR that needs activation
   if (qrData.needsActivation) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center px-4">
@@ -184,14 +198,17 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
               </button>
             </div>
 
-            <p className="text-sm text-gray-500">
-              Expires in{" "}
-              {Math.ceil(
-                (new Date(qrData.expiresAt) - new Date()) /
-                  (1000 * 60 * 60 * 24)
-              )}{" "}
-              days
-            </p>
+            {qrData.expiresAt && (
+              <p className="text-sm text-gray-500">
+                Expires in{" "}
+                {Math.ceil(
+                  (new Date(qrData.expiresAt).getTime() -
+                    new Date().getTime()) /
+                    (1000 * 60 * 60 * 24)
+                )}{" "}
+                days
+              </p>
+            )}
           </div>
 
           <div className="flex items-center justify-center text-xs text-gray-400">
@@ -205,13 +222,11 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
     );
   }
 
-  // Active QR - show the appropriate menu directly
   if (qrData.type === "digital") {
     return <CustomerMenuViewer qrCode={qrCode} />;
   }
 
   if (qrData.type === "photo") {
-    // Placeholder for photo menu viewer
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
