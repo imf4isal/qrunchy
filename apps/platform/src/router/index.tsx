@@ -7,6 +7,7 @@ import About from "@/pages/about/About";
 import Contact from "@/pages/contact/Contact";
 import { Hello } from "@/components/Hello";
 import HowItWorks from "@/pages/howWorks/HowItWorks";
+import MenuHandler from "@/pages/menu/MenuHandler";
 
 export default function Router() {
   return (
@@ -18,6 +19,9 @@ export default function Router() {
       <Route path="/about" component={About} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/contact" component={Contact} />
+      <Route path="/menu/:qrCode">
+        {(params) => <MenuHandler qrCode={params.qrCode} />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
