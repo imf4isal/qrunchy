@@ -1,15 +1,17 @@
 import React, { useState, useMemo } from "react";
 import { Search, Share2, MapPin, Phone, Clock, Star } from "lucide-react";
 import { dummyRestaurant, dummyMenu } from "@/data/dummyData";
-import type { MenuItem, Variant } from "@/types/digitalMenu";
+import type { MenuItem } from "@/types/digitalMenu";
 
-export default function CustomerMenuViewer() {
+export default function CustomerMenuViewer({ qrCode }: { qrCode?: string }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
+  // Filter items based on search and category
   const filteredItems = useMemo(() => {
     let items = dummyMenu.items;
 
+    // Filter by category
     if (selectedCategory !== "all") {
       items = items.filter((item) => item.categoryId === selectedCategory);
     }
@@ -42,6 +44,7 @@ export default function CustomerMenuViewer() {
         console.log("Error sharing:", err);
       }
     } else {
+      // Fallback - copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert("Menu link copied to clipboard!");
     }
@@ -49,8 +52,10 @@ export default function CustomerMenuViewer() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header with Restaurant Info */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="relative">
+          {/* Restaurant Image Header */}
           <div className="h-48 bg-gradient-to-r from-amber-500 to-orange-500 relative overflow-hidden">
             <div
               className="absolute inset-0 bg-cover bg-center opacity-80"
@@ -58,6 +63,7 @@ export default function CustomerMenuViewer() {
             />
             <div className="absolute inset-0 bg-black bg-opacity-40" />
 
+            {/* Share Button */}
             <button
               onClick={handleShare}
               className="absolute top-4 right-4 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-2 rounded-full shadow-lg transition-all"
@@ -66,6 +72,7 @@ export default function CustomerMenuViewer() {
             </button>
           </div>
 
+          {/* Restaurant Details */}
           <div className="px-6 py-6 bg-white">
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
@@ -103,6 +110,7 @@ export default function CustomerMenuViewer() {
               </div>
             </div>
 
+            {/* Search Bar */}
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -118,6 +126,7 @@ export default function CustomerMenuViewer() {
             </div>
           </div>
 
+          {/* Category Filter */}
           <div className="px-6 pb-4 bg-white border-b">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               <button
@@ -148,8 +157,10 @@ export default function CustomerMenuViewer() {
         </div>
       </div>
 
+      {/* Menu Content */}
       <div className="px-6 py-6">
         {selectedCategory === "all" ? (
+          // Show all categories
           <div className="space-y-8">
             {dummyMenu.categories
               .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -172,6 +183,7 @@ export default function CustomerMenuViewer() {
               })}
           </div>
         ) : (
+          // Show filtered category
           <div className="space-y-4">
             {filteredItems.map((item) => (
               <MenuItemCard key={item.id} item={item} />
@@ -191,6 +203,7 @@ export default function CustomerMenuViewer() {
         )}
       </div>
 
+      {/* Footer */}
       <div className="mt-12 bg-white border-t px-6 py-8">
         <div className="text-center">
           <div className="flex items-center justify-center mb-3">
@@ -230,9 +243,10 @@ function MenuItemCard({ item }: { item: MenuItem }) {
           </div>
         </div>
 
+        {/* Variants and Add-ons Preview */}
         {(item.variants.length > 0 || item.addons.length > 0) && (
           <div className="flex flex-wrap gap-2 mb-3">
-            {item.variants.map((variant: Variant) => (
+            {item.variants.map((variant) => (
               <span
                 key={variant.id}
                 className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium"
@@ -249,6 +263,7 @@ function MenuItemCard({ item }: { item: MenuItem }) {
           </div>
         )}
 
+        {/* Expandable Details */}
         {(item.variants.length > 0 || item.addons.length > 0) && (
           <div>
             <button
@@ -260,13 +275,14 @@ function MenuItemCard({ item }: { item: MenuItem }) {
 
             {showDetails && (
               <div className="mt-4 pt-4 border-t border-gray-100">
-                {item.variants.map((variant: Variant) => (
+                {/* Variants */}
+                {item.variants.map((variant) => (
                   <div key={variant.id} className="mb-4">
                     <h4 className="font-medium text-gray-900 mb-2">
                       {variant.title}:
                     </h4>
                     <div className="grid grid-cols-1 gap-2">
-                      {variant.options.map((option: any) => (
+                      {variant.options.map((option) => (
                         <div
                           key={option.id}
                           className="flex justify-between items-center p-2 bg-gray-50 rounded-lg"
