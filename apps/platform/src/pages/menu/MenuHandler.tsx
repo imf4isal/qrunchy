@@ -81,7 +81,7 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
 
   if (qrData.type === "photo") {
     return <PhotoMenuPlaceholder qrCode={qrCode} />;
-  }
+  } 
 
   return null;
 }

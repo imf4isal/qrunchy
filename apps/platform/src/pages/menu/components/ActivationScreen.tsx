@@ -1,5 +1,3 @@
-// apps/platform/src/pages/menu/components/ActivationScreen.tsx
-
 import QrunchyFooter from "./QrunchyFooter";
 
 interface ActivationScreenProps {
