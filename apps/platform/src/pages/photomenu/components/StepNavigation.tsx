@@ -1,4 +1,6 @@
 import type {Step} from "@/pages/photomenu/hooks/usePhotoMenuSteps.ts";
+import { Button } from "@/components/ui/button";
+import {ArrowLeft, ArrowRight} from "lucide-react";
 
 interface StepNavigationProps {
     step: Step;
