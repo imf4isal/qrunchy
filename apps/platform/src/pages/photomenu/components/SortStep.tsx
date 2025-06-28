@@ -1,3 +1,4 @@
+import { type Dispatch, type SetStateAction } from "react";
 import SortableImages from "../SortableImages";
 
 interface UploadedImage {
@@ -8,7 +9,7 @@ interface UploadedImage {
 
 interface SortStepProps {
     images: UploadedImage[];
-    onImagesChange: (images: UploadedImage[]) => void;
+    onImagesChange: Dispatch<SetStateAction<UploadedImage[]>>;
 }
 
 export default function SortStep({ images, onImagesChange }: SortStepProps) {
