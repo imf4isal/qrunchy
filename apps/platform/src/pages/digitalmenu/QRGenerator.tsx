@@ -5,10 +5,11 @@ import type { DigitalMenu } from "@/types/digitalMenu";
 
 interface QRGeneratorProps {
   menu: DigitalMenu;
+  restaurantId?: number;
   onQrGenerated?: () => void;
 }
 
-export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
+export default function QRGenerator({ menu, restaurantId, onQrGenerated }: QRGeneratorProps) {
   const [isGenerated, setIsGenerated] = useState(false);
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [copied, setCopied] = useState(false);

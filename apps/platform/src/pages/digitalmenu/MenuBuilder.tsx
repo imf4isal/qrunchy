@@ -9,12 +9,14 @@ import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 interface MenuBuilderProps {
   menu: DigitalMenu;
+  restaurantId?: number;
   onCategoriesChange: (categories: Category[]) => void;
   onItemsChange: (items: MenuItem[]) => void;
 }
 
 export default function MenuBuilder({
   menu,
+  restaurantId,
   onCategoriesChange,
   onItemsChange,
 }: MenuBuilderProps) {

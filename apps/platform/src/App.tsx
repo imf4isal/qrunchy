@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { Suspense, useState } from "react";
 import Router from "./router";
+import { RestaurantProvider } from "./contexts/RestaurantContext";
 
 import { trpc } from "./utils/trpc";
 // import { devtoolsLink } from "trpc-client-devtools-link";
@@ -24,9 +25,11 @@ const App = () => {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <Suspense>
-          <Router />
-        </Suspense>
+        <RestaurantProvider>
+          <Suspense>
+            <Router />
+          </Suspense>
+        </RestaurantProvider>
       </QueryClientProvider>
     </trpc.Provider>
   );

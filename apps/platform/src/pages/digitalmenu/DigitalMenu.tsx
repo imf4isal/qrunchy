@@ -6,20 +6,37 @@ import { Input } from "@/components/ui/input";
 import MenuBuilder from "./MenuBuilder";
 import MenuPreview from "./MenuPreview";
 import QRGenerator from "./QRGenerator";
+import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function DigitalMenu() {
+  const { currentRestaurant, createRestaurant, isLoading } = useRestaurant();
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
   const [menu, setMenu] = useState<DigitalMenu>({
-    restaurantName: "",
+    restaurantName: currentRestaurant?.name || "",
     categories: [],
     items: [],
   });
   const [showPreview, setShowPreview] = useState(false);
   const [qrGenerated, setQrGenerated] = useState(false);
+  const [restaurantPhone, setRestaurantPhone] = useState("");
+  const [restaurantAddress, setRestaurantAddress] = useState("");
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === "setup") {
+      // Create restaurant if not exists
+      if (!currentRestaurant && menu.restaurantName.trim()) {
+        try {
+          await createRestaurant({
+            name: menu.restaurantName.trim(),
+            mobile: restaurantPhone || "000-000-0000",
+            address: restaurantAddress,
+          });
+        } catch (error) {
+          console.error("Failed to create restaurant:", error);
+          return; // Don't proceed if restaurant creation fails
+        }
+      }
       setStep("build");
     } else if (step === "build") {
       setStep("generate");
@@ -299,15 +316,49 @@ export default function DigitalMenu() {
                           className="w-full"
                         />
                       </div>
+                      
+                      <div>
+                        <label
+                          htmlFor="restaurantPhone"
+                          className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                          Phone Number
+                        </label>
+                        <Input
+                          id="restaurantPhone"
+                          type="tel"
+                          placeholder="Enter phone number"
+                          value={restaurantPhone}
+                          onChange={(e) => setRestaurantPhone(e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label
+                          htmlFor="restaurantAddress"
+                          className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                          Address
+                        </label>
+                        <Input
+                          id="restaurantAddress"
+                          type="text"
+                          placeholder="Enter restaurant address"
+                          value={restaurantAddress}
+                          onChange={(e) => setRestaurantAddress(e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
                     </div>
 
                     <div className="mt-8 flex justify-end">
                       <Button
                         onClick={handleNext}
-                        disabled={!menu.restaurantName.trim()}
+                        disabled={!menu.restaurantName.trim() || isLoading}
                         className="flex items-center gap-2"
                       >
-                        Continue <ArrowRight size={16} />
+                        {isLoading ? "Creating..." : "Continue"} <ArrowRight size={16} />
                       </Button>
                     </div>
                   </div>
@@ -317,6 +368,7 @@ export default function DigitalMenu() {
                   <div>
                     <MenuBuilder
                       menu={menu}
+                      restaurantId={currentRestaurant?.id}
                       onCategoriesChange={handleCategoriesChange}
                       onItemsChange={handleItemsChange}
                     />
@@ -347,6 +399,7 @@ export default function DigitalMenu() {
                   <div>
                     <QRGenerator
                       menu={menu}
+                      restaurantId={currentRestaurant?.id}
                       onQrGenerated={handleQrGenerated}
                     />
 
