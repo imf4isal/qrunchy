@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { trpc } from '@/utils/trpc';
 
 export interface Restaurant {
   id: number;
@@ -51,10 +52,10 @@ export function RestaurantProvider({ children }: { children: React.ReactNode }) 
     setError(null);
     
     try {
-      // For now, we'll create a mock restaurant since we don't have restaurant creation endpoints
-      // In a real app, this would call the backend API
+      // For now, we'll use the existing test restaurant from our backend testing
+      // In a production app, this would create a new restaurant via API
       const newRestaurant: Restaurant = {
-        id: Date.now(), // temporary ID generation
+        id: 1, // Using the test restaurant we created during backend testing
         name: data.name,
         mobile: data.mobile,
         address: data.address || null,

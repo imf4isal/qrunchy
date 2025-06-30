@@ -1,10 +1,11 @@
 // src/pages/digitalmenu/MenuBuilder.tsx
-import { useState } from "react";
-import { Plus, Trash2, Edit3, Check, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Trash2, Edit3, Check, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemEditor from "./ItemEditor";
+import { trpc } from "@/utils/trpc";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 interface MenuBuilderProps {
@@ -29,29 +30,106 @@ export default function MenuBuilder({
   const [isDragging, setIsDragging] = useState(false);
   const [showSampleFormat, setShowSampleFormat] = useState(false);
 
-  const handleAddCategory = () => {
-    if (!newCategoryName.trim()) return;
+  // tRPC queries and mutations
+  const utils = trpc.useUtils();
+  
+  // Fetch categories for the restaurant
+  const { 
+    data: backendCategories, 
+    isLoading: categoriesLoading,
+    error: categoriesError 
+  } = trpc.digitalMenu.categories.getByRestaurant.useQuery(
+    { restaurant_id: restaurantId! },
+    { enabled: !!restaurantId }
+  );
 
-    const newCategory: Category = {
-      id: crypto.randomUUID(),
-      name: newCategoryName.trim(),
-      sortOrder: menu.categories.length,
-    };
+  // Fetch items for the restaurant
+  const { 
+    data: backendItems, 
+    isLoading: itemsLoading,
+    error: itemsError 
+  } = trpc.digitalMenu.items.getByRestaurant.useQuery(
+    { restaurant_id: restaurantId! },
+    { enabled: !!restaurantId }
+  );
 
-    onCategoriesChange([...menu.categories, newCategory]);
-    setNewCategoryName("");
+  // Category mutations
+  const createCategoryMutation = trpc.digitalMenu.categories.create.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.categories.getByRestaurant.invalidate();
+    },
+  });
+
+  const updateCategoryMutation = trpc.digitalMenu.categories.update.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.categories.getByRestaurant.invalidate();
+    },
+  });
+
+  const deleteCategoryMutation = trpc.digitalMenu.categories.delete.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.categories.getByRestaurant.invalidate();
+      utils.digitalMenu.items.getByRestaurant.invalidate();
+    },
+  });
+
+  // Item mutations
+  const createItemMutation = trpc.digitalMenu.items.create.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.items.getByRestaurant.invalidate();
+    },
+  });
+
+  const deleteItemMutation = trpc.digitalMenu.items.delete.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.items.getByRestaurant.invalidate();
+    },
+  });
+
+  // Sync backend data to local state
+  useEffect(() => {
+    if (backendCategories) {
+      onCategoriesChange(backendCategories);
+    }
+  }, [backendCategories, onCategoriesChange]);
+
+  useEffect(() => {
+    if (backendItems) {
+      // Transform backend items format to local format
+      const transformedItems: MenuItem[] = [];
+      backendItems.forEach(categoryData => {
+        categoryData.items.forEach(item => {
+          transformedItems.push(item);
+        });
+      });
+      onItemsChange(transformedItems);
+    }
+  }, [backendItems, onItemsChange]);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim() || !restaurantId) return;
+
+    try {
+      await createCategoryMutation.mutateAsync({
+        name: newCategoryName.trim(),
+        restaurant_id: restaurantId,
+      });
+      setNewCategoryName("");
+    } catch (error) {
+      console.error("Failed to create category:", error);
+    }
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
-    const updatedCategories = menu.categories.filter(
-      (cat) => cat.id !== categoryId
-    );
-    const updatedItems = menu.items.filter(
-      (item) => item.categoryId !== categoryId
-    );
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!restaurantId) return;
 
-    onCategoriesChange(updatedCategories);
-    onItemsChange(updatedItems);
+    try {
+      await deleteCategoryMutation.mutateAsync({
+        id: parseInt(categoryId, 10),
+      });
+    } catch (error) {
+      console.error("Failed to delete category:", error);
+    }
   };
 
   const handleEditCategory = (categoryId: string) => {
@@ -62,18 +140,19 @@ export default function MenuBuilder({
     }
   };
 
-  const handleSaveCategory = () => {
-    if (!editingCategoryName.trim() || !editingCategory) return;
+  const handleSaveCategory = async () => {
+    if (!editingCategoryName.trim() || !editingCategory || !restaurantId) return;
 
-    const updatedCategories = menu.categories.map((cat) =>
-      cat.id === editingCategory
-        ? { ...cat, name: editingCategoryName.trim() }
-        : cat
-    );
-
-    onCategoriesChange(updatedCategories);
-    setEditingCategory(null);
-    setEditingCategoryName("");
+    try {
+      await updateCategoryMutation.mutateAsync({
+        id: parseInt(editingCategory, 10),
+        name: editingCategoryName.trim(),
+      });
+      setEditingCategory(null);
+      setEditingCategoryName("");
+    } catch (error) {
+      console.error("Failed to update category:", error);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -101,25 +180,54 @@ export default function MenuBuilder({
     setShowItemEditor(true);
   };
 
-  const handleSaveItem = (item: MenuItem) => {
-    if (menu.items.find((existingItem) => existingItem.id === item.id)) {
-      // Update existing item
-      const updatedItems = menu.items.map((existingItem) =>
-        existingItem.id === item.id ? item : existingItem
-      );
-      onItemsChange(updatedItems);
-    } else {
-      // Add new item
-      onItemsChange([...menu.items, item]);
-    }
+  const handleSaveItem = async (item: MenuItem) => {
+    if (!restaurantId) return;
 
-    setShowItemEditor(false);
-    setEditingItem(null);
+    try {
+      if (menu.items.find((existingItem) => existingItem.id === item.id)) {
+        // Update existing item - TODO: implement when backend supports it
+        console.log("Item update not yet implemented in backend");
+        setShowItemEditor(false);
+        setEditingItem(null);
+        return;
+      } else {
+        // Add new item
+        await createItemMutation.mutateAsync({
+          name: item.name,
+          price: item.price,
+          description: item.description,
+          category_id: parseInt(item.categoryId, 10),
+          variants: item.variants.map(variant => ({
+            title: variant.title,
+            options: variant.options.map(option => ({
+              name: option.name,
+              price: option.price,
+            })),
+          })),
+          addons: item.addons.map(addon => ({
+            name: addon.name,
+            price: addon.price,
+          })),
+        });
+      }
+
+      setShowItemEditor(false);
+      setEditingItem(null);
+    } catch (error) {
+      console.error("Failed to save item:", error);
+    }
   };
 
-  const handleDeleteItem = (itemId: string) => {
-    const updatedItems = menu.items.filter((item) => item.id !== itemId);
-    onItemsChange(updatedItems);
+  const handleDeleteItem = async (itemId: string) => {
+    if (!restaurantId) return;
+
+    try {
+      await deleteItemMutation.mutateAsync({
+        id: parseInt(itemId, 10),
+      });
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
   };
 
   const handleCloseItemEditor = () => {
@@ -357,6 +465,36 @@ export default function MenuBuilder({
     return menu.items.filter((item) => item.categoryId === categoryId);
   };
 
+  // Show loading state while fetching data
+  if (categoriesLoading || itemsLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <span className="ml-2 text-gray-600">Loading menu data...</span>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (categoriesError || itemsError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <h3 className="text-red-800 font-medium mb-2">Error Loading Menu</h3>
+        <p className="text-red-600 text-sm">
+          {categoriesError?.message || itemsError?.message || "Failed to load menu data"}
+        </p>
+        <Button 
+          onClick={() => window.location.reload()} 
+          variant="outline" 
+          size="sm" 
+          className="mt-2"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Build Your Menu</h2>
@@ -530,9 +668,13 @@ export default function MenuBuilder({
                 />
                 <Button
                   onClick={handleAddCategory}
-                  disabled={!newCategoryName.trim()}
+                  disabled={!newCategoryName.trim() || createCategoryMutation.isPending}
                 >
-                  <Plus size={16} />
+                  {createCategoryMutation.isPending ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Plus size={16} />
+                  )}
                 </Button>
               </div>
             </CardContent>
@@ -558,8 +700,16 @@ export default function MenuBuilder({
                       className="flex-1"
                       autoFocus
                     />
-                    <Button size="sm" onClick={handleSaveCategory}>
-                      <Check size={14} />
+                    <Button 
+                      size="sm" 
+                      onClick={handleSaveCategory}
+                      disabled={updateCategoryMutation.isPending}
+                    >
+                      {updateCategoryMutation.isPending ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Check size={14} />
+                      )}
                     </Button>
                     <Button
                       size="sm"
@@ -585,8 +735,13 @@ export default function MenuBuilder({
                         variant="ghost"
                         onClick={() => handleDeleteCategory(category.id)}
                         className="text-red-500 hover:text-red-700"
+                        disabled={deleteCategoryMutation.isPending}
                       >
-                        <Trash2 size={14} />
+                        {deleteCategoryMutation.isPending ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
                       </Button>
                     </div>
                   </>
