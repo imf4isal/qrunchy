@@ -85,28 +85,118 @@ Learn more about the power of Turborepo:
   –––––––––
 
 ```
-I want you to deep dive into whole codebase. it's a turbo monorepo architecture codebase. where there
+I want you to deep dive into whole codebase. it's a turbo monorepo architecture codebase. where there are two apps inside apps folder. one is server which is basically the backend and another is platform, which is basically the frontend. so, the brief of the project is , it's qrunchy. where restaurant owner can create their menu instead of paper menu. now, we are keeping two flow.
 
-    are two apps inside apps folder. one is server which is basically the backend and another is
-  platform,
-    which is basically the frontend. so, the brief of the project is , it's qrunchy. where restaurant
-  owner can create their menu instead of paper menu. now, we are keeping two flow. one is to build
-  photomenu, where they just need to take photo, upload, sort photo, generate qr, then boom. it will be
-   ready. that flow is in the platform –> src –> pages –> photoMenu. it's just frontend ui. then, there
-   are also digitalmenu inside pages folder, which is basically manual menu creation flow for better
-  UI. user will put their menu information – category, item, variants, addons, etc . then it will
-  generate better ui than the photomenu.   –––– there are also other ui stuff in the platform. the ui
-  is almost done. there are some integration with backend server. ––– to understand things better, i
-  want you to start analyzing with server code. there are migrations file. go through each of the
-  migrations file, so you understand the data model. the migrations file are inside server –> src –> db
-   –> migrations. then we have implemented the backend part for the digitalMenu(manual menu information
-   input) creation flow. In server's src –> trpc –> routers –> index has router of digitalMenu. inside
-  digital menu router, there are routes for categories, items, menu and qr. go through in depth into
-  each of them. You will get the detail implementation of the procedures inside procedures folder. the
-  backend, which are implemented so far, are already tested. so you don't need to test any server code.
-   i just want you to understand the whole thing really very much in depth so that we can proceed
-  further. start with server code. we won't change anything in server right now. then dive into the
-  platform again. Deep dive into platform –>src–> pages –> digitalMenu –> all file.there are some api
-  implementations. i want you to understand all very deeply. From each angle. Then we will start coding
-   further.
+One is to build photomenu, where user just need to take photos of their menuq, upload, sort photo, generate qr, then boom. it will be
+ready. that flow is in the platform –> src –> pages –> photoMenu. it's just frontend ui. We have not implemented the backend for this part yet. It's just dummy.
+
+Then, thereare also digitalmenu inside pages folder, which is basically manual menu creation flow for better UI for custoemr. User will put their menu information – category, item, variants, addons, etc .
+Then it will generate better ui than the photomenu.   –––– there are also other ui stuff in the platform.
+Currently, at the first step, the user put the restaurant information, then continue - two options, user can bulk upload json menu data, it will automatically take all from formatted json. Or, user can put menu data manually. Categories, Items, variants, addons etc etc. The UI of this flow is kinda done. And most of the critical API has been implemented.. Right now, we are creating the user at the last step of the flow.
+
+ To understand things better, i want you to start analyzing with server code. there are migrations file. go through each of the
+  migrations file, so you understand the data model. the migrations file are inside server –> src –> db–> migrations. then we have implemented the backend part for the digitalMenu(manual menu information input) creation flow. In server's src –> trpc –> routers –> index has router of digitalMenu. inside
+  digital menu router, there are routes for categories, items, menu and qr. go through in depth into each of them. You will get the detail implementation of the procedures inside procedures folder. The backend, which are implemented so far, are already tested. so you don't need to test any server code.
+
+I just want you to understand the whole thing really very much in depth so that we can proceed
+  further. Oh, here is the data model of the project's database(dbdiagram format).
+
+```
+
+Table user {
+id int [pk, increment]
+mobile_number varchar [unique]
+created_at timestamp
+updated_at timestamp
+}
+
+Table group_res {
+id int [pk, increment]
+name varchar
+mobile varchar [null]
+address text
+geolocation point
+description text [null]
+user_id int [ref: > user.id]
+created_at timestamp
+updated_at timestamp
+is_active boolean [default: true]
+}
+
+Table restaurant {
+id int [pk, increment]
+name varchar
+mobile varchar
+address text [null]
+geolocation point
+group_res_id int [ref: > group_res.id, null]
+user_id int [ref: > user.id]
+created_at timestamp
+updated_at timestamp
+is_active boolean [default: true]
+}
+
+Table qr_code {
+id int [pk, increment]
+code varchar [unique]
+type enum('photo', 'digital')
+status enum('available', 'used', 'expired')
+restaurant_id int [ref: > restaurant.id, null]
+created_at timestamp
+bound_at timestamp [null]
+expires_at timestamp [null]
+self_serve boolean [default: false]
+}
+
+Table photo_menu {
+id int [pk, increment]
+restaurant_id int [ref: > restaurant.id]
+image_url varchar
+sort_order int
+created_at timestamp
+updated_at timestamp
+}
+
+Table category {
+id int [pk, increment]
+restaurant_id int [ref: > restaurant.id]
+name varchar
+sort_order int
+}
+
+Table item {
+id int [pk, increment]
+name varchar
+price decimal(10,2)
+description text [null]
+category_id int [ref: > category.id]
+sort_order int
+}
+
+Table variant {
+id int [pk, increment]
+name varchar
+item_id int [ref: > item.id]
+
+note: "Contains all multi variant information. e.g. size, spice level"
+}
+
+Table variant_option {
+id int [pk, increment]
+item_variant_id int [ref: > variant.id]
+name varchar // e.g. large
+price decimal(10,2)
+}
+
+Table addon {
+id int [pk, increment]
+item_id int [ref: > item.id]
+name varchar
+price decimal(10,2)
+}
+
+```
+
+Start with server code. we won't change anything in server right now. Then dive into the platform again. Deep dive into platform –>src–> pages –> digitalMenu –> all file.there are some api
+implementations. i want you to understand all very deeply. From each angle. Then we will start coding further. First, ensure that, everything is making sense to you.
 ```

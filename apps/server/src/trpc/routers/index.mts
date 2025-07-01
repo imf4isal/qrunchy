@@ -3,12 +3,14 @@ import { helloRouter } from "./hello.mts";
 import { digitalMenuRouter } from "./digitalMenu.mts";
 import { userRouter } from "./user.mts";
 import { restaurantRouter } from "./restaurant.mts";
+import { authRouter } from "./auth.mts";
 
 export const appRouter = router({
   hello: helloRouter,
   digitalMenu: digitalMenuRouter,
   user: userRouter,
   restaurant: restaurantRouter,
+  auth: authRouter,
 });
 
 export type AppRouter = typeof appRouter;
