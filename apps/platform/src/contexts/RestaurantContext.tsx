@@ -52,10 +52,10 @@ export function RestaurantProvider({ children }: { children: React.ReactNode }) 
     setError(null);
     
     try {
-      // For now, we'll use the existing test restaurant from our backend testing
-      // In a production app, this would create a new restaurant via API
+      // This will be implemented when we integrate with QRGenerator
+      // For now, return a placeholder that won't break existing code
       const newRestaurant: Restaurant = {
-        id: 1, // Using the test restaurant we created during backend testing
+        id: 1, // Temporary - will be replaced with real implementation
         name: data.name,
         mobile: data.mobile,
         address: data.address || null,

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { QrCode, Download, Copy, Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trpc } from "@/utils/trpc";
+import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { DigitalMenu } from "@/types/digitalMenu";
 
 interface QRGeneratorProps {
@@ -9,11 +11,19 @@ interface QRGeneratorProps {
   onQrGenerated?: () => void;
 }
 
-export default function QRGenerator({ menu, restaurantId, onQrGenerated }: QRGeneratorProps) {
+export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
+  const { setCurrentRestaurant } = useRestaurant();
   const [isGenerated, setIsGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [createdRestaurantId, setCreatedRestaurantId] = useState<number | null>(null);
+
+  // TRPC mutations
+  const createUserMutation = trpc.user.create.useMutation();
+  const createRestaurantMutation = trpc.restaurant.create.useMutation();
+  const bulkImportMutation = trpc.digitalMenu.menu.bulkImport.useMutation();
+  const generateQRMutation = trpc.digitalMenu.qr.generate.useMutation();
 
   const handleGenerateQR = async () => {
     if (!mobileNumber.trim()) {
@@ -24,14 +34,70 @@ export default function QRGenerator({ menu, restaurantId, onQrGenerated }: QRGen
     setIsGenerating(true);
     
     try {
-      // TODO: This will be implemented when we add the backend APIs
-      // 1. Create user with mobile number
-      // 2. Create restaurant with user_id
-      // 3. Save menu data if exists
-      // 4. Generate QR code
-      
-      // For now, simulate the process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Step 1: Create user with mobile number
+      const user = await createUserMutation.mutateAsync({
+        mobile_number: mobileNumber.trim(),
+      });
+
+      // Step 2: Create restaurant with user_id
+      const restaurant = await createRestaurantMutation.mutateAsync({
+        name: menu.restaurantName,
+        mobile: mobileNumber.trim(),
+        address: "Not specified", // Can be updated later
+        user_id: user.id,
+      });
+
+      setCreatedRestaurantId(restaurant.id);
+
+      // Update restaurant context
+      setCurrentRestaurant({
+        id: restaurant.id,
+        name: restaurant.name,
+        mobile: restaurant.mobile,
+        address: restaurant.address,
+      });
+
+      // Step 3: Save menu data if exists
+      if (menu.categories.length > 0 && menu.items.length > 0) {
+        // Transform menu data to backend format
+        const menuData = {
+          categories: menu.categories.map(cat => ({ name: cat.name })),
+          items: menu.items.map(item => ({
+            name: item.name,
+            price: item.price,
+            description: item.description || "",
+            categoryName: menu.categories.find(cat => cat.id === item.categoryId)?.name || "Uncategorized",
+            variants: item.variants.map(variant => ({
+              title: variant.title,
+              options: variant.options.map(option => ({
+                name: option.name,
+                price: option.price,
+              })),
+            })),
+            addons: item.addons.map(addon => ({
+              name: addon.name,
+              price: addon.price,
+            })),
+          })),
+        };
+
+        await bulkImportMutation.mutateAsync({
+          restaurant_id: restaurant.id,
+          menu_data: menuData,
+          replace_existing: true,
+        });
+      }
+
+      // Step 4: Generate QR code
+      await generateQRMutation.mutateAsync({
+        restaurant_id: restaurant.id,
+        type: "digital",
+        setup_type: "assisted",
+        assisted_data: {
+          phone_number: mobileNumber.trim(),
+          address: "Not specified",
+        },
+      });
       
       setIsGenerated(true);
       if (onQrGenerated) {
@@ -39,7 +105,23 @@ export default function QRGenerator({ menu, restaurantId, onQrGenerated }: QRGen
       }
     } catch (error) {
       console.error("Failed to generate QR:", error);
-      alert("Failed to create account and generate QR. Please try again.");
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes("User")) {
+          alert("Failed to create user account. Please try again.");
+        } else if (error.message.includes("Restaurant")) {
+          alert("Failed to create restaurant. Please try again.");
+        } else if (error.message.includes("Menu")) {
+          alert("Failed to save menu data. Please try again.");
+        } else if (error.message.includes("QR")) {
+          alert("Failed to generate QR code. Please try again.");
+        } else {
+          alert("Failed to create account and generate QR. Please try again.");
+        }
+      } else {
+        alert("Failed to create account and generate QR. Please try again.");
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -158,12 +240,17 @@ export default function QRGenerator({ menu, restaurantId, onQrGenerated }: QRGen
 
           <div>
             <h3 className="text-lg font-semibold text-green-600 mb-2">
-              🎉 Your QR Code is Ready!
+              🎉 Your Account & QR Code are Ready!
             </h3>
             <p className="text-gray-600 mb-6">
-              Customers can scan this code to view your digital menu for{" "}
+              Welcome to Qrunchy! Your account has been created and customers can now scan this QR code to view your digital menu for{" "}
               <strong>{menu.restaurantName}</strong>
             </p>
+            {createdRestaurantId && (
+              <p className="text-sm text-gray-500 mb-4">
+                Restaurant ID: {createdRestaurantId} • Mobile: {mobileNumber}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center">
