@@ -120,7 +120,7 @@ export default function MenuBuilder({
       const transformedItems: MenuItem[] = [];
       backendItems.forEach((categoryData) => {
         categoryData.items.forEach((item) => {
-          transformedItems.push(item);
+          transformedItems.push(item as MenuItem);
         });
       });
       onItemsChange(transformedItems);
