@@ -199,7 +199,7 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
-                  placeholder="e.g. +1 (555) 123-4567"
+                  placeholder="e.g. +880 1712-345678"
                   disabled={isGenerating}
                 />
               </div>
