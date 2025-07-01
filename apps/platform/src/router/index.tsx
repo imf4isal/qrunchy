@@ -9,6 +9,9 @@ import { Hello } from "@/components/Hello";
 import HowItWorks from "@/pages/howWorks/HowItWorks";
 import MenuHandler from "@/pages/menu/MenuHandler";
 import Login from "@/pages/auth/Login";
+import Dashboard from "@/pages/dashboard/Dashboard";
+import RestaurantMenuManager from "@/pages/dashboard/RestaurantMenuManager";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function Router() {
   return (
@@ -21,9 +24,25 @@ export default function Router() {
       <Route path="/about" component={About} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/contact" component={Contact} />
+      
+      {/* Protected Routes */}
+      <Route path="/dashboard">
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/dashboard/restaurant/:id/menu">
+        <ProtectedRoute>
+          <RestaurantMenuManager />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Customer Menu Route (Public) */}
       <Route path="/menu/:qrCode">
         {(params) => <MenuHandler qrCode={params.qrCode} />}
       </Route>
+      
       <Route component={NotFound} />
     </Switch>
   );

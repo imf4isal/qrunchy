@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { trpc } from "@/utils/trpc";
+import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
 
 export default function Login() {
@@ -11,22 +11,7 @@ export default function Login() {
   const [mobileNumber, setMobileNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // tRPC login mutation
-  const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: (data) => {
-      // Store user session in localStorage for now
-      localStorage.setItem("qrunchy_user", JSON.stringify(data.user));
-      localStorage.setItem("qrunchy_restaurants", JSON.stringify(data.restaurants));
-      
-      // Redirect to dashboard
-      setLocation("/dashboard");
-    },
-    onError: (error) => {
-      setError(error.message);
-      setIsLoading(false);
-    },
-  });
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,11 +25,13 @@ export default function Login() {
     setError("");
 
     try {
-      await loginMutation.mutateAsync({
-        mobile_number: mobileNumber.trim(),
-      });
+      await login(mobileNumber.trim());
+      // Redirect to dashboard on success
+      setLocation("/dashboard");
     } catch (err) {
-      // Error is handled by onError callback
+      setError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 

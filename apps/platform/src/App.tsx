@@ -3,6 +3,7 @@ import { httpBatchLink } from "@trpc/client";
 import { Suspense, useState } from "react";
 import Router from "./router";
 import { RestaurantProvider } from "./contexts/RestaurantContext";
+import { AuthProvider } from "./contexts/AuthContext";
 
 import { trpc } from "./utils/trpc";
 // import { devtoolsLink } from "trpc-client-devtools-link";
@@ -25,11 +26,13 @@ const App = () => {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <RestaurantProvider>
-          <Suspense>
-            <Router />
-          </Suspense>
-        </RestaurantProvider>
+        <AuthProvider>
+          <RestaurantProvider>
+            <Suspense>
+              <Router />
+            </Suspense>
+          </RestaurantProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </trpc.Provider>
   );

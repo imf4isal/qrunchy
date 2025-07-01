@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { QrCode, Download, Copy, Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/utils/trpc";
 import { useRestaurant } from "@/contexts/RestaurantContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { DigitalMenu } from "@/types/digitalMenu";
 
 interface QRGeneratorProps {
@@ -13,6 +15,7 @@ interface QRGeneratorProps {
 
 export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
   const { setCurrentRestaurant } = useRestaurant();
+  const { refreshSession } = useAuth();
   const [isGenerated, setIsGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
@@ -103,6 +106,9 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
       if (onQrGenerated) {
         onQrGenerated();
       }
+
+      // Refresh auth session to update user state
+      await refreshSession();
     } catch (error) {
       console.error("Failed to generate QR:", error);
       
@@ -253,7 +259,7 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
             )}
           </div>
 
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center mb-4">
             <Button
               onClick={handleDownloadQR}
               className="flex items-center gap-2"
@@ -278,6 +284,14 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
             >
               <Eye size={16} />
               Preview Menu
+            </Button>
+          </div>
+
+          <div className="text-center">
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <Link href="/dashboard">
+                Go to Dashboard
+              </Link>
             </Button>
           </div>
 

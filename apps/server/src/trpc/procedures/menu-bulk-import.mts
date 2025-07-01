@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../index.mts";
 import { db } from "../../db/index.mts";
-import { ItemTable } from "../../types/database.mts";
+import type { ItemTable } from "../../types/database.mts";
 import {
   variantSchema,
   addonSchema,

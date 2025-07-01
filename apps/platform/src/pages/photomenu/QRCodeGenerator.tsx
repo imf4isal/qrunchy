@@ -14,7 +14,7 @@ interface QRCodeGeneratorProps {
   onQrGenerated?: () => void;
 }
 
-const QRCodeGenerator = ({ images, onQrGenerated }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({ images: _images, onQrGenerated }: QRCodeGeneratorProps) => {
   const [qrType, setQrType] = useState<"self" | "assisted" | null>(null);
   const [qrGenerated, setQrGenerated] = useState(false);
   const [showForm, setShowForm] = useState(false);

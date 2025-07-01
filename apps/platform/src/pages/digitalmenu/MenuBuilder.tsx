@@ -1,6 +1,25 @@
 // src/pages/digitalmenu/MenuBuilder.tsx
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Edit3, Check, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit3, Check, X, Loader2, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,6 +105,12 @@ export default function MenuBuilder({
     },
   });
 
+  const updateItemMutation = trpc.digitalMenu.items.update.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.items.getByRestaurant.invalidate();
+    },
+  });
+
   const deleteItemMutation = trpc.digitalMenu.items.delete.useMutation({
     onSuccess: () => {
       utils.digitalMenu.items.getByRestaurant.invalidate();
@@ -98,7 +123,7 @@ export default function MenuBuilder({
       utils.digitalMenu.categories.getByRestaurant.invalidate();
       utils.digitalMenu.items.getByRestaurant.invalidate();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Bulk import failed:", error);
       alert(
         "Failed to import menu. Please check your JSON format and try again."
@@ -106,6 +131,27 @@ export default function MenuBuilder({
       setBulkUploadMode(false);
     },
   });
+
+  // Reorder mutations
+  const reorderCategoriesMutation = trpc.digitalMenu.categories.reorder.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.categories.getByRestaurant.invalidate();
+    },
+  });
+
+  const reorderItemsMutation = trpc.digitalMenu.items.reorder.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.items.getByRestaurant.invalidate();
+    },
+  });
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Sync backend data to local state
   useEffect(() => {
@@ -118,8 +164,8 @@ export default function MenuBuilder({
     if (backendItems) {
       // Transform backend items format to local format
       const transformedItems: MenuItem[] = [];
-      backendItems.forEach((categoryData) => {
-        categoryData.items.forEach((item) => {
+      backendItems.forEach((categoryData: any) => {
+        categoryData.items.forEach((item: any) => {
           transformedItems.push(item as MenuItem);
         });
       });
@@ -206,12 +252,31 @@ export default function MenuBuilder({
     if (!restaurantId) return;
 
     try {
-      if (menu.items.find((existingItem) => existingItem.id === item.id)) {
-        // Update existing item - TODO: implement when backend supports it
-        console.log("Item update not yet implemented in backend");
-        setShowItemEditor(false);
-        setEditingItem(null);
-        return;
+      const existingItem = menu.items.find((existingItem) => existingItem.id === item.id);
+      
+      if (existingItem) {
+        // Update existing item
+        await updateItemMutation.mutateAsync({
+          id: parseInt(item.id, 10),
+          name: item.name,
+          price: item.price,
+          description: item.description,
+          category_id: parseInt(item.categoryId, 10),
+          variants: item.variants.map((variant) => ({
+            id: variant.id, // Include ID for existing variants
+            title: variant.title,
+            options: variant.options.map((option) => ({
+              id: option.id, // Include ID for existing options
+              name: option.name,
+              price: option.price,
+            })),
+          })),
+          addons: item.addons.map((addon) => ({
+            id: addon.id, // Include ID for existing addons
+            name: addon.name,
+            price: addon.price,
+          })),
+        });
       } else {
         // Add new item
         await createItemMutation.mutateAsync({
@@ -455,6 +520,270 @@ export default function MenuBuilder({
     return menu.items.filter((item) => item.categoryId === categoryId);
   };
 
+  // Drag end handlers
+  const handleCategoryDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = menu.categories.findIndex((item) => item.id === active.id);
+      const newIndex = menu.categories.findIndex((item) => item.id === over?.id);
+
+      const reorderedCategories = arrayMove(menu.categories, oldIndex, newIndex);
+      
+      // Update local state immediately for better UX
+      onCategoriesChange(reorderedCategories);
+
+      // Update backend
+      if (restaurantId) {
+        try {
+          await reorderCategoriesMutation.mutateAsync({
+            restaurant_id: restaurantId,
+            category_orders: reorderedCategories.map((category, index) => ({
+              id: parseInt(category.id, 10),
+              sort_order: index,
+            })),
+          });
+        } catch (error) {
+          console.error("Failed to reorder categories:", error);
+          // Revert local state on error
+          onCategoriesChange(menu.categories);
+        }
+      }
+    }
+  };
+
+  const handleItemDragEnd = async (event: DragEndEvent, categoryId: string) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const categoryItems = getItemsForCategory(categoryId);
+      const oldIndex = categoryItems.findIndex((item) => item.id === active.id);
+      const newIndex = categoryItems.findIndex((item) => item.id === over?.id);
+
+      const reorderedItems = arrayMove(categoryItems, oldIndex, newIndex);
+      
+      // Update local state immediately
+      const updatedAllItems = menu.items.map((item) => {
+        if (item.categoryId === categoryId) {
+          const reorderedItem = reorderedItems.find((ri) => ri.id === item.id);
+          return reorderedItem || item;
+        }
+        return item;
+      });
+      onItemsChange(updatedAllItems);
+
+      // Update backend
+      if (restaurantId) {
+        try {
+          await reorderItemsMutation.mutateAsync({
+            category_id: parseInt(categoryId, 10),
+            item_orders: reorderedItems.map((item, index) => ({
+              id: parseInt(item.id, 10),
+              sort_order: index,
+            })),
+          });
+        } catch (error) {
+          console.error("Failed to reorder items:", error);
+          // Revert local state on error
+          onItemsChange(menu.items);
+        }
+      }
+    }
+  };
+
+  // Sortable Category Component
+  const SortableCategory = ({ category }: { category: Category }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: category.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    return (
+      <Card ref={setNodeRef} style={style} className={isDragging ? "opacity-50" : ""}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            {editingCategory === category.id ? (
+              <div className="flex items-center gap-2 flex-1">
+                <Input
+                  value={editingCategoryName}
+                  onChange={(e) => setEditingCategoryName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveCategory();
+                    if (e.key === "Escape") handleCancelEdit();
+                  }}
+                  className="flex-1"
+                  autoFocus
+                />
+                <Button
+                  size="sm"
+                  onClick={handleSaveCategory}
+                  disabled={updateCategoryMutation.isPending}
+                >
+                  {updateCategoryMutation.isPending ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Check size={14} />
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCancelEdit}
+                >
+                  <X size={14} />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <div
+                    {...attributes}
+                    {...listeners}
+                    className="cursor-grab hover:bg-gray-100 p-1 rounded"
+                  >
+                    <GripVertical size={16} className="text-gray-400" />
+                  </div>
+                  <CardTitle className="text-lg">{category.name}</CardTitle>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleEditCategory(category.id)}
+                  >
+                    <Edit3 size={14} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleDeleteCategory(category.id)}
+                    className="text-red-500 hover:text-red-700"
+                    disabled={deleteCategoryMutation.isPending}
+                  >
+                    {deleteCategoryMutation.isPending ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(event) => handleItemDragEnd(event, category.id)}
+          >
+            <SortableContext
+              items={getItemsForCategory(category.id).map((item) => item.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {getItemsForCategory(category.id).map((item) => (
+                  <SortableItem key={item.id} item={item} />
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={() => handleAddItem(category.id)}
+                  className="w-full"
+                >
+                  <Plus size={16} />
+                  Add Item to {category.name}
+                </Button>
+              </div>
+            </SortableContext>
+          </DndContext>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Sortable Item Component
+  const SortableItem = ({ item }: { item: MenuItem }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: item.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={`flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 ${
+          isDragging ? "opacity-50" : ""
+        }`}
+      >
+        <div className="flex items-center gap-2 flex-1">
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab hover:bg-gray-100 p-1 rounded"
+          >
+            <GripVertical size={14} className="text-gray-400" />
+          </div>
+          <div className="flex-1">
+            <div className="font-medium">
+              {item.name || "Untitled Item"}
+            </div>
+            <div className="text-sm text-gray-500">
+              ${item.price.toFixed(2)}
+              {item.variants.length > 0 && (
+                <span className="ml-2 text-blue-500">
+                  {item.variants.length} variant
+                  {item.variants.length !== 1 ? "s" : ""}
+                </span>
+              )}
+              {item.addons.length > 0 && (
+                <span className="ml-2 text-green-500">
+                  {item.addons.length} addon
+                  {item.addons.length !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleEditItem(item)}
+          >
+            <Edit3 size={14} />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleDeleteItem(item.id)}
+            className="text-red-500 hover:text-red-700"
+          >
+            <Trash2 size={14} />
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   // Show loading state while fetching data
   if (categoriesLoading || itemsLoading) {
     return (
@@ -694,141 +1023,32 @@ export default function MenuBuilder({
       )}
 
       {/* Categories and Items - Always show if data exists */}
-      <div className="space-y-6">
-        {menu.categories.map((category) => (
-          <Card key={category.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                {editingCategory === category.id ? (
-                  <div className="flex items-center gap-2 flex-1">
-                    <Input
-                      value={editingCategoryName}
-                      onChange={(e) => setEditingCategoryName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveCategory();
-                        if (e.key === "Escape") handleCancelEdit();
-                      }}
-                      className="flex-1"
-                      autoFocus
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleSaveCategory}
-                      disabled={updateCategoryMutation.isPending}
-                    >
-                      {updateCategoryMutation.isPending ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <Check size={14} />
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleCancelEdit}
-                    >
-                      <X size={14} />
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <CardTitle className="text-lg">{category.name}</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleEditCategory(category.id)}
-                      >
-                        <Edit3 size={14} />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteCategory(category.id)}
-                        className="text-red-500 hover:text-red-700"
-                        disabled={deleteCategoryMutation.isPending}
-                      >
-                        {deleteCategoryMutation.isPending ? (
-                          <Loader2 size={14} className="animate-spin" />
-                        ) : (
-                          <Trash2 size={14} />
-                        )}
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {getItemsForCategory(category.id).map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium">
-                        {item.name || "Untitled Item"}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        ${item.price.toFixed(2)}
-                        {item.variants.length > 0 && (
-                          <span className="ml-2 text-blue-500">
-                            {item.variants.length} variant
-                            {item.variants.length !== 1 ? "s" : ""}
-                          </span>
-                        )}
-                        {item.addons.length > 0 && (
-                          <span className="ml-2 text-green-500">
-                            {item.addons.length} addon
-                            {item.addons.length !== 1 ? "s" : ""}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleEditItem(item)}
-                      >
-                        <Edit3 size={14} />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-
-                <Button
-                  variant="outline"
-                  onClick={() => handleAddItem(category.id)}
-                  className="w-full"
-                >
-                  <Plus size={16} />
-                  Add Item to {category.name}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {menu.categories.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            <p>
-              {bulkUploadMode
-                ? "Upload a JSON file above to populate your menu automatically"
-                : "Start by adding your first category above"}
-            </p>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleCategoryDragEnd}
+      >
+        <SortableContext
+          items={menu.categories.map((category) => category.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-6">
+            {menu.categories.map((category) => (
+              <SortableCategory key={category.id} category={category} />
+            ))}
           </div>
-        )}
-      </div>
+        </SortableContext>
+      </DndContext>
+
+      {menu.categories.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          <p>
+            {bulkUploadMode
+              ? "Upload a JSON file above to populate your menu automatically"
+              : "Start by adding your first category above"}
+          </p>
+        </div>
+      )}
 
       {/* Item Editor Modal */}
       {showItemEditor && editingItem && (

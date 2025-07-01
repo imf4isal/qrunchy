@@ -20,8 +20,30 @@ export const variantSchema = z.object({
     .min(1, "At least one option is required"),
 });
 
+// Variant update schema - includes IDs for existing items
+export const variantUpdateSchema = z.object({
+  id: z.string().optional(), // For existing variants
+  title: z.string().min(1, "Variant title is required"),
+  options: z
+    .array(
+      z.object({
+        id: z.string().optional(), // For existing options
+        name: z.string().min(1, "Option name is required"),
+        price: z.number().min(0, "Price must be non-negative"),
+      })
+    )
+    .min(1, "At least one option is required"),
+});
+
 // Addon schema - used in items.mts and menu.mts
 export const addonSchema = z.object({
+  name: z.string().min(1, "Addon name is required"),
+  price: z.number().min(0, "Price must be non-negative"),
+});
+
+// Addon update schema - includes ID for existing items
+export const addonUpdateSchema = z.object({
+  id: z.string().optional(), // For existing addons
   name: z.string().min(1, "Addon name is required"),
   price: z.number().min(0, "Price must be non-negative"),
 });

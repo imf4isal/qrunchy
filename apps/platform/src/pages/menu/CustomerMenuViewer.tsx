@@ -8,7 +8,7 @@ interface CustomerMenuViewerProps {
 }
 
 export default function CustomerMenuViewer({
-  qrCode,
+  qrCode: _qrCode,
 }: CustomerMenuViewerProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");

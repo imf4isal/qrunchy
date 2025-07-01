@@ -1,4 +1,4 @@
-import { Generated, ColumnType } from "kysely";
+import type { Generated, ColumnType } from "kysely";
 
 type Point = ColumnType<string, string, string>;
 

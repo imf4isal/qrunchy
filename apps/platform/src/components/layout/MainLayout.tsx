@@ -1,31 +1,50 @@
 import React from "react";
 import { Link } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
+  const { isAuthenticated, user, logout } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <Link href="/">
-              <a className="text-xl font-bold text-blue-600">Qrunchy</a>
+            <Link href="/" className="text-xl font-bold text-blue-600">
+              Qrunchy
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/how-it-works">
-              <a className="text-sm text-gray-600 hover:text-gray-900">
-                How It Works
-              </a>
+            <Link href="/how-it-works" className="text-sm text-gray-600 hover:text-gray-900">
+              How It Works
             </Link>
-            <Link href="/login">
-              <a className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">
+                  Dashboard
+                </Link>
+                <span className="text-sm text-gray-600">
+                  {user?.mobile_number}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="text-sm"
+                >
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Link href="/login" className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
                 Login
-              </a>
-            </Link>
+              </Link>
+            )}
           </nav>
           <button className="md:hidden">
             <svg
@@ -50,22 +69,22 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <Link href="/">
-                <a className="text-xl font-bold">Qrunchy</a>
+              <Link href="/" className="text-xl font-bold">
+                Qrunchy
               </Link>
             </div>
             <div className="flex gap-6">
-              <Link href="/about">
-                <a className="text-gray-300 hover:text-white">About</a>
+              <Link href="/about" className="text-gray-300 hover:text-white">
+                About
               </Link>
-              <Link href="/contact">
-                <a className="text-gray-300 hover:text-white">Contact</a>
+              <Link href="/contact" className="text-gray-300 hover:text-white">
+                Contact
               </Link>
-              <Link href="/privacy">
-                <a className="text-gray-300 hover:text-white">Privacy</a>
+              <Link href="/privacy" className="text-gray-300 hover:text-white">
+                Privacy
               </Link>
-              <Link href="/terms">
-                <a className="text-gray-300 hover:text-white">Terms</a>
+              <Link href="/terms" className="text-gray-300 hover:text-white">
+                Terms
               </Link>
             </div>
           </div>

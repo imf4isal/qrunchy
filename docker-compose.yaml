@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     working_dir: /app
-    command: sh -c "pnpm install && pnpm dev"
+    command: sh -c "pnpm install --force && pnpm dev"
     ports:
       - target: 5173
         published: 5173
