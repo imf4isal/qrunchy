@@ -2,27 +2,17 @@ import { z } from "zod";
 import { publicProcedure, router } from "../index.mjs";
 import { db } from "../../db/index.mjs";
 import { getCompleteMenuByRestaurant } from "../../db/queries/digitalMenu.mjs";
-
-// Bulk import schemas
-const variantSchema = z.object({
-  title: z.string().min(1, "Variant title is required"),
-  options: z.array(z.object({
-    name: z.string().min(1, "Option name is required"),
-    price: z.number().min(0, "Price must be non-negative"),
-  })).min(1, "At least one option is required"),
-});
-
-const addonSchema = z.object({
-  name: z.string().min(1, "Addon name is required"),
-  price: z.number().min(0, "Price must be non-negative"),
-});
+import {
+  variantSchema,
+  addonSchema,
+  restaurantIdSchema,
+  categoryCreateSchema,
+} from "./shared/schemas.mjs";
 
 const bulkImportSchema = z.object({
   restaurant_id: z.number().int().positive(),
   menu_data: z.object({
-    categories: z.array(z.object({
-      name: z.string().min(1, "Category name is required"),
-    })),
+    categories: z.array(categoryCreateSchema),
     items: z.array(z.object({
       name: z.string().min(1, "Item name is required"),
       price: z.number().min(0, "Price must be non-negative"),
@@ -72,7 +62,7 @@ const transformMenuToFrontend = (menuData: any) => ({
 export const menuProcedures = router({
   // Get complete menu structure for a restaurant
   getComplete: publicProcedure
-    .input(z.object({ restaurant_id: z.number().int().positive() }))
+    .input(restaurantIdSchema)
     .query(async ({ input }) => {
       try {
         const menuData = await getCompleteMenuByRestaurant(input.restaurant_id);

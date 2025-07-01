@@ -7,22 +7,16 @@ import {
   updateCategory,
   deleteCategory,
 } from "../../db/queries/digitalMenu.mjs";
-
-const categoryCreateSchema = z.object({
-  name: z.string().min(1, "Category name is required"),
-  restaurant_id: z.number().int().positive(),
-  sort_order: z.number().int().min(0).optional(),
-});
-
-const categoryUpdateSchema = z.object({
-  id: z.number().int().positive(),
-  name: z.string().min(1, "Category name is required").optional(),
-  sort_order: z.number().int().min(0).optional(),
-});
+import {
+  restaurantIdSchema,
+  categoryCreateWithRestaurantSchema,
+  categoryUpdateSchema,
+  idSchema,
+} from "./shared/schemas.mjs";
 
 export const categoriesProcedures = router({
   getByRestaurant: publicProcedure
-    .input(z.object({ restaurant_id: z.number().int().positive() }))
+    .input(restaurantIdSchema)
     .query(async ({ input }) => {
       try {
         const categories = await getCategoriesByRestaurant(input.restaurant_id);
@@ -39,7 +33,7 @@ export const categoriesProcedures = router({
     }),
 
   create: publicProcedure
-    .input(categoryCreateSchema)
+    .input(categoryCreateWithRestaurantSchema)
     .mutation(async ({ input }) => {
       try {
         const category = await createCategory({
@@ -78,7 +72,7 @@ export const categoriesProcedures = router({
     }),
 
   delete: publicProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(idSchema)
     .mutation(async ({ input }) => {
       try {
         const category = await deleteCategory(input.id);

@@ -7,23 +7,13 @@ import {
   createItemWithDetails,
   deleteItemCascade,
 } from "../../db/queries/digitalMenu.mjs";
-
-const variantSchema = z.object({
-  title: z.string().min(1, "Variant title is required"),
-  options: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Option name is required"),
-        price: z.number().min(0, "Price must be non-negative"),
-      })
-    )
-    .min(1, "At least one option is required"),
-});
-
-const addonSchema = z.object({
-  name: z.string().min(1, "Addon name is required"),
-  price: z.number().min(0, "Price must be non-negative"),
-});
+import {
+  variantSchema,
+  addonSchema,
+  restaurantIdSchema,
+  categoryIdSchema,
+  idSchema,
+} from "./shared/schemas.mjs";
 
 const menuItemCreateSchema = z.object({
   name: z.string().min(1, "Item name is required"),
@@ -70,7 +60,7 @@ const transformItemToFrontend = (item: any) => ({
 
 export const itemsProcedures = router({
   getByRestaurant: publicProcedure
-    .input(z.object({ restaurant_id: z.number().int().positive() }))
+    .input(restaurantIdSchema)
     .query(async ({ input }) => {
       try {
         const categories = await db
@@ -104,7 +94,7 @@ export const itemsProcedures = router({
     }),
 
   getByCategory: publicProcedure
-    .input(z.object({ category_id: z.number().int().positive() }))
+    .input(categoryIdSchema)
     .query(async ({ input }) => {
       try {
         const items = await getItemsWithDetailsByCategory(input.category_id);
@@ -116,7 +106,7 @@ export const itemsProcedures = router({
     }),
 
   getById: publicProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(idSchema)
     .query(async ({ input }) => {
       try {
         const item = await getItemWithDetailsById(input.id);
@@ -163,7 +153,7 @@ export const itemsProcedures = router({
     }),
 
   delete: publicProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(idSchema)
     .mutation(async ({ input }) => {
       try {
         const deletedItem = await deleteItemCascade(input.id);
