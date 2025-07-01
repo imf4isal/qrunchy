@@ -317,45 +317,6 @@ export default function MenuBuilder({
     );
   };
 
-  const transformJsonToMenu = (data: any) => {
-    // Create categories with IDs
-    const categories: Category[] = data.categories.map(
-      (cat: any, index: number) => ({
-        id: crypto.randomUUID(),
-        name: cat.name,
-        sortOrder: index,
-      })
-    );
-
-    // Create a mapping from category name to ID
-    const categoryMap = new Map(categories.map((cat) => [cat.name, cat.id]));
-
-    // Create items with proper IDs and references
-    const items: MenuItem[] = data.items.map((item: any) => ({
-      id: crypto.randomUUID(),
-      name: item.name,
-      price: item.price,
-      description: item.description || "",
-      categoryId: categoryMap.get(item.categoryName) || categories[0]?.id || "",
-      variants: (item.variants || []).map((variant: any) => ({
-        id: crypto.randomUUID(),
-        title: variant.title,
-        options: (variant.options || []).map((option: any) => ({
-          id: crypto.randomUUID(),
-          name: option.name,
-          price: option.price,
-        })),
-      })),
-      addons: (item.addons || []).map((addon: any) => ({
-        id: crypto.randomUUID(),
-        name: addon.name,
-        price: addon.price,
-      })),
-    }));
-
-    return { categories, items };
-  };
-
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
