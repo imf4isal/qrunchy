@@ -22,11 +22,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </a>
             </Link>
             <Link href="/login">
-              <a className="text-sm text-gray-600 hover:text-gray-900">Login</a>
-            </Link>
-            <Link href="/signup">
               <a className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Sign Up
+                Login
               </a>
             </Link>
           </nav>

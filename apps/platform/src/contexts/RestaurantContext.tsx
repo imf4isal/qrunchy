@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { trpc } from '@/utils/trpc';
 
 export interface Restaurant {
   id: number;

@@ -8,6 +8,7 @@ import Contact from "@/pages/contact/Contact";
 import { Hello } from "@/components/Hello";
 import HowItWorks from "@/pages/howWorks/HowItWorks";
 import MenuHandler from "@/pages/menu/MenuHandler";
+import Login from "@/pages/auth/Login";
 
 export default function Router() {
   return (
@@ -16,6 +17,7 @@ export default function Router() {
       <Route path="/trpc-test" component={Hello} />
       <Route path="/photo-menu" component={PhotoMenu} />
       <Route path="/digital-menu" component={DigitalMenu} />
+      <Route path="/login" component={Login} />
       <Route path="/about" component={About} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/contact" component={Contact} />
