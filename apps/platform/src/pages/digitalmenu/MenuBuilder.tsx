@@ -32,46 +32,52 @@ export default function MenuBuilder({
 
   // tRPC queries and mutations
   const utils = trpc.useUtils();
-  
+
   // Fetch categories for the restaurant
-  const { 
-    data: backendCategories, 
+  const {
+    data: backendCategories,
     isLoading: categoriesLoading,
-    error: categoriesError 
+    error: categoriesError,
   } = trpc.digitalMenu.categories.getByRestaurant.useQuery(
     { restaurant_id: restaurantId! },
     { enabled: !!restaurantId }
   );
 
   // Fetch items for the restaurant
-  const { 
-    data: backendItems, 
+  const {
+    data: backendItems,
     isLoading: itemsLoading,
-    error: itemsError 
+    error: itemsError,
   } = trpc.digitalMenu.items.getByRestaurant.useQuery(
     { restaurant_id: restaurantId! },
     { enabled: !!restaurantId }
   );
 
   // Category mutations
-  const createCategoryMutation = trpc.digitalMenu.categories.create.useMutation({
-    onSuccess: () => {
-      utils.digitalMenu.categories.getByRestaurant.invalidate();
-    },
-  });
+  const createCategoryMutation = trpc.digitalMenu.categories.create.useMutation(
+    {
+      onSuccess: () => {
+        utils.digitalMenu.categories.getByRestaurant.invalidate();
+      },
+    }
+  );
 
-  const updateCategoryMutation = trpc.digitalMenu.categories.update.useMutation({
-    onSuccess: () => {
-      utils.digitalMenu.categories.getByRestaurant.invalidate();
-    },
-  });
+  const updateCategoryMutation = trpc.digitalMenu.categories.update.useMutation(
+    {
+      onSuccess: () => {
+        utils.digitalMenu.categories.getByRestaurant.invalidate();
+      },
+    }
+  );
 
-  const deleteCategoryMutation = trpc.digitalMenu.categories.delete.useMutation({
-    onSuccess: () => {
-      utils.digitalMenu.categories.getByRestaurant.invalidate();
-      utils.digitalMenu.items.getByRestaurant.invalidate();
-    },
-  });
+  const deleteCategoryMutation = trpc.digitalMenu.categories.delete.useMutation(
+    {
+      onSuccess: () => {
+        utils.digitalMenu.categories.getByRestaurant.invalidate();
+        utils.digitalMenu.items.getByRestaurant.invalidate();
+      },
+    }
+  );
 
   // Item mutations
   const createItemMutation = trpc.digitalMenu.items.create.useMutation({
@@ -86,6 +92,21 @@ export default function MenuBuilder({
     },
   });
 
+  // Bulk import mutation
+  const bulkImportMutation = trpc.digitalMenu.menu.bulkImport.useMutation({
+    onSuccess: () => {
+      utils.digitalMenu.categories.getByRestaurant.invalidate();
+      utils.digitalMenu.items.getByRestaurant.invalidate();
+    },
+    onError: (error) => {
+      console.error("Bulk import failed:", error);
+      alert(
+        "Failed to import menu. Please check your JSON format and try again."
+      );
+      setBulkUploadMode(false);
+    },
+  });
+
   // Sync backend data to local state
   useEffect(() => {
     if (backendCategories) {
@@ -97,8 +118,8 @@ export default function MenuBuilder({
     if (backendItems) {
       // Transform backend items format to local format
       const transformedItems: MenuItem[] = [];
-      backendItems.forEach(categoryData => {
-        categoryData.items.forEach(item => {
+      backendItems.forEach((categoryData) => {
+        categoryData.items.forEach((item) => {
           transformedItems.push(item);
         });
       });
@@ -141,7 +162,8 @@ export default function MenuBuilder({
   };
 
   const handleSaveCategory = async () => {
-    if (!editingCategoryName.trim() || !editingCategory || !restaurantId) return;
+    if (!editingCategoryName.trim() || !editingCategory || !restaurantId)
+      return;
 
     try {
       await updateCategoryMutation.mutateAsync({
@@ -197,14 +219,14 @@ export default function MenuBuilder({
           price: item.price,
           description: item.description,
           category_id: parseInt(item.categoryId, 10),
-          variants: item.variants.map(variant => ({
+          variants: item.variants.map((variant) => ({
             title: variant.title,
-            options: variant.options.map(option => ({
+            options: variant.options.map((option) => ({
               name: option.name,
               price: option.price,
             })),
           })),
-          addons: item.addons.map(addon => ({
+          addons: item.addons.map((addon) => ({
             name: addon.name,
             price: addon.price,
           })),
@@ -235,9 +257,15 @@ export default function MenuBuilder({
     setEditingItem(null);
   };
 
-  const handleFileUpload = (file: File) => {
+  const handleFileUpload = async (file: File) => {
+    if (!restaurantId) {
+      alert("Restaurant ID not found. Please refresh and try again.");
+      setBulkUploadMode(false);
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const jsonData = JSON.parse(e.target?.result as string);
 
@@ -250,18 +278,19 @@ export default function MenuBuilder({
           return;
         }
 
-        // Transform JSON to our internal format
-        const transformedData = transformJsonToMenu(jsonData);
-
-        // Replace existing data
-        onCategoriesChange(transformedData.categories);
-        onItemsChange(transformedData.items);
+        // Use backend bulk import instead of local state update
+        await bulkImportMutation.mutateAsync({
+          restaurant_id: restaurantId,
+          menu_data: jsonData,
+          replace_existing: true,
+        });
 
         alert("Menu imported successfully!");
         setBulkUploadMode(false);
       } catch (error) {
+        console.error("Failed to import menu:", error);
         alert(
-          "Invalid JSON file. Please check the format and try again, or use manual entry."
+          "Invalid JSON file or import failed. Please check the format and try again."
         );
         setBulkUploadMode(false);
       }
@@ -481,12 +510,14 @@ export default function MenuBuilder({
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <h3 className="text-red-800 font-medium mb-2">Error Loading Menu</h3>
         <p className="text-red-600 text-sm">
-          {categoriesError?.message || itemsError?.message || "Failed to load menu data"}
+          {categoriesError?.message ||
+            itemsError?.message ||
+            "Failed to load menu data"}
         </p>
-        <Button 
-          onClick={() => window.location.reload()} 
-          variant="outline" 
-          size="sm" 
+        <Button
+          onClick={() => window.location.reload()}
+          variant="outline"
+          size="sm"
           className="mt-2"
         >
           Retry
@@ -598,7 +629,9 @@ export default function MenuBuilder({
 
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                  isDragging
+                  bulkImportMutation.isPending
+                    ? "border-blue-500 bg-blue-50 opacity-50"
+                    : isDragging
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-300 hover:border-gray-400"
                 }`}
@@ -606,36 +639,49 @@ export default function MenuBuilder({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleFileInputChange}
-                  className="hidden"
-                  id="json-upload"
-                />
-                <label htmlFor="json-upload" className="cursor-pointer">
+                {bulkImportMutation.isPending ? (
                   <div className="flex flex-col items-center">
-                    <svg
-                      className="w-12 h-12 text-gray-400 mb-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
-                    <p className="text-gray-600 mb-1">
-                      Drag and drop your JSON file here, or click to browse
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Accepts .json files only
+                    <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-3" />
+                    <p className="text-blue-600 font-medium">Importing menu...</p>
+                    <p className="text-xs text-blue-500 mt-1">
+                      Please wait while we process your menu data
                     </p>
                   </div>
-                </label>
+                ) : (
+                  <>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleFileInputChange}
+                      className="hidden"
+                      id="json-upload"
+                      disabled={bulkImportMutation.isPending}
+                    />
+                    <label htmlFor="json-upload" className="cursor-pointer">
+                      <div className="flex flex-col items-center">
+                        <svg
+                          className="w-12 h-12 text-gray-400 mb-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                        <p className="text-gray-600 mb-1">
+                          Drag and drop your JSON file here, or click to browse
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Accepts .json files only
+                        </p>
+                      </div>
+                    </label>
+                  </>
+                )}
               </div>
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
@@ -668,7 +714,9 @@ export default function MenuBuilder({
                 />
                 <Button
                   onClick={handleAddCategory}
-                  disabled={!newCategoryName.trim() || createCategoryMutation.isPending}
+                  disabled={
+                    !newCategoryName.trim() || createCategoryMutation.isPending
+                  }
                 >
                   {createCategoryMutation.isPending ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -700,8 +748,8 @@ export default function MenuBuilder({
                       className="flex-1"
                       autoFocus
                     />
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       onClick={handleSaveCategory}
                       disabled={updateCategoryMutation.isPending}
                     >

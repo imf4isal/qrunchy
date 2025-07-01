@@ -1,5 +1,5 @@
 // src/pages/digitalmenu/DigitalMenu.tsx
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,13 +56,13 @@ export default function DigitalMenu() {
     setMenu((prev) => ({ ...prev, restaurantName: name }));
   };
 
-  const handleCategoriesChange = (categories: Category[]) => {
+  const handleCategoriesChange = useCallback((categories: Category[]) => {
     setMenu((prev) => ({ ...prev, categories }));
-  };
+  }, []);
 
-  const handleItemsChange = (items: MenuItem[]) => {
+  const handleItemsChange = useCallback((items: MenuItem[]) => {
     setMenu((prev) => ({ ...prev, items }));
-  };
+  }, []);
 
   const handleQrGenerated = () => {
     setQrGenerated(true);
