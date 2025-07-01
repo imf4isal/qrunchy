@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../index.mts";
 import { db } from "../../db/index.mts";
+import {
+  getItemsWithDetailsByCategory,
+} from "../../db/queries/digitalMenu.mts";
 
 // QR generation schema
 const qrGenerateSchema = z.object({
@@ -249,6 +252,152 @@ export const qrProcedures = router({
       } catch (error) {
         console.error("Error activating QR code:", error);
         throw new Error("Failed to activate QR code");
+      }
+    }),
+
+  // Get QR code data for customer menu display (public endpoint)
+  getQrData: publicProcedure
+    .input(z.object({ qr_code: z.string().min(1, "QR code is required") }))
+    .query(async ({ input }) => {
+      try {
+        const qrRecord = await db
+          .selectFrom("qr_code")
+          .leftJoin("restaurant", "qr_code.restaurant_id", "restaurant.id")
+          .select([
+            "qr_code.id",
+            "qr_code.code",
+            "qr_code.type",
+            "qr_code.status", 
+            "qr_code.expires_at",
+            "qr_code.self_serve",
+            "restaurant.id as restaurant_id",
+            "restaurant.name as restaurant_name",
+            "restaurant.address as restaurant_address",
+            "restaurant.mobile as restaurant_phone",
+          ])
+          .where("qr_code.code", "=", input.qr_code)
+          .executeTakeFirst();
+
+        if (!qrRecord) {
+          throw new Error("QR code not found");
+        }
+
+        return {
+          id: qrRecord.id.toString(),
+          code: qrRecord.code,
+          type: qrRecord.type,
+          status: qrRecord.status,
+          isActive: qrRecord.status === "used" && (!qrRecord.expires_at || qrRecord.expires_at > new Date()),
+          needsActivation: qrRecord.self_serve && qrRecord.status === "available",
+          expiresAt: qrRecord.expires_at?.toISOString() || null,
+          restaurant: qrRecord.restaurant_id ? {
+            id: qrRecord.restaurant_id.toString(),
+            name: qrRecord.restaurant_name || "",
+            address: qrRecord.restaurant_address || "",
+            phone: qrRecord.restaurant_phone || "",
+          } : null,
+        };
+      } catch (error) {
+        console.error("Error fetching QR data:", error);
+        throw new Error("Failed to fetch QR data");
+      }
+    }),
+
+  // Get full menu data for customer viewing (public endpoint) 
+  getMenuByQr: publicProcedure
+    .input(z.object({ qr_code: z.string().min(1, "QR code is required") }))
+    .query(async ({ input }) => {
+      try {
+        // First get QR data and restaurant info
+        const qrRecord = await db
+          .selectFrom("qr_code")
+          .innerJoin("restaurant", "qr_code.restaurant_id", "restaurant.id")
+          .select([
+            "qr_code.status",
+            "qr_code.expires_at", 
+            "restaurant.id as restaurant_id",
+            "restaurant.name as restaurant_name",
+            "restaurant.address as restaurant_address",
+            "restaurant.mobile as restaurant_phone",
+          ])
+          .where("qr_code.code", "=", input.qr_code)
+          .where("qr_code.type", "=", "digital")
+          .executeTakeFirst();
+
+        if (!qrRecord) {
+          throw new Error("QR code not found or not a digital menu");
+        }
+
+        // Check if QR is active
+        const isActive = qrRecord.status === "used" && (!qrRecord.expires_at || qrRecord.expires_at > new Date());
+        if (!isActive) {
+          throw new Error("QR code is not active");
+        }
+
+        // Get categories for this restaurant
+        const categories = await db
+          .selectFrom("category")
+          .selectAll()
+          .where("restaurant_id", "=", qrRecord.restaurant_id)
+          .orderBy("sort_order", "asc")
+          .execute();
+
+        // Get items with details for each category
+        const menuData = [];
+        for (const category of categories) {
+          const items = await getItemsWithDetailsByCategory(category.id);
+          
+          // Transform items to match frontend format
+          const transformedItems = items.map((item: any) => ({
+            id: item.id.toString(),
+            name: item.name,
+            price: parseFloat(item.price),
+            description: item.description || undefined,
+            categoryId: category.id.toString(),
+            variants: (item.variants || []).map((variant: any) => ({
+              id: variant.id.toString(),
+              title: variant.name,
+              options: (variant.options || []).map((option: any) => ({
+                id: option.id.toString(),
+                name: option.name,
+                price: parseFloat(option.price),
+              })),
+            })),
+            addons: (item.addons || []).map((addon: any) => ({
+              id: addon.id.toString(),
+              name: addon.name,
+              price: parseFloat(addon.price),
+            })),
+          }));
+
+          menuData.push({
+            category: {
+              id: category.id.toString(),
+              name: category.name,
+              sortOrder: category.sort_order,
+            },
+            items: transformedItems,
+          });
+        }
+
+        return {
+          restaurant: {
+            id: qrRecord.restaurant_id.toString(),
+            name: qrRecord.restaurant_name,
+            address: qrRecord.restaurant_address,
+            phone: qrRecord.restaurant_phone,
+          },
+          categories: categories.map(cat => ({
+            id: cat.id.toString(),
+            name: cat.name,
+            sortOrder: cat.sort_order,
+          })),
+          items: menuData.flatMap(data => data.items),
+          menuData, // Full structured data
+        };
+      } catch (error) {
+        console.error("Error fetching menu by QR:", error);
+        throw new Error("Failed to fetch menu data");
       }
     }),
 });

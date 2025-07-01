@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { Search, Share2, MapPin, Phone, Clock, Star } from "lucide-react";
-import { dummyRestaurant, dummyMenu } from "@/data/dummyData";
+import { Search, Share2, MapPin, Phone } from "lucide-react";
+import { trpc } from "@/utils/trpc";
 import type { Category, MenuItem } from "@/types/digitalMenu";
 
 interface CustomerMenuViewerProps {
@@ -8,23 +8,35 @@ interface CustomerMenuViewerProps {
 }
 
 export default function CustomerMenuViewer({
-  qrCode: _qrCode,
+  qrCode,
 }: CustomerMenuViewerProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
+  // Fetch real menu data from backend
+  const {
+    data: menuData,
+    isLoading,
+    error,
+  } = trpc.digitalMenu.qr.getMenuByQr.useQuery(
+    { qr_code: qrCode! },
+    { enabled: !!qrCode }
+  );
+
   const filteredItems = useMemo(() => {
-    let items = dummyMenu.items;
+    if (!menuData) return [];
+    
+    let items = menuData.items as MenuItem[];
 
     if (selectedCategory !== "all") {
       items = items.filter(
-        (item: MenuItem) => item.categoryId === selectedCategory
+        (item) => item.categoryId === selectedCategory
       );
     }
 
     if (searchTerm) {
       items = items.filter(
-        (item: MenuItem) =>
+        (item) =>
           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (item.description &&
             item.description.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -32,20 +44,48 @@ export default function CustomerMenuViewer({
     }
 
     return items;
-  }, [searchTerm, selectedCategory]);
+  }, [menuData, searchTerm, selectedCategory]);
 
   const getItemsForCategory = (categoryId: string): MenuItem[] => {
     return filteredItems.filter(
-      (item: MenuItem) => item.categoryId === categoryId
+      (item) => item.categoryId === categoryId
     );
   };
+
+  // Handle loading and error states
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !menuData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Failed to load menu</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleShare = async (): Promise<void> => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${dummyRestaurant.name} - Menu`,
-          text: `Check out the menu at ${dummyRestaurant.name}`,
+          title: `${menuData.restaurant.name} - Menu`,
+          text: `Check out the menu at ${menuData.restaurant.name}`,
           url: window.location.href,
         });
       } catch (err) {
@@ -63,8 +103,7 @@ export default function CustomerMenuViewer({
         <div className="relative">
           <div className="h-48 bg-gradient-to-r from-amber-500 to-orange-500 relative overflow-hidden">
             <div
-              className="absolute inset-0 bg-cover bg-center opacity-80"
-              style={{ backgroundImage: `url(${dummyRestaurant.imageUrl})` }}
+              className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-700 opacity-80"
             />
             <div className="absolute inset-0 bg-black bg-opacity-40" />
 
@@ -78,38 +117,25 @@ export default function CustomerMenuViewer({
 
           <div className="px-6 py-6 bg-white">
             <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
+              <div className="mb-2">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {dummyRestaurant.name}
+                  {menuData.restaurant.name}
                 </h1>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span className="text-sm font-medium text-gray-700">
-                    {dummyRestaurant.rating}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    ({dummyRestaurant.reviewCount})
-                  </span>
-                </div>
               </div>
 
-              <p className="text-gray-600 mb-3">
-                {dummyRestaurant.description}
-              </p>
-
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <MapPin size={16} className="text-gray-400" />
-                  <span>{dummyRestaurant.address}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone size={16} className="text-gray-400" />
-                  <span>{dummyRestaurant.phone}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock size={16} className="text-gray-400" />
-                  <span>{dummyRestaurant.hours}</span>
-                </div>
+                {menuData.restaurant.address && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin size={16} className="text-gray-400" />
+                    <span>{menuData.restaurant.address}</span>
+                  </div>
+                )}
+                {menuData.restaurant.phone && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Phone size={16} className="text-gray-400" />
+                    <span>{menuData.restaurant.phone}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -148,7 +174,7 @@ export default function CustomerMenuViewer({
               >
                 All
               </button>
-              {dummyMenu.categories.map((category: Category) => (
+              {menuData.categories.map((category: Category) => (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
@@ -169,7 +195,7 @@ export default function CustomerMenuViewer({
       <div className="px-6 py-6">
         {selectedCategory === "all" ? (
           <div className="space-y-8">
-            {dummyMenu.categories
+            {menuData.categories
               .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
               .map((category: Category) => {
                 const categoryItems = getItemsForCategory(category.id);

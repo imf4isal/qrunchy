@@ -4,9 +4,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MainLayout from "@/components/layout/MainLayout";
 import { Plus, QrCode, Edit3, BarChart3 } from "lucide-react";
+import { trpc } from "@/utils/trpc";
+import { useMemo } from "react";
 
 export default function Dashboard() {
   const { user, restaurants } = useAuth();
+
+  // Fetch QR codes for all restaurants
+  const qrQueries = restaurants.map((restaurant) =>
+    trpc.digitalMenu.qr.getByRestaurant.useQuery(
+      { restaurant_id: restaurant.id },
+      { enabled: !!restaurant.id }
+    )
+  );
+
+  // Create a mapping of restaurant ID to QR code data
+  const restaurantQrMap = useMemo(() => {
+    const map: Record<string, { code: string; menu_url: string } | null> = {};
+
+    restaurants.forEach((restaurant, index) => {
+      const qrData = qrQueries[index]?.data;
+      if (qrData && qrData.length > 0) {
+        // Use the first (most recent) QR code for each restaurant
+        map[restaurant.id] = {
+          code: qrData[0].code,
+          menu_url: qrData[0].menu_url,
+        };
+      } else {
+        map[restaurant.id] = null;
+      }
+    });
+
+    return map;
+  }, [restaurants, qrQueries]);
 
   return (
     <MainLayout>
@@ -47,19 +77,16 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {restaurants.length} {/* Assuming 1 QR per restaurant for now */}
+                {restaurants.length}{" "}
+                {/* Assuming 1 QR per restaurant for now */}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Active QR codes
-              </p>
+              <p className="text-xs text-muted-foreground">Active QR codes</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Account
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Account</CardTitle>
               <Edit3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -110,7 +137,10 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-4">
                 {restaurants.map((restaurant) => (
-                  <Card key={restaurant.id} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={restaurant.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -128,17 +158,29 @@ export default function Dashboard() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" asChild>
-                            <Link href={`/dashboard/restaurant/${restaurant.id}/menu`}>
+                            <Link
+                              href={`/dashboard/restaurant/${restaurant.id}/menu`}
+                            >
                               <Edit3 className="w-4 h-4 mr-1" />
                               Edit Menu
                             </Link>
                           </Button>
-                          <Button variant="outline" size="sm" asChild>
-                            <Link href={`/menu/qr_${restaurant.id}`} target="_blank">
+                          {restaurantQrMap[restaurant.id] ? (
+                            <Button variant="outline" size="sm" asChild>
+                              <Link
+                                href={restaurantQrMap[restaurant.id]!.menu_url}
+                                target="_blank"
+                              >
+                                <QrCode className="w-4 h-4 mr-1" />
+                                View Menu
+                              </Link>
+                            </Button>
+                          ) : (
+                            <Button variant="outline" size="sm" disabled>
                               <QrCode className="w-4 h-4 mr-1" />
-                              View Menu
-                            </Link>
-                          </Button>
+                              No QR Code
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -196,9 +238,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <h3 className="font-medium">View Analytics</h3>
-                      <p className="text-sm text-gray-600">
-                        Coming soon
-                      </p>
+                      <p className="text-sm text-gray-600">Coming soon</p>
                     </div>
                   </div>
                 </CardContent>

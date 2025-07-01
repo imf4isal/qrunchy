@@ -1,5 +1,5 @@
 // src/pages/digitalmenu/MenuBuilder.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Edit3, Check, X, Loader2, GripVertical } from "lucide-react";
 import {
   DndContext,
@@ -48,6 +48,9 @@ export default function MenuBuilder({
   const [bulkUploadMode, setBulkUploadMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showSampleFormat, setShowSampleFormat] = useState(false);
+  
+  // Ref to track scroll position during drag operations
+  const scrollPositionRef = useRef<{ top: number; left: number }>({ top: 0, left: 0 });
 
   // tRPC queries and mutations
   const utils = trpc.useUtils();
@@ -135,13 +138,19 @@ export default function MenuBuilder({
   // Reorder mutations
   const reorderCategoriesMutation = trpc.digitalMenu.categories.reorder.useMutation({
     onSuccess: () => {
-      utils.digitalMenu.categories.getByRestaurant.invalidate();
+      // Delay invalidation to prevent immediate scroll jumping
+      setTimeout(() => {
+        utils.digitalMenu.categories.getByRestaurant.invalidate();
+      }, 100);
     },
   });
 
   const reorderItemsMutation = trpc.digitalMenu.items.reorder.useMutation({
     onSuccess: () => {
-      utils.digitalMenu.items.getByRestaurant.invalidate();
+      // Delay invalidation to prevent immediate scroll jumping
+      setTimeout(() => {
+        utils.digitalMenu.items.getByRestaurant.invalidate();
+      }, 100);
     },
   });
 
@@ -520,11 +529,35 @@ export default function MenuBuilder({
     return menu.items.filter((item) => item.categoryId === categoryId);
   };
 
+  // Scroll position utilities
+  const saveScrollPosition = () => {
+    scrollPositionRef.current = {
+      top: window.scrollY,
+      left: window.scrollX,
+    };
+  };
+
+  const restoreScrollPosition = () => {
+    requestAnimationFrame(() => {
+      const { top, left } = scrollPositionRef.current;
+      window.scrollTo({ top, left, behavior: 'instant' });
+    });
+  };
+
+  // Drag event handlers
+  const handleDragStart = () => {
+    // Save scroll position when drag starts
+    saveScrollPosition();
+  };
+
   // Drag end handlers
   const handleCategoryDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
+      // Save scroll position before any state changes
+      saveScrollPosition();
+
       const oldIndex = menu.categories.findIndex((item) => item.id === active.id);
       const newIndex = menu.categories.findIndex((item) => item.id === over?.id);
 
@@ -532,6 +565,9 @@ export default function MenuBuilder({
       
       // Update local state immediately for better UX
       onCategoriesChange(reorderedCategories);
+
+      // Restore scroll position after state update
+      restoreScrollPosition();
 
       // Update backend
       if (restaurantId) {
@@ -543,10 +579,13 @@ export default function MenuBuilder({
               sort_order: index,
             })),
           });
+          // Restore scroll position after backend update too
+          restoreScrollPosition();
         } catch (error) {
           console.error("Failed to reorder categories:", error);
           // Revert local state on error
           onCategoriesChange(menu.categories);
+          restoreScrollPosition();
         }
       }
     }
@@ -556,6 +595,9 @@ export default function MenuBuilder({
     const { active, over } = event;
 
     if (active.id !== over?.id) {
+      // Save scroll position before any state changes
+      saveScrollPosition();
+
       const categoryItems = getItemsForCategory(categoryId);
       const oldIndex = categoryItems.findIndex((item) => item.id === active.id);
       const newIndex = categoryItems.findIndex((item) => item.id === over?.id);
@@ -572,6 +614,9 @@ export default function MenuBuilder({
       });
       onItemsChange(updatedAllItems);
 
+      // Restore scroll position after state update
+      restoreScrollPosition();
+
       // Update backend
       if (restaurantId) {
         try {
@@ -582,10 +627,13 @@ export default function MenuBuilder({
               sort_order: index,
             })),
           });
+          // Restore scroll position after backend update too
+          restoreScrollPosition();
         } catch (error) {
           console.error("Failed to reorder items:", error);
           // Revert local state on error
           onItemsChange(menu.items);
+          restoreScrollPosition();
         }
       }
     }
@@ -684,6 +732,7 @@ export default function MenuBuilder({
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
             onDragEnd={(event) => handleItemDragEnd(event, category.id)}
           >
             <SortableContext
@@ -1026,6 +1075,7 @@ export default function MenuBuilder({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
         onDragEnd={handleCategoryDragEnd}
       >
         <SortableContext
