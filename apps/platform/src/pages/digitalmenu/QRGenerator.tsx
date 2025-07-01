@@ -11,28 +11,38 @@ interface QRGeneratorProps {
 
 export default function QRGenerator({ menu, restaurantId, onQrGenerated }: QRGeneratorProps) {
   const [isGenerated, setIsGenerated] = useState(false);
-  const [showAuthForm, setShowAuthForm] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [authData, setAuthData] = useState({
-    phoneNumber: "",
-    address: "",
-  });
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleGenerateQR = () => {
-    setIsGenerated(true);
-    if (onQrGenerated) {
-      onQrGenerated();
-    }
-  };
-
-  const handleAuthSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!authData.phoneNumber.trim() || !authData.address.trim()) {
-      alert("Please fill in all fields");
+  const handleGenerateQR = async () => {
+    if (!mobileNumber.trim()) {
+      alert("Please provide your mobile number to continue");
       return;
     }
-    handleGenerateQR();
-    setShowAuthForm(false);
+
+    setIsGenerating(true);
+    
+    try {
+      // TODO: This will be implemented when we add the backend APIs
+      // 1. Create user with mobile number
+      // 2. Create restaurant with user_id
+      // 3. Save menu data if exists
+      // 4. Generate QR code
+      
+      // For now, simulate the process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setIsGenerated(true);
+      if (onQrGenerated) {
+        onQrGenerated();
+      }
+    } catch (error) {
+      console.error("Failed to generate QR:", error);
+      alert("Failed to create account and generate QR. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleCopyLink = () => {
@@ -55,10 +65,9 @@ export default function QRGenerator({ menu, restaurantId, onQrGenerated }: QRGen
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">Generate QR Code</h2>
+      <h2 className="text-2xl font-bold mb-4">Almost There! 🚀</h2>
       <p className="text-gray-600 mb-6">
-        Your digital menu is ready! Generate a QR code that customers can scan
-        to view your menu.
+        Your digital menu is looking fantastic! Let's get it live so customers can start ordering.
       </p>
 
       {!isGenerated ? (
@@ -87,97 +96,56 @@ export default function QRGenerator({ menu, restaurantId, onQrGenerated }: QRGen
             </div>
           </div>
 
-          {/* Generation Options */}
-          <div className="space-y-4">
-            <div className="p-6 border rounded-lg">
-              <h3 className="font-medium mb-2">Quick Generate</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Generate a QR code instantly. You'll need to create an account
-                to keep it active.
+          {/* Ready to Go Live */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-100">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                🎉 Your menu looks amazing!
+              </h3>
+              <p className="text-gray-600">
+                Ready to share it with customers? Just need your mobile number to create your account and generate your QR code.
               </p>
-              <Button onClick={handleGenerateQR} className="w-full">
-                <QrCode size={16} />
-                Generate QR Code
-              </Button>
             </div>
 
-            <div className="p-6 border rounded-lg">
-              <h3 className="font-medium mb-2">Generate with Account</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Provide your details to create an account and activate your QR
-                code immediately.
-              </p>
+            <div className="space-y-4 max-w-md mx-auto">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mobile Number
+                </label>
+                <input
+                  type="tel"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                  placeholder="e.g. +1 (555) 123-4567"
+                  disabled={isGenerating}
+                />
+              </div>
+
               <Button
-                variant="outline"
-                onClick={() => setShowAuthForm(true)}
-                className="w-full"
+                onClick={handleGenerateQR}
+                disabled={!mobileNumber.trim() || isGenerating}
+                className="w-full py-3 text-lg font-medium"
+                size="lg"
               >
-                Setup Account & Generate
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Creating Account & Generating QR...
+                  </>
+                ) : (
+                  <>
+                    <QrCode size={20} className="mr-2" />
+                    Create Account & Generate QR Code
+                  </>
+                )}
               </Button>
+
+              <p className="text-xs text-gray-500 text-center">
+                By continuing, you agree to create a Qrunchy account. No spam, just menu management! 📱
+              </p>
             </div>
           </div>
-
-          {/* form */}
-          {showAuthForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-                <h3 className="text-lg font-semibold mb-4">Account Setup</h3>
-                <form onSubmit={handleAuthSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={authData.phoneNumber}
-                      onChange={(e) =>
-                        setAuthData((prev) => ({
-                          ...prev,
-                          phoneNumber: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Restaurant Address *
-                    </label>
-                    <textarea
-                      required
-                      value={authData.address}
-                      onChange={(e) =>
-                        setAuthData((prev) => ({
-                          ...prev,
-                          address: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      rows={3}
-                      placeholder="Enter your restaurant address"
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowAuthForm(false)}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="flex-1">
-                      Create Account & Generate QR
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
         </div>
       ) : (
         /* qr */

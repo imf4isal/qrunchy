@@ -10,7 +10,7 @@ import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function DigitalMenu() {
-  const { currentRestaurant, createRestaurant, isLoading } = useRestaurant();
+  const { currentRestaurant } = useRestaurant();
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
   const [menu, setMenu] = useState<DigitalMenu>({
     restaurantName: currentRestaurant?.name || "",
@@ -19,24 +19,9 @@ export default function DigitalMenu() {
   });
   const [showPreview, setShowPreview] = useState(false);
   const [qrGenerated, setQrGenerated] = useState(false);
-  const [restaurantPhone, setRestaurantPhone] = useState("");
-  const [restaurantAddress, setRestaurantAddress] = useState("");
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (step === "setup") {
-      // Create restaurant if not exists
-      if (!currentRestaurant && menu.restaurantName.trim()) {
-        try {
-          await createRestaurant({
-            name: menu.restaurantName.trim(),
-            mobile: restaurantPhone || "000-000-0000",
-            address: restaurantAddress,
-          });
-        } catch (error) {
-          console.error("Failed to create restaurant:", error);
-          return; // Don't proceed if restaurant creation fails
-        }
-      }
       setStep("build");
     } else if (step === "build") {
       setStep("generate");
@@ -273,12 +258,12 @@ export default function DigitalMenu() {
             <div className="mt-6 text-center">
               <p className="text-gray-600 text-sm">
                 {step === "setup"
-                  ? "Enter basic information about your restaurant"
+                  ? "Just tell us your restaurant name to get started"
                   : step === "build"
-                    ? "Add categories and menu items with variants and add-ons"
+                    ? "Build your menu - add categories, items, variants and add-ons"
                     : qrGenerated
-                      ? "Your QR code is ready to share with customers"
-                      : "Generate your QR code and make it available to customers"}
+                      ? "Your QR code is ready! Share it with customers"
+                      : "Ready to go live? Create your account and generate QR code"}
               </p>
             </div>
           </div>
@@ -290,64 +275,24 @@ export default function DigitalMenu() {
               <div className="bg-white rounded-xl shadow-sm border p-8">
                 {step === "setup" && (
                   <div>
-                    <h2 className="text-xl font-bold mb-4">
-                      Restaurant Information
+                    <h2 className="text-2xl font-bold mb-4">
+                      What's your restaurant called?
                     </h2>
-                    <p className="text-gray-600 mb-6">
-                      Start by entering your restaurant's basic information
+                    <p className="text-gray-600 mb-8">
+                      Get started in seconds - just your restaurant name and you're ready to build!
                     </p>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       <div>
-                        <label
-                          htmlFor="restaurantName"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Restaurant Name *
-                        </label>
                         <Input
                           id="restaurantName"
                           type="text"
-                          placeholder="Enter your restaurant name"
+                          placeholder="e.g. Mario's Pizza, Sunset Cafe, The Local Bistro"
                           value={menu.restaurantName}
                           onChange={(e) =>
                             handleRestaurantNameChange(e.target.value)
                           }
-                          className="w-full"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label
-                          htmlFor="restaurantPhone"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Phone Number
-                        </label>
-                        <Input
-                          id="restaurantPhone"
-                          type="tel"
-                          placeholder="Enter phone number"
-                          value={restaurantPhone}
-                          onChange={(e) => setRestaurantPhone(e.target.value)}
-                          className="w-full"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label
-                          htmlFor="restaurantAddress"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Address
-                        </label>
-                        <Input
-                          id="restaurantAddress"
-                          type="text"
-                          placeholder="Enter restaurant address"
-                          value={restaurantAddress}
-                          onChange={(e) => setRestaurantAddress(e.target.value)}
-                          className="w-full"
+                          className="w-full text-lg py-3"
                         />
                       </div>
                     </div>
@@ -355,10 +300,10 @@ export default function DigitalMenu() {
                     <div className="mt-8 flex justify-end">
                       <Button
                         onClick={handleNext}
-                        disabled={!menu.restaurantName.trim() || isLoading}
-                        className="flex items-center gap-2"
+                        disabled={!menu.restaurantName.trim()}
+                        className="flex items-center gap-2 px-6 py-3"
                       >
-                        {isLoading ? "Creating..." : "Continue"} <ArrowRight size={16} />
+                        Let's Build Your Menu <ArrowRight size={16} />
                       </Button>
                     </div>
                   </div>

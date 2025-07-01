@@ -632,8 +632,8 @@ export default function MenuBuilder({
                   bulkImportMutation.isPending
                     ? "border-blue-500 bg-blue-50 opacity-50"
                     : isDragging
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300 hover:border-gray-400"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300 hover:border-gray-400"
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -642,7 +642,9 @@ export default function MenuBuilder({
                 {bulkImportMutation.isPending ? (
                   <div className="flex flex-col items-center">
                     <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-3" />
-                    <p className="text-blue-600 font-medium">Importing menu...</p>
+                    <p className="text-blue-600 font-medium">
+                      Importing menu...
+                    </p>
                     <p className="text-xs text-blue-500 mt-1">
                       Please wait while we process your menu data
                     </p>
