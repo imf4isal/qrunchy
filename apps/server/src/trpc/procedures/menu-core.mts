@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mjs";
-import { db } from "../../db/index.mjs";
-import { getCompleteMenuByRestaurant } from "../../db/queries/digitalMenu.mjs";
-import { restaurantIdSchema } from "./shared/schemas.mjs";
-import { transformMenuToFrontend, transformMenuForExport } from "./shared/transforms.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { db } from "../../db/index.mts";
+import { getCompleteMenuByRestaurant } from "../../db/queries/digitalMenu.mts";
+import { restaurantIdSchema } from "./shared/schemas.mts";
+import { transformMenuToFrontend, transformMenuForExport } from "./shared/transforms.mts";
 
 export const menuCoreProcedures = router({
   // Get complete menu structure for a restaurant

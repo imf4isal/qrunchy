@@ -1,19 +1,19 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mjs";
-import { db } from "../../db/index.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { db } from "../../db/index.mts";
 import {
   getItemsWithDetailsByCategory,
   getItemWithDetailsById,
   createItemWithDetails,
   deleteItemCascade,
-} from "../../db/queries/digitalMenu.mjs";
+} from "../../db/queries/digitalMenu.mts";
 import {
   variantSchema,
   addonSchema,
   restaurantIdSchema,
   categoryIdSchema,
   idSchema,
-} from "./shared/schemas.mjs";
+} from "./shared/schemas.mts";
 
 const menuItemCreateSchema = z.object({
   name: z.string().min(1, "Item name is required"),

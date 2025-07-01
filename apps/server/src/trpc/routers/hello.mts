@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mjs";
+import { publicProcedure, router } from "../index.mts";
 
 export const helloRouter = router({
   hello: publicProcedure

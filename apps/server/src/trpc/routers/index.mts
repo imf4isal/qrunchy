@@ -1,8 +1,8 @@
-import { router } from "../index.mjs";
-import { helloRouter } from "./hello.mjs";
-import { digitalMenuRouter } from "./digitalMenu.mjs";
-import { userRouter } from "./user.mjs";
-import { restaurantRouter } from "./restaurant.mjs";
+import { router } from "../index.mts";
+import { helloRouter } from "./hello.mts";
+import { digitalMenuRouter } from "./digitalMenu.mts";
+import { userRouter } from "./user.mts";
+import { restaurantRouter } from "./restaurant.mts";
 
 export const appRouter = router({
   hello: helloRouter,

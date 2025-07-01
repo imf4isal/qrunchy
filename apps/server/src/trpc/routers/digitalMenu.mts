@@ -1,8 +1,8 @@
-import { publicProcedure, router } from "../index.mjs";
-import { categoriesProcedures } from "../procedures/categories.mjs";
-import { itemsProcedures } from "../procedures/items.mjs";
-import { menuProcedures } from "../procedures/menu.mjs";
-import { qrProcedures } from "../procedures/qr.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { categoriesProcedures } from "../procedures/categories.mts";
+import { itemsProcedures } from "../procedures/items.mts";
+import { menuProcedures } from "../procedures/menu.mts";
+import { qrProcedures } from "../procedures/qr.mts";
 
 export const digitalMenuRouter = router({
   // Simple test endpoint

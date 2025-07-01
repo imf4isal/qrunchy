@@ -1,5 +1,5 @@
-import { publicProcedure, router } from "../index.mjs";
-import { restaurantProcedures } from "../procedures/restaurant.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { restaurantProcedures } from "../procedures/restaurant.mts";
 
 export const restaurantRouter = router({
   // Simple test endpoint

@@ -1,18 +1,18 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mjs";
-import { db } from "../../db/index.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { db } from "../../db/index.mts";
 import {
   getCategoriesByRestaurant,
   createCategory,
   updateCategory,
   deleteCategory,
-} from "../../db/queries/digitalMenu.mjs";
+} from "../../db/queries/digitalMenu.mts";
 import {
   restaurantIdSchema,
   categoryCreateWithRestaurantSchema,
   categoryUpdateSchema,
   idSchema,
-} from "./shared/schemas.mjs";
+} from "./shared/schemas.mts";
 
 export const categoriesProcedures = router({
   getByRestaurant: publicProcedure

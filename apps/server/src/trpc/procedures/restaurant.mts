@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { sql } from "kysely";
-import { publicProcedure, router } from "../index.mjs";
-import { db } from "../../db/index.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { db } from "../../db/index.mts";
 
 const restaurantCreateSchema = z.object({
   name: z.string().min(1, "Restaurant name is required"),

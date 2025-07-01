@@ -1,6 +1,6 @@
 import express from "express";
-import routes from "./restroutes/index.mjs";
-import { trpcRouter } from "./trpc/trpc-server.mjs";
+import routes from "./restroutes/index.mts";
+import { trpcRouter } from "./trpc/trpc-server.mts";
 import cors from "cors";
 
 const app = express();

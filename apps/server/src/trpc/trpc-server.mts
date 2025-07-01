@@ -1,6 +1,6 @@
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { appRouter } from "./routers/index.mjs";
-import { createContext } from "./index.mjs";
+import { appRouter } from "./routers/index.mts";
+import { createContext } from "./index.mts";
 import express from "express";
 
 export const trpcMiddleware = createExpressMiddleware({

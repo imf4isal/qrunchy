@@ -1,6 +1,6 @@
 import { fileURLToPath } from "url";
-import { db } from "./index.mjs";
-import { getMigrator } from "./migrator.mjs";
+import { db } from "./index.mts";
+import { getMigrator } from "./migrator.mts";
 
 async function migrateToLatest() {
   const migrator = getMigrator(db);

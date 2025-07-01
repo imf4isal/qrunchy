@@ -1,6 +1,6 @@
-import { router } from "../index.mjs";
-import { menuCoreProcedures } from "./menu-core.mjs";
-import { menuBulkImportProcedures } from "./menu-bulk-import.mjs";
+import { router } from "../index.mts";
+import { menuCoreProcedures } from "./menu-core.mts";
+import { menuBulkImportProcedures } from "./menu-bulk-import.mts";
 
 // Combine all menu-related procedures
 export const menuProcedures = router({

@@ -1,11 +1,12 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mjs";
-import { db } from "../../db/index.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { db } from "../../db/index.mts";
+import { ItemTable } from "../../types/database.mts";
 import {
   variantSchema,
   addonSchema,
   categoryCreateSchema,
-} from "./shared/schemas.mjs";
+} from "./shared/schemas.mts";
 
 // Bulk import schema
 const bulkImportSchema = z.object({
@@ -169,7 +170,7 @@ const createItems = async (trx: any, input: any, categoryMap: Map<string, number
         sort_order: createdItems.length,
       })
       .returningAll()
-      .executeTakeFirstOrThrow();
+      .executeTakeFirstOrThrow() as ItemTable & { id: number };
 
     // Create variants if provided
     if (itemData.variants) {

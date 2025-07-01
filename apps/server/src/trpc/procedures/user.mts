@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mjs";
-import { db } from "../../db/index.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { db } from "../../db/index.mts";
 
 const userCreateSchema = z.object({
   mobile_number: z.string().min(1, "Mobile number is required"),

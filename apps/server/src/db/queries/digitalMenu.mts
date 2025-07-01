@@ -1,10 +1,10 @@
-import { db } from "../index.mjs";
+import { db } from "../index.mts";
 import type { 
   CategoryWithItems, 
   MenuItemWithDetails, 
   VariantWithOptions, 
   CompleteMenuData 
-} from "../../types/digitalMenu.mjs";
+} from "../../types/digitalMenu.mts";
 
 /**
  * Get all categories for a restaurant with their items, variants, and addons

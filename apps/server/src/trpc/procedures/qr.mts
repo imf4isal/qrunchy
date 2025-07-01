@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mjs";
-import { db } from "../../db/index.mjs";
+import { publicProcedure, router } from "../index.mts";
+import { db } from "../../db/index.mts";
 
 // QR generation schema
 const qrGenerateSchema = z.object({

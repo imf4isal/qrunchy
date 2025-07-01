@@ -1,5 +1,5 @@
 import express from "express";
-import pool from "../config/database.mjs";
+import pool from "../config/database.mts";
 
 const router = express.Router();
 
