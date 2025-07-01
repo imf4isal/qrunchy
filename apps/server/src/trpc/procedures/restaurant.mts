@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { sql } from "kysely";
 import { publicProcedure, router } from "../index.mjs";
 import { db } from "../../db/index.mjs";
 
@@ -63,7 +64,7 @@ export const restaurantProcedures = router({
             name: input.name,
             mobile: input.mobile,
             address: input.address || null,
-            geolocation: "POINT(0 0)", // Default location
+            geolocation: sql`POINT(0, 0)`, // Default location using PostgreSQL POINT function
             user_id: input.user_id,
             group_res_id: input.group_res_id || null,
           })
