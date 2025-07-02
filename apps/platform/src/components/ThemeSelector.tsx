@@ -36,7 +36,8 @@ export default function ThemeSelector({
   const utils = trpc.useUtils();
   
   const updateThemeMutation = trpc.restaurant.updateTheme.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Theme update successful:", data);
       setIsUpdating(false);
       onThemeChange?.(selectedTheme);
       
@@ -50,6 +51,7 @@ export default function ThemeSelector({
     onError: (error) => {
       setIsUpdating(false);
       console.error("Failed to update theme:", error);
+      console.error("Error details:", error.message, error.data);
       // Revert selection on error
       setSelectedTheme(currentTheme);
     },
@@ -57,6 +59,8 @@ export default function ThemeSelector({
 
   const handleThemeSelect = (themeId: "minimal" | "modern") => {
     if (themeId === currentTheme || isUpdating) return;
+    
+    console.log(`Attempting to change theme from ${currentTheme} to ${themeId} for restaurant ${restaurantId}`);
     
     setSelectedTheme(themeId);
     setIsUpdating(true);
