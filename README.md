@@ -92,7 +92,7 @@ ready. that flow is in the platform –> src –> pages –> photoMenu. it's jus
 
 Then, thereare also digitalmenu inside pages folder, which is basically manual menu creation flow for better UI for custoemr. User will put their menu information – category, item, variants, addons, etc .
 Then it will generate better ui than the photomenu.   –––– there are also other ui stuff in the platform.
-Currently, at the first step, the user put the restaurant information, then continue - two options, user can bulk upload json menu data, it will automatically take all from formatted json. Or, user can put menu data manually. Categories, Items, variants, addons etc etc. The UI of this flow is kinda done. And most of the critical API has been implemented.. Right now, we are creating the user at the last step of the flow.
+Currently, at the first step, the user put the restaurant information, then continue - two options, user can bulk upload json menu data, it will automatically take all from formatted json. Or, user can put menu data manually. Categories, Items, variants, addons etc etc. The UI of this flow is kinda done. And most of the critical API has been implemented..
 
  To understand things better, i want you to start analyzing with server code. there are migrations file. go through each of the
   migrations file, so you understand the data model. the migrations file are inside server –> src –> db–> migrations. then we have implemented the backend part for the digitalMenu(manual menu information input) creation flow. In server's src –> trpc –> routers –> index has router of digitalMenu. inside

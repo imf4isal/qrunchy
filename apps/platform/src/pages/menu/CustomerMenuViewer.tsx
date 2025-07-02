@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { Search, Share2, MapPin, Phone } from "lucide-react";
+import React, { useState, useMemo, useEffect } from "react";
+import { Search, Share2, MapPin, Phone, ChevronDown, ArrowUp } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import type { Category, MenuItem } from "@/types/digitalMenu";
 
@@ -12,6 +12,7 @@ export default function CustomerMenuViewer({
 }: CustomerMenuViewerProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
 
   // Fetch real menu data from backend
   const {
@@ -22,6 +23,15 @@ export default function CustomerMenuViewer({
     { qr_code: qrCode! },
     { enabled: !!qrCode }
   );
+
+  // Handle scroll for back to top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const filteredItems = useMemo(() => {
     if (!menuData) return [];
@@ -55,10 +65,18 @@ export default function CustomerMenuViewer({
   // Handle loading and error states
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading menu...</p>
+          <div className="relative mb-8">
+            <div className="w-16 h-16 bg-gradient-to-tr from-slate-900 to-slate-700 rounded-2xl mx-auto flex items-center justify-center shadow-2xl">
+              <span className="text-white font-bold text-xl">Q</span>
+            </div>
+            <div className="absolute inset-0 w-16 h-16 bg-gradient-to-tr from-slate-900 to-slate-700 rounded-2xl mx-auto animate-ping opacity-20"></div>
+          </div>
+          <p className="text-slate-600 text-xl font-semibold">Loading menu</p>
+          <div className="w-32 h-1 bg-slate-200 rounded-full mx-auto mt-4 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-slate-900 to-slate-700 rounded-full animate-pulse"></div>
+          </div>
         </div>
       </div>
     );
@@ -66,14 +84,18 @@ export default function CustomerMenuViewer({
 
   if (error || !menuData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Failed to load menu</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center px-6">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-red-50 rounded-2xl mx-auto mb-6 flex items-center justify-center border border-red-100">
+            <span className="text-red-500 text-2xl">⚠️</span>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">Menu unavailable</h2>
+          <p className="text-slate-600 text-lg mb-6">We couldn't load the menu right now. Please try again.</p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-6 py-3 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            Retry
+            Try again
           </button>
         </div>
       </div>
@@ -97,43 +119,55 @@ export default function CustomerMenuViewer({
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="relative">
-          <div className="h-48 bg-gradient-to-r from-amber-500 to-orange-500 relative overflow-hidden">
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-700 opacity-80"
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-40" />
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
+      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50">
+        <div className="relative">
+          <div className="h-32 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-slate-800/90" />
+            
             <button
               onClick={handleShare}
-              className="absolute top-4 right-4 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-2 rounded-full shadow-lg transition-all"
+              className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-2.5 rounded-xl border border-white/20 transition-all hover:scale-105"
             >
-              <Share2 size={20} />
+              <Share2 size={18} />
             </button>
+
+            <div className="absolute bottom-4 left-4 text-white">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                  <span className="text-white font-bold text-xs">Q</span>
+                </div>
+                <span className="text-white/80 text-sm font-medium">Digital Menu</span>
+              </div>
+            </div>
           </div>
 
-          <div className="px-6 py-6 bg-white">
-            <div className="mb-4">
-              <div className="mb-2">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {menuData.restaurant.name}
-                </h1>
-              </div>
+          <div className="px-6 py-8 bg-white">
+            <div className="mb-8">
+              <h1 className="text-2xl font-semibold text-slate-900 mb-4 tracking-tight">
+                {menuData.restaurant.name}
+              </h1>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-3">
                 {menuData.restaurant.address && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <MapPin size={16} className="text-gray-400" />
-                    <span>{menuData.restaurant.address}</span>
+                  <div className="flex items-center gap-3 text-slate-600">
+                    <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <MapPin size={16} className="text-slate-500" />
+                    </div>
+                    <span className="text-sm">{menuData.restaurant.address}</span>
                   </div>
                 )}
                 {menuData.restaurant.phone && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Phone size={16} className="text-gray-400" />
-                    <span>{menuData.restaurant.phone}</span>
+                  <div className="flex items-center gap-3 text-slate-600">
+                    <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <Phone size={16} className="text-slate-500" />
+                    </div>
+                    <span className="text-sm">{menuData.restaurant.phone}</span>
                   </div>
                 )}
               </div>
@@ -141,35 +175,29 @@ export default function CustomerMenuViewer({
 
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"
+                size={18}
               />
               <input
                 type="text"
-                placeholder="Search menu items..."
+                placeholder="Search dishes..."
                 value={searchTerm}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSearchTerm(e.target.value)
                 }
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all text-slate-900 placeholder:text-slate-400"
               />
             </div>
           </div>
 
-          <div className="px-6 pb-4 bg-white border-b">
-            <div
-              className="flex gap-2 overflow-x-auto category-scroll"
-              style={{
-                scrollbarWidth: "thin",
-                scrollbarColor: "rgba(156, 163, 175, 0.5) transparent",
-              }}
-            >
+          <div className="px-6 pb-6 bg-white border-b border-slate-100">
+            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
               <button
                 onClick={() => setSelectedCategory("all")}
                 className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   selectedCategory === "all"
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-slate-900 text-white shadow-lg shadow-slate-900/25"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
                 }`}
               >
                 All
@@ -180,8 +208,8 @@ export default function CustomerMenuViewer({
                   onClick={() => setSelectedCategory(category.id)}
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     selectedCategory === category.id
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-slate-900 text-white shadow-lg shadow-slate-900/25"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
                   }`}
                 >
                   {category.name}
@@ -192,9 +220,9 @@ export default function CustomerMenuViewer({
         </div>
       </div>
 
-      <div className="px-6 py-6">
+      <div className="px-6 py-8">
         {selectedCategory === "all" ? (
-          <div className="space-y-8">
+          <div className="space-y-12">
             {menuData.categories
               .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
               .map((category: Category) => {
@@ -203,10 +231,12 @@ export default function CustomerMenuViewer({
 
                 return (
                   <section key={category.id}>
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 sticky top-44 bg-gray-50 py-2 z-5">
-                      {category.name}
-                    </h2>
-                    <div className="space-y-4">
+                    <div className="sticky top-[200px] bg-white/90 backdrop-blur-xl py-4 mb-6 z-40 -mx-6 px-6 border-b border-slate-100">
+                      <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
+                        {category.name}
+                      </h2>
+                    </div>
+                    <div className="grid gap-6">
                       {categoryItems.map((item) => (
                         <MenuItemCard key={item.id} item={item} />
                       ))}
@@ -216,7 +246,7 @@ export default function CustomerMenuViewer({
               })}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-6">
             {filteredItems.map((item: MenuItem) => (
               <MenuItemCard key={item.id} item={item} />
             ))}
@@ -224,28 +254,49 @@ export default function CustomerMenuViewer({
         )}
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-2">
-              <Search size={48} className="mx-auto" />
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+              <Search size={24} className="text-slate-400" />
             </div>
-            <p className="text-gray-600">
-              No items found matching your search.
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No dishes found</h3>
+            <p className="text-slate-600 text-sm mb-6">
+              Try adjusting your search or browse different categories
             </p>
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory("all");
+              }}
+              className="px-4 py-2 bg-slate-900 text-white rounded-lg font-medium text-sm hover:bg-slate-800 transition-all"
+            >
+              View all items
+            </button>
           </div>
         )}
       </div>
 
-      <div className="mt-12 bg-white border-t px-6 py-8">
+      {/* Back to top button */}
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 bg-slate-900 text-white p-3 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50"
+        >
+          <ArrowUp size={20} />
+        </button>
+      )}
+
+      <div className="mt-16 bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-12">
         <div className="text-center">
-          <div className="flex items-center justify-center mb-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg mr-3 flex items-center justify-center text-white font-bold text-sm">
-              Q
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-10 h-10 bg-white/10 rounded-2xl mr-3 flex items-center justify-center backdrop-blur-sm border border-white/20">
+              <span className="font-bold text-white">Q</span>
             </div>
-            <span className="font-semibold text-gray-800">
-              Powered by Qrunchy
-            </span>
+            <div className="text-left">
+              <span className="font-semibold text-white text-lg block">Qrunchy</span>
+              <span className="text-white/60 text-sm">Digital menus made simple</span>
+            </div>
           </div>
-          <p className="text-xs text-gray-500">Digital menus made simple</p>
+          <p className="text-white/40 text-xs">Scan. Browse. Order. The future of dining.</p>
         </div>
       </div>
     </div>
@@ -260,38 +311,39 @@ function MenuItemCard({ item }: MenuItemCardProps) {
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+    <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-xl hover:shadow-slate-900/10 transition-all duration-300 hover:-translate-y-1">
+      <div className="p-8">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex-1 pr-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2 leading-tight">
               {item.name}
             </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              {item.description}
-            </p>
+            {item.description && (
+              <p className="text-slate-600 text-sm leading-relaxed">
+                {item.description}
+              </p>
+            )}
           </div>
-          <div className="ml-4 text-right">
-            <div className="text-xl font-bold text-gray-900">
+          <div className="text-right">
+            <div className="text-lg font-semibold text-slate-900">
               ৳{item.price.toFixed(2)}
             </div>
           </div>
         </div>
 
         {(item.variants.length > 0 || item.addons.length > 0) && (
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-3 mb-6">
             {item.variants.map((variant) => (
               <span
                 key={variant.id}
-                className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium"
+                className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200"
               >
-                {variant.title} options
+                {variant.title} ({variant.options.length})
               </span>
             ))}
             {item.addons.length > 0 && (
-              <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-50 text-green-700 text-xs font-medium">
-                +{item.addons.length} add-on
-                {item.addons.length !== 1 ? "s" : ""}
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
+                +{item.addons.length} add-on{item.addons.length !== 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -301,31 +353,35 @@ function MenuItemCard({ item }: MenuItemCardProps) {
           <div>
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="text-orange-500 text-sm font-medium hover:text-orange-600 transition-colors"
+              className="flex items-center gap-2 text-slate-600 text-sm font-medium hover:text-slate-900 transition-colors"
             >
-              {showDetails ? "Hide details" : "View options"}
+              {showDetails ? "Hide options" : "View options"}
+              <ChevronDown 
+                size={16} 
+                className={`transition-transform ${showDetails ? "rotate-180" : ""}`} 
+              />
             </button>
 
             {showDetails && (
-              <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="mt-6 pt-6 border-t border-slate-100 space-y-8">
                 {item.variants.map((variant) => (
-                  <div key={variant.id} className="mb-4">
-                    <h4 className="font-medium text-gray-900 mb-2">
-                      {variant.title}:
+                  <div key={variant.id}>
+                    <h4 className="font-semibold text-slate-900 mb-3 text-sm">
+                      {variant.title}
                     </h4>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="space-y-3">
                       {variant.options.map((option) => (
                         <div
                           key={option.id}
-                          className="flex justify-between items-center p-2 bg-gray-50 rounded-lg"
+                          className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-slate-100 transition-colors"
                         >
-                          <span className="text-sm text-gray-700">
+                          <span className="font-medium text-slate-700 text-sm">
                             {option.name}
                           </span>
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="font-semibold text-slate-900 text-sm">
                             {option.price > 0
                               ? `+৳${option.price.toFixed(2)}`
-                              : "No extra charge"}
+                              : "Free"}
                           </span>
                         </div>
                       ))}
@@ -335,17 +391,17 @@ function MenuItemCard({ item }: MenuItemCardProps) {
 
                 {item.addons.length > 0 && (
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Add-ons:</h4>
-                    <div className="grid grid-cols-1 gap-2">
+                    <h4 className="font-semibold text-slate-900 mb-3 text-sm">Add-ons</h4>
+                    <div className="space-y-3">
                       {item.addons.map((addon) => (
                         <div
                           key={addon.id}
-                          className="flex justify-between items-center p-2 bg-green-50 rounded-lg"
+                          className="flex justify-between items-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100 hover:bg-emerald-100 transition-colors"
                         >
-                          <span className="text-sm text-gray-700">
+                          <span className="font-medium text-emerald-800 text-sm">
                             {addon.name}
                           </span>
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="font-semibold text-emerald-900 text-sm">
                             +৳{addon.price.toFixed(2)}
                           </span>
                         </div>
@@ -360,4 +416,23 @@ function MenuItemCard({ item }: MenuItemCardProps) {
       </div>
     </div>
   );
+}
+
+// Add styles for scrollbar hiding
+const styles = `
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = styles;
+  document.head.appendChild(styleElement);
 }
