@@ -33,10 +33,19 @@ export default function ThemeSelector({
   const [selectedTheme, setSelectedTheme] = useState<"minimal" | "modern">(currentTheme);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  const utils = trpc.useUtils();
+  
   const updateThemeMutation = trpc.restaurant.updateTheme.useMutation({
     onSuccess: () => {
       setIsUpdating(false);
       onThemeChange?.(selectedTheme);
+      
+      // Invalidate relevant queries to ensure fresh data
+      utils.digitalMenu.qr.getQrData.invalidate();
+      utils.digitalMenu.qr.getMenuByQr.invalidate();
+      utils.restaurant.getById.invalidate();
+      utils.restaurant.getByUser.invalidate();
+      utils.auth.me.invalidate();
     },
     onError: (error) => {
       setIsUpdating(false);

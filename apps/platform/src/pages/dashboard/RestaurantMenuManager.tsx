@@ -213,8 +213,8 @@ export default function RestaurantMenuManager() {
             restaurantId={restaurantId}
             currentTheme={restaurant?.theme_id || "minimal"}
             onThemeChange={(newTheme) => {
-              // Update local restaurant data to reflect theme change
-              console.log(`Theme changed to: ${newTheme}`);
+              // Cache invalidation in ThemeSelector will handle updates
+              console.log(`Theme successfully changed to: ${newTheme}`);
             }}
           />
         </div>
