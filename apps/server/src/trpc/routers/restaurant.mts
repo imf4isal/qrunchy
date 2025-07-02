@@ -12,4 +12,7 @@ export const restaurantRouter = router({
   getByUser: restaurantProcedures.getByUser,
   getById: restaurantProcedures.getById,
   update: restaurantProcedures.update,
+  
+  // Theme management
+  updateTheme: restaurantProcedures.updateTheme,
 });

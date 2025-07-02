@@ -274,6 +274,7 @@ export const qrProcedures = router({
             "restaurant.name as restaurant_name",
             "restaurant.address as restaurant_address",
             "restaurant.mobile as restaurant_phone",
+            "restaurant.theme_id as restaurant_theme",
           ])
           .where("qr_code.code", "=", input.qr_code)
           .executeTakeFirst();
@@ -295,6 +296,7 @@ export const qrProcedures = router({
             name: qrRecord.restaurant_name || "",
             address: qrRecord.restaurant_address || "",
             phone: qrRecord.restaurant_phone || "",
+            theme_id: qrRecord.restaurant_theme || "minimal",
           } : null,
         };
       } catch (error) {
@@ -319,6 +321,7 @@ export const qrProcedures = router({
             "restaurant.name as restaurant_name",
             "restaurant.address as restaurant_address",
             "restaurant.mobile as restaurant_phone",
+            "restaurant.theme_id as restaurant_theme",
           ])
           .where("qr_code.code", "=", input.qr_code)
           .where("qr_code.type", "=", "digital")
@@ -386,6 +389,7 @@ export const qrProcedures = router({
             name: qrRecord.restaurant_name,
             address: qrRecord.restaurant_address,
             phone: qrRecord.restaurant_phone,
+            theme_id: qrRecord.restaurant_theme || "minimal",
           },
           categories: categories.map(cat => ({
             id: cat.id.toString(),

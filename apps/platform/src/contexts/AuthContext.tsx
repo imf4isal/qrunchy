@@ -13,6 +13,7 @@ export interface Restaurant {
   name: string;
   mobile: string;
   address: string | null;
+  theme_id?: string;
   created_at: string;
   updated_at: string;
 }

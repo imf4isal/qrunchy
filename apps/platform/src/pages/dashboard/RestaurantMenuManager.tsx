@@ -8,6 +8,7 @@ import MenuPreview from "@/pages/digitalmenu/MenuPreview";
 import MainLayout from "@/components/layout/MainLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { trpc } from "@/utils/trpc";
+import ThemeSelector from "@/components/ThemeSelector";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function RestaurantMenuManager() {
@@ -204,6 +205,18 @@ export default function RestaurantMenuManager() {
               </Button>
             </div>
           </div>
+        </div>
+
+        {/* Theme Settings */}
+        <div className="mb-8">
+          <ThemeSelector
+            restaurantId={restaurantId}
+            currentTheme={restaurant?.theme_id || "minimal"}
+            onThemeChange={(newTheme) => {
+              // Update local restaurant data to reflect theme change
+              console.log(`Theme changed to: ${newTheme}`);
+            }}
+          />
         </div>
 
         {/* Content */}

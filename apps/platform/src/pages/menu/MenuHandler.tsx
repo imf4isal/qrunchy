@@ -1,5 +1,6 @@
 import { trpc } from "@/utils/trpc";
 import CustomerMenuViewer from "./CustomerMenuViewer";
+import CustomerMenuViewerModern from "./CustomerMenuViewerModern";
 import LoadingScreen from "./components/LoadingScreen";
 import ErrorScreen from "./components/ErrorScreen";
 import ExpiredScreen from "./components/ExpiredScreen";
@@ -9,7 +10,6 @@ import PhotoMenuPlaceholder from "./components/PhotoMenuPlaceholder";
 interface MenuHandlerProps {
   qrCode: string;
 }
-
 
 export default function MenuHandler({ qrCode }: MenuHandlerProps) {
   // Use tRPC to fetch QR data from the real backend
@@ -28,10 +28,12 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
   }
 
   if (qrData.status === "expired" || !qrData.isActive) {
-    const restaurantWithDescription = qrData.restaurant ? {
-      ...qrData.restaurant,
-      description: qrData.restaurant.name + " - Digital Menu", // Add description
-    } : null;
+    const restaurantWithDescription = qrData.restaurant
+      ? {
+          ...qrData.restaurant,
+          description: qrData.restaurant.name + " - Digital Menu", // Add description
+        }
+      : null;
     return <ExpiredScreen restaurant={restaurantWithDescription} />;
   }
 
@@ -40,12 +42,21 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
   }
 
   if (qrData.type === "digital") {
-    return <CustomerMenuViewer qrCode={qrCode} />;
+    // Route to appropriate theme component based on restaurant's theme
+    const themeId = qrData.restaurant?.theme_id || "minimal";
+    
+    switch (themeId) {
+      case "modern":
+        return <CustomerMenuViewerModern qrCode={qrCode} />;
+      case "minimal":
+      default:
+        return <CustomerMenuViewer qrCode={qrCode} />;
+    }
   }
 
   if (qrData.type === "photo") {
     return <PhotoMenuPlaceholder qrCode={qrCode} />;
-  } 
+  }
 
   return null;
 }

@@ -17,6 +17,7 @@ const restaurantUpdateSchema = z.object({
   mobile: z.string().min(1, "Mobile number is required").optional(),
   address: z.string().optional(),
   group_res_id: z.number().int().positive().optional(),
+  theme_id: z.enum(["minimal", "modern"]).optional(),
 });
 
 const restaurantGetByUserSchema = z.object({
@@ -25,6 +26,11 @@ const restaurantGetByUserSchema = z.object({
 
 const restaurantGetByIdSchema = z.object({
   id: z.number().int().positive(),
+});
+
+const restaurantUpdateThemeSchema = z.object({
+  id: z.number().int().positive(),
+  theme_id: z.enum(["minimal", "modern"]),
 });
 
 export const restaurantProcedures = router({
@@ -78,6 +84,7 @@ export const restaurantProcedures = router({
           address: restaurant.address,
           user_id: restaurant.user_id,
           group_res_id: restaurant.group_res_id,
+          theme_id: restaurant.theme_id || "minimal",
           created_at: restaurant.created_at.toISOString(),
           updated_at: restaurant.updated_at.toISOString(),
           is_active: restaurant.is_active,
@@ -107,6 +114,7 @@ export const restaurantProcedures = router({
           address: restaurant.address,
           user_id: restaurant.user_id,
           group_res_id: restaurant.group_res_id,
+          theme_id: restaurant.theme_id || "minimal",
           created_at: restaurant.created_at.toISOString(),
           updated_at: restaurant.updated_at.toISOString(),
           is_active: restaurant.is_active,
@@ -139,6 +147,7 @@ export const restaurantProcedures = router({
           address: restaurant.address,
           user_id: restaurant.user_id,
           group_res_id: restaurant.group_res_id,
+          theme_id: restaurant.theme_id || "minimal",
           created_at: restaurant.created_at.toISOString(),
           updated_at: restaurant.updated_at.toISOString(),
           is_active: restaurant.is_active,
@@ -194,6 +203,7 @@ export const restaurantProcedures = router({
           address: updatedRestaurant.address,
           user_id: updatedRestaurant.user_id,
           group_res_id: updatedRestaurant.group_res_id,
+          theme_id: updatedRestaurant.theme_id || "minimal",
           created_at: updatedRestaurant.created_at.toISOString(),
           updated_at: updatedRestaurant.updated_at.toISOString(),
           is_active: updatedRestaurant.is_active,
@@ -201,6 +211,30 @@ export const restaurantProcedures = router({
       } catch (error) {
         console.error("Error updating restaurant:", error);
         throw new Error("Failed to update restaurant");
+      }
+    }),
+
+  updateTheme: publicProcedure
+    .input(restaurantUpdateThemeSchema)
+    .mutation(async ({ input }) => {
+      try {
+        const updatedRestaurant = await db
+          .updateTable("restaurant")
+          .set({ theme_id: input.theme_id })
+          .where("id", "=", input.id)
+          .where("is_active", "=", true)
+          .returningAll()
+          .executeTakeFirstOrThrow();
+
+        return {
+          id: updatedRestaurant.id,
+          name: updatedRestaurant.name,
+          theme_id: updatedRestaurant.theme_id,
+          updated_at: updatedRestaurant.updated_at.toISOString(),
+        };
+      } catch (error) {
+        console.error("Error updating restaurant theme:", error);
+        throw new Error("Failed to update restaurant theme");
       }
     }),
 });

@@ -46,6 +46,7 @@ export interface RestaurantTable {
   geolocation: Point;
   group_res_id: number | null;
   user_id: number;
+  theme_id: Generated<string>;
   created_at: Generated<Date>;
   updated_at: Generated<Date>;
   is_active: Generated<boolean>;
