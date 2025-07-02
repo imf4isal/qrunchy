@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Check, Eye, Palette } from "lucide-react";
 import { trpc } from "@/utils/trpc";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ThemeSelectorProps {
   restaurantId: number;
@@ -32,39 +33,70 @@ export default function ThemeSelector({
 }: ThemeSelectorProps) {
   const [selectedTheme, setSelectedTheme] = useState<"minimal" | "modern">(currentTheme);
   const [isUpdating, setIsUpdating] = useState(false);
+  const { updateRestaurant } = useAuth();
 
   const utils = trpc.useUtils();
   
   const updateThemeMutation = trpc.restaurant.updateTheme.useMutation({
-    onSuccess: (data) => {
-      console.log("Theme update successful:", data);
-      setIsUpdating(false);
+    onSuccess: async (data) => {
+      console.log("✅ Theme update successful:", data);
+      console.log("Updated theme_id:", data.theme_id);
+      
+      // Update the restaurant in the auth context immediately
+      updateRestaurant(restaurantId, { 
+        theme_id: data.theme_id,
+        updated_at: data.updated_at 
+      });
+      
+      // Only call onThemeChange after successful backend update
       onThemeChange?.(selectedTheme);
       
-      // Invalidate relevant queries to ensure fresh data
-      utils.digitalMenu.qr.getQrData.invalidate();
-      utils.digitalMenu.qr.getMenuByQr.invalidate();
-      utils.restaurant.getById.invalidate();
-      utils.restaurant.getByUser.invalidate();
-      utils.auth.me.invalidate();
+      // Invalidate relevant queries AFTER confirming success
+      try {
+        await Promise.all([
+          utils.digitalMenu.qr.getQrData.invalidate(),
+          utils.digitalMenu.qr.getMenuByQr.invalidate(), 
+          utils.restaurant.getById.invalidate(),
+          utils.restaurant.getByUser.invalidate(),
+          utils.auth.me.invalidate(),
+        ]);
+        console.log("✅ Cache invalidation completed");
+      } catch (invalidationError) {
+        console.warn("⚠️ Cache invalidation failed:", invalidationError);
+      }
+      
+      setIsUpdating(false);
     },
     onError: (error) => {
-      setIsUpdating(false);
-      console.error("Failed to update theme:", error);
-      console.error("Error details:", error.message, error.data);
+      console.error("❌ Failed to update theme:", error);
+      console.error("Error details:", {
+        message: error.message,
+        data: error.data,
+        shape: error.shape,
+        cause: error.cause
+      });
+      
       // Revert selection on error
       setSelectedTheme(currentTheme);
+      setIsUpdating(false);
+      
+      // Show user-friendly error
+      alert(`Failed to update theme: ${error.message || 'Unknown error. Please check console and try again.'}`);
     },
   });
 
   const handleThemeSelect = (themeId: "minimal" | "modern") => {
-    if (themeId === currentTheme || isUpdating) return;
+    if (themeId === currentTheme || isUpdating) {
+      return;
+    }
     
-    console.log(`Attempting to change theme from ${currentTheme} to ${themeId} for restaurant ${restaurantId}`);
+    console.log(`🎨 Changing theme from '${currentTheme}' to '${themeId}' for restaurant ${restaurantId}`);
     
+    // Update UI optimistically but don't call onThemeChange yet
     setSelectedTheme(themeId);
     setIsUpdating(true);
     
+    // Save to backend - onThemeChange will be called on success
     updateThemeMutation.mutate({
       id: restaurantId,
       theme_id: themeId,

@@ -258,59 +258,79 @@ export default function MenuBuilder({
   };
 
   const handleSaveItem = async (item: MenuItem) => {
-    if (!restaurantId) return;
-
-    try {
-      const existingItem = menu.items.find((existingItem) => existingItem.id === item.id);
+    if (batchSaveMode) {
+      // In batch save mode, just update local state
+      const existingItemIndex = menu.items.findIndex(existingItem => existingItem.id === item.id);
       
-      if (existingItem) {
+      let updatedItems;
+      if (existingItemIndex >= 0) {
         // Update existing item
-        await updateItemMutation.mutateAsync({
-          id: parseInt(item.id, 10),
-          name: item.name,
-          price: item.price,
-          description: item.description,
-          category_id: parseInt(item.categoryId, 10),
-          variants: item.variants.map((variant) => ({
-            id: variant.id, // Include ID for existing variants
-            title: variant.title,
-            options: variant.options.map((option) => ({
-              id: option.id, // Include ID for existing options
-              name: option.name,
-              price: option.price,
-            })),
-          })),
-          addons: item.addons.map((addon) => ({
-            id: addon.id, // Include ID for existing addons
-            name: addon.name,
-            price: addon.price,
-          })),
-        });
+        updatedItems = [...menu.items];
+        updatedItems[existingItemIndex] = item;
       } else {
         // Add new item
-        await createItemMutation.mutateAsync({
-          name: item.name,
-          price: item.price,
-          description: item.description,
-          category_id: parseInt(item.categoryId, 10),
-          variants: item.variants.map((variant) => ({
-            title: variant.title,
-            options: variant.options.map((option) => ({
-              name: option.name,
-              price: option.price,
-            })),
-          })),
-          addons: item.addons.map((addon) => ({
-            name: addon.name,
-            price: addon.price,
-          })),
-        });
+        updatedItems = [...menu.items, item];
       }
-
+      
+      onItemsChange(updatedItems);
       setShowItemEditor(false);
       setEditingItem(null);
-    } catch (error) {
-      console.error("Failed to save item:", error);
+    } else {
+      // Immediate save mode (backward compatibility)
+      if (!restaurantId) return;
+
+      try {
+        const existingItem = menu.items.find((existingItem) => existingItem.id === item.id);
+        
+        if (existingItem) {
+          // Update existing item
+          await updateItemMutation.mutateAsync({
+            id: parseInt(item.id, 10),
+            name: item.name,
+            price: item.price,
+            description: item.description,
+            category_id: parseInt(item.categoryId, 10),
+            variants: item.variants.map((variant) => ({
+              id: variant.id, // Include ID for existing variants
+              title: variant.title,
+              options: variant.options.map((option) => ({
+                id: option.id, // Include ID for existing options
+                name: option.name,
+                price: option.price,
+              })),
+            })),
+            addons: item.addons.map((addon) => ({
+              id: addon.id, // Include ID for existing addons
+              name: addon.name,
+              price: addon.price,
+            })),
+          });
+        } else {
+          // Add new item
+          await createItemMutation.mutateAsync({
+            name: item.name,
+            price: item.price,
+            description: item.description,
+            category_id: parseInt(item.categoryId, 10),
+            variants: item.variants.map((variant) => ({
+              title: variant.title,
+              options: variant.options.map((option) => ({
+                name: option.name,
+                price: option.price,
+              })),
+            })),
+            addons: item.addons.map((addon) => ({
+              name: addon.name,
+              price: addon.price,
+            })),
+          });
+        }
+
+        setShowItemEditor(false);
+        setEditingItem(null);
+      } catch (error) {
+        console.error("Failed to save item:", error);
+      }
     }
   };
 

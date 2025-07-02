@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useParams, useLocation } from "wouter";
-import { ArrowLeft, Eye, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MenuBuilder from "@/pages/digitalmenu/MenuBuilder";
@@ -26,6 +26,18 @@ export default function RestaurantMenuManager() {
   });
   const [showPreview, setShowPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
+  
+  // Keep track of the initial state to detect changes
+  const initialMenuRef = useRef<DigitalMenu | null>(null);
+  
+  // Batch save mutations
+  const utils = trpc.useUtils();
+  
+  const bulkImportMutation = trpc.digitalMenu.menu.bulkImport.useMutation();
+  const updateThemeMutation = trpc.restaurant.updateTheme.useMutation();
 
   // Redirect if not authenticated or restaurant not found
   useEffect(() => {
@@ -52,7 +64,7 @@ export default function RestaurantMenuManager() {
   // Update local menu state when backend data loads
   useEffect(() => {
     if (existingMenu && restaurant) {
-      setMenu({
+      const menuData = {
         restaurantName: restaurant.name,
         categories: existingMenu.categories.map((cat: any) => ({
           id: cat.id,
@@ -70,27 +82,92 @@ export default function RestaurantMenuManager() {
             addons: item.addons,
           }))
         ),
-      });
+      };
+      setMenu(menuData);
+      initialMenuRef.current = JSON.parse(JSON.stringify(menuData));
+      setHasUnsavedChanges(false);
+      setSaveStatus('idle');
     }
   }, [existingMenu, restaurant]);
 
   const handleCategoriesChange = useCallback((categories: Category[]) => {
     setMenu(prev => ({ ...prev, categories }));
+    setHasUnsavedChanges(true);
+    setSaveStatus('idle');
   }, []);
 
   const handleItemsChange = useCallback((items: MenuItem[]) => {
     setMenu(prev => ({ ...prev, items }));
+    setHasUnsavedChanges(true);
+    setSaveStatus('idle');
   }, []);
+  
+  const handleThemeChange = useCallback((newTheme: string) => {
+    console.log("🎨 Theme change callback triggered:", {
+      oldTheme: restaurant?.theme_id,
+      newTheme,
+      restaurantId
+    });
+    setHasUnsavedChanges(true);
+    setSaveStatus('idle');
+  }, [restaurant?.theme_id, restaurantId]);
 
   const handleSaveMenu = async () => {
+    if (!hasUnsavedChanges || !restaurantId) return;
+    
     setIsSaving(true);
+    setSaveStatus('saving');
+    
     try {
-      // For now, just show success message
-      // The MenuBuilder component handles individual saves
-      alert("Menu saved successfully!");
+      // Prepare menu data for bulk import
+      const menuData = {
+        categories: menu.categories.map(cat => ({ name: cat.name })),
+        items: menu.items.map(item => ({
+          name: item.name,
+          price: item.price,
+          description: item.description,
+          categoryName: menu.categories.find(cat => cat.id === item.categoryId)?.name || '',
+          variants: item.variants.map(variant => ({
+            title: variant.title,
+            options: variant.options.map(option => ({
+              name: option.name,
+              price: option.price,
+            })),
+          })),
+          addons: item.addons.map(addon => ({
+            name: addon.name,
+            price: addon.price,
+          })),
+        })),
+      };
+      
+      // Save menu data with bulk import (replaces existing)
+      await bulkImportMutation.mutateAsync({
+        restaurant_id: restaurantId,
+        menu_data: menuData,
+        replace_existing: true,
+      });
+      
+      // Update saved state
+      initialMenuRef.current = JSON.parse(JSON.stringify(menu));
+      setHasUnsavedChanges(false);
+      setSaveStatus('success');
+      setLastSaveTime(new Date());
+      
+      // Invalidate relevant caches to refresh data
+      await utils.digitalMenu.menu.getComplete.invalidate({ restaurant_id: restaurantId });
+      await utils.digitalMenu.categories.getByRestaurant.invalidate({ restaurant_id: restaurantId });
+      await utils.digitalMenu.items.getByRestaurant.invalidate({ restaurant_id: restaurantId });
+      
+      // Reset success status after 3 seconds
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      
     } catch (error) {
-      console.error("Error saving menu:", error);
-      alert("Failed to save menu. Please try again.");
+      console.error('Error saving menu:', error);
+      setSaveStatus('error');
+      
+      // Reset error status after 5 seconds
+      setTimeout(() => setSaveStatus('idle'), 5000);
     } finally {
       setIsSaving(false);
     }
@@ -188,18 +265,31 @@ export default function RestaurantMenuManager() {
               
               <Button
                 onClick={handleSaveMenu}
-                disabled={isSaving}
-                className="flex items-center gap-2"
+                disabled={isSaving || !hasUnsavedChanges}
+                className={`flex items-center gap-2 ${
+                  saveStatus === 'success' ? 'bg-green-600 hover:bg-green-700' :
+                  saveStatus === 'error' ? 'bg-red-600 hover:bg-red-700' : ''
+                }`}
               >
                 {isSaving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Saving...
                   </>
+                ) : saveStatus === 'success' ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Saved!
+                  </>
+                ) : saveStatus === 'error' ? (
+                  <>
+                    <AlertCircle className="w-4 h-4" />
+                    Failed
+                  </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    Save Menu
+                    {hasUnsavedChanges ? 'Save Changes' : 'No Changes'}
                   </>
                 )}
               </Button>
@@ -209,14 +299,13 @@ export default function RestaurantMenuManager() {
 
         {/* Theme Settings */}
         <div className="mb-8">
-          <ThemeSelector
-            restaurantId={restaurantId}
-            currentTheme={restaurant?.theme_id || "minimal"}
-            onThemeChange={(newTheme) => {
-              // Cache invalidation in ThemeSelector will handle updates
-              console.log(`Theme successfully changed to: ${newTheme}`);
-            }}
-          />
+          {restaurant && (
+            <ThemeSelector
+              restaurantId={restaurantId}
+              currentTheme={restaurant?.theme_id || "minimal"}
+              onThemeChange={handleThemeChange}
+            />
+          )}
         </div>
 
         {/* Content */}
@@ -230,6 +319,7 @@ export default function RestaurantMenuManager() {
                   restaurantId={restaurantId}
                   onCategoriesChange={handleCategoriesChange}
                   onItemsChange={handleItemsChange}
+                  batchSaveMode={true}
                 />
               </CardContent>
             </Card>
@@ -255,11 +345,21 @@ export default function RestaurantMenuManager() {
           )}
         </div>
 
-        {/* Quick Actions Footer */}
+        {/* Save Status Footer */}
         <div className="mt-8 p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Changes are saved automatically when you add or modify items.
+              {hasUnsavedChanges ? (
+                <span className="text-amber-600 font-medium">
+                  ⚠️ You have unsaved changes. Click "Save Changes" to save them.
+                </span>
+              ) : lastSaveTime ? (
+                <span className="text-green-600">
+                  ✅ All changes saved at {lastSaveTime.toLocaleTimeString()}
+                </span>
+              ) : (
+                "Make changes to your menu and click Save to update it."
+              )}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" asChild>

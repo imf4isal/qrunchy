@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Search, Share2, MapPin, Phone, ChevronDown, ArrowUp, Filter, Star } from "lucide-react";
+import { Search, Share2, MapPin, Phone, ChevronDown, ArrowUp, Filter, Star, Clock, Heart, Sparkles } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import type { Category, MenuItem } from "@/types/digitalMenu";
 
@@ -65,17 +65,18 @@ export default function CustomerMenuViewerModern({
   // Handle loading and error states
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center">
           <div className="relative mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-white to-indigo-100 rounded-full mx-auto flex items-center justify-center shadow-2xl border-4 border-white/30">
-              <span className="text-indigo-600 font-bold text-2xl">Q</span>
+            <div className="w-24 h-24 bg-gradient-to-br from-white to-blue-50 rounded-2xl mx-auto flex items-center justify-center shadow-2xl border border-white/20 backdrop-blur-xl">
+              <Sparkles className="text-blue-600 animate-pulse" size={32} />
             </div>
-            <div className="absolute inset-0 w-20 h-20 bg-white rounded-full mx-auto animate-ping opacity-30"></div>
+            <div className="absolute inset-0 w-24 h-24 bg-blue-500/20 rounded-2xl mx-auto animate-ping"></div>
           </div>
-          <p className="text-white text-xl font-semibold mb-4">Loading your menu</p>
-          <div className="w-40 h-2 bg-white/20 rounded-full mx-auto overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-white to-indigo-200 rounded-full animate-pulse"></div>
+          <p className="text-white text-xl font-semibold mb-2">Preparing your menu</p>
+          <p className="text-white/70 text-sm mb-6">Just a moment while we load everything...</p>
+          <div className="w-48 h-1 bg-white/10 rounded-full mx-auto overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -84,18 +85,18 @@ export default function CustomerMenuViewerModern({
 
   if (error || !menuData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center px-6">
         <div className="text-center max-w-md">
-          <div className="w-20 h-20 bg-white/10 rounded-full mx-auto mb-8 flex items-center justify-center border-2 border-white/30">
-            <span className="text-white text-3xl">⚠️</span>
+          <div className="w-24 h-24 bg-white/5 rounded-3xl mx-auto mb-8 flex items-center justify-center border border-white/10 backdrop-blur-xl">
+            <span className="text-white text-4xl">😔</span>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-4">Oops!</h2>
-          <p className="text-white/80 text-lg mb-8">We couldn't load the menu right now. Let's try again.</p>
+          <h2 className="text-2xl font-bold text-white mb-4">Menu Unavailable</h2>
+          <p className="text-white/70 text-base mb-8">We're having trouble loading this menu. Please try refreshing the page.</p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-8 py-4 bg-white text-indigo-900 rounded-2xl font-semibold hover:bg-indigo-50 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105"
+            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 border border-white/10"
           >
-            Retry
+            Try Again
           </button>
         </div>
       </div>
@@ -124,63 +125,67 @@ export default function CustomerMenuViewerModern({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       {/* Hero Header */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-pink-600/20" />
-        <div className="relative px-6 py-12">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent" />
+        <div className="relative px-6 py-16">
           
           <button
             onClick={handleShare}
-            className="absolute top-6 right-6 bg-white/10 hover:bg-white/20 backdrop-blur-xl text-white p-3 rounded-2xl border border-white/20 transition-all hover:scale-110 shadow-lg"
+            className="absolute top-8 right-6 bg-white/5 hover:bg-white/15 backdrop-blur-2xl text-white p-3 rounded-2xl border border-white/10 transition-all hover:scale-110 shadow-lg group"
           >
-            <Share2 size={20} />
+            <Share2 size={20} className="group-hover:rotate-12 transition-transform" />
           </button>
 
           <div className="text-center text-white max-w-2xl mx-auto">
-            <div className="flex items-center justify-center mb-6">
-              <div className="w-12 h-12 bg-white/20 rounded-2xl mr-4 flex items-center justify-center backdrop-blur-sm border border-white/30">
-                <span className="text-white font-bold text-lg">Q</span>
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-14 h-14 bg-gradient-to-br from-white/20 to-blue-500/20 rounded-3xl mr-4 flex items-center justify-center backdrop-blur-xl border border-white/20 shadow-xl">
+                <Sparkles className="text-white" size={24} />
               </div>
-              <span className="text-white/90 text-lg font-medium">Digital Menu</span>
+              <div className="text-left">
+                <span className="text-white font-semibold text-lg block">Qrunchy</span>
+                <span className="text-white/60 text-sm">Digital Menu Experience</span>
+              </div>
             </div>
             
-            <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent leading-tight">
               {menuData.restaurant.name}
             </h1>
 
-            <div className="flex flex-col items-center gap-4 mb-8">
+            <div className="flex flex-col items-center gap-4 mb-10">
               {menuData.restaurant.address && (
-                <div className="flex items-center gap-3 text-white/80">
-                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <MapPin size={18} className="text-white" />
+                <div className="flex items-center gap-4 text-white/90 bg-white/5 px-4 py-3 rounded-2xl backdrop-blur-xl border border-white/10">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center">
+                    <MapPin size={18} className="text-blue-300" />
                   </div>
                   <span className="text-sm">{menuData.restaurant.address}</span>
                 </div>
               )}
               {menuData.restaurant.phone && (
-                <div className="flex items-center gap-3 text-white/80">
-                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <Phone size={18} className="text-white" />
+                <div className="flex items-center gap-4 text-white/90 bg-white/5 px-4 py-3 rounded-2xl backdrop-blur-xl border border-white/10">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center">
+                    <Phone size={18} className="text-green-300" />
                   </div>
                   <span className="text-sm">{menuData.restaurant.phone}</span>
                 </div>
               )}
             </div>
 
-            <div className="relative max-w-md mx-auto">
+            <div className="relative max-w-lg mx-auto">
               <Search
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-indigo-300"
-                size={20}
+                className="absolute left-5 top-1/2 transform -translate-y-1/2 text-blue-300"
+                size={22}
               />
               <input
                 type="text"
-                placeholder="Search delicious dishes..."
+                placeholder="Search for your favorite dishes..."
                 value={searchTerm}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSearchTerm(e.target.value)
                 }
-                className="w-full pl-12 pr-4 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl focus:bg-white/20 focus:ring-2 focus:ring-white/50 focus:border-white/50 outline-none transition-all text-white placeholder:text-white/60"
+                className="w-full pl-14 pr-6 py-4 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl focus:bg-white/10 focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/30 outline-none transition-all text-white placeholder:text-white/50 shadow-xl"
               />
             </div>
           </div>
@@ -188,26 +193,26 @@ export default function CustomerMenuViewerModern({
       </div>
 
       {/* Category Pills */}
-      <div className="px-6 py-6">
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+      <div className="px-6 py-8">
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-3">
           <button
             onClick={() => setSelectedCategory("all")}
-            className={`flex-shrink-0 px-6 py-3 rounded-2xl text-sm font-semibold transition-all ${
+            className={`flex-shrink-0 px-6 py-3 rounded-3xl text-sm font-semibold transition-all transform hover:scale-105 ${
               selectedCategory === "all"
-                ? "bg-white text-indigo-900 shadow-xl"
-                : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border border-white/20"
+                ? "bg-gradient-to-r from-white to-blue-50 text-slate-900 shadow-2xl border border-white/20"
+                : "bg-white/5 text-white hover:bg-white/15 backdrop-blur-2xl border border-white/10 shadow-lg"
             }`}
           >
-            All Dishes
+            🍽️ All Dishes
           </button>
           {menuData.categories.map((category: Category) => (
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className={`flex-shrink-0 px-6 py-3 rounded-2xl text-sm font-semibold transition-all ${
+              className={`flex-shrink-0 px-6 py-3 rounded-3xl text-sm font-semibold transition-all transform hover:scale-105 ${
                 selectedCategory === category.id
-                  ? "bg-white text-indigo-900 shadow-xl"
-                  : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border border-white/20"
+                  ? "bg-gradient-to-r from-white to-blue-50 text-slate-900 shadow-2xl border border-white/20"
+                  : "bg-white/5 text-white hover:bg-white/15 backdrop-blur-2xl border border-white/10 shadow-lg"
               }`}
             >
               {category.name}
@@ -228,11 +233,14 @@ export default function CustomerMenuViewerModern({
 
                 return (
                   <section key={category.id}>
-                    <div className="mb-8">
-                      <h2 className="text-2xl font-bold text-white mb-2">
+                    <div className="mb-10">
+                      <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-xl flex items-center justify-center">
+                          <Sparkles size={14} className="text-blue-300" />
+                        </div>
                         {category.name}
                       </h2>
-                      <div className="w-16 h-1 bg-gradient-to-r from-white to-indigo-200 rounded-full"></div>
+                      <div className="w-20 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full shadow-lg"></div>
                     </div>
                     <div className="grid gap-6">
                       {categoryItems.map((item) => (
@@ -252,22 +260,22 @@ export default function CustomerMenuViewerModern({
         )}
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 bg-white/10 rounded-full mx-auto mb-8 flex items-center justify-center backdrop-blur-sm border border-white/20">
-              <Search size={28} className="text-white/60" />
+          <div className="text-center py-24">
+            <div className="w-24 h-24 bg-white/5 rounded-3xl mx-auto mb-8 flex items-center justify-center backdrop-blur-xl border border-white/10">
+              <Search size={32} className="text-white/40" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">No dishes found</h3>
-            <p className="text-white/80 text-lg mb-8">
-              Try a different search or browse other categories
+            <h3 className="text-xl font-semibold text-white mb-4">No dishes found</h3>
+            <p className="text-white/70 text-base mb-10 max-w-md mx-auto">
+              We couldn't find any dishes matching your search. Try browsing other categories or clearing your search.
             </p>
             <button
               onClick={() => {
                 setSearchTerm("");
                 setSelectedCategory("all");
               }}
-              className="px-8 py-4 bg-white text-indigo-900 rounded-2xl font-semibold hover:bg-indigo-50 transition-all shadow-xl"
+              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-3xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-xl transform hover:scale-105 border border-white/10"
             >
-              Show all dishes
+              Browse All Dishes
             </button>
           </div>
         )}
@@ -277,25 +285,27 @@ export default function CustomerMenuViewerModern({
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 bg-white text-indigo-900 p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all hover:scale-110 z-50"
+          className="fixed bottom-8 right-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-2xl shadow-2xl hover:shadow-3xl transition-all hover:scale-110 z-50 border border-white/20 backdrop-blur-xl"
         >
           <ArrowUp size={24} />
         </button>
       )}
 
       {/* Footer */}
-      <div className="bg-black/20 backdrop-blur-xl px-6 py-16 border-t border-white/10">
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-12 h-12 bg-white/10 rounded-2xl mr-4 flex items-center justify-center backdrop-blur-sm border border-white/20">
-              <span className="font-bold text-white text-lg">Q</span>
+      <div className="bg-black/10 backdrop-blur-2xl px-6 py-20 border-t border-white/5">
+        <div className="text-center max-w-md mx-auto">
+          <div className="flex items-center justify-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-white/10 to-blue-500/20 rounded-3xl mr-6 flex items-center justify-center backdrop-blur-xl border border-white/10">
+              <Sparkles className="text-white" size={28} />
             </div>
             <div className="text-left">
-              <span className="font-bold text-white text-xl block">Qrunchy</span>
-              <span className="text-white/60 text-sm">Modern dining experience</span>
+              <span className="font-semibold text-white text-xl block">Qrunchy</span>
+              <span className="text-white/50 text-sm">Elevating your dining experience</span>
             </div>
           </div>
-          <p className="text-white/50 text-sm">Experience the future of restaurant menus</p>
+          <p className="text-white/40 text-sm leading-relaxed">
+            Powered by modern technology to bring you the most delightful way to explore restaurant menus
+          </p>
         </div>
       </div>
     </div>
@@ -308,49 +318,65 @@ interface ModernMenuItemCardProps {
 
 function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
 
   return (
-    <div className="bg-white/95 backdrop-blur-xl rounded-3xl border border-white/20 overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500 hover:scale-[1.02] hover:bg-white">
-      <div className="p-8">
-        <div className="flex justify-between items-start mb-6">
-          <div className="flex-1 pr-8">
+    <div className="bg-white/95 backdrop-blur-2xl rounded-3xl border border-white/10 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:scale-[1.02] hover:bg-white group">
+      <div className="p-8 relative">
+        <button
+          onClick={() => setIsLiked(!isLiked)}
+          className="absolute top-6 right-6 p-2 rounded-full transition-all hover:bg-gray-100 group-hover:scale-110"
+        >
+          <Heart 
+            size={20} 
+            className={`transition-all ${isLiked ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-400'}`} 
+          />
+        </button>
+
+        <div className="flex justify-between items-start mb-6 pr-12">
+          <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
-              <h3 className="text-xl font-bold text-gray-900 leading-tight">
+              <h3 className="text-lg font-semibold text-gray-900 leading-tight">
                 {item.name}
               </h3>
               {Math.random() > 0.7 && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-yellow-100 rounded-full">
-                  <Star size={12} className="text-yellow-500 fill-current" />
-                  <span className="text-yellow-700 text-xs font-medium">Popular</span>
+                <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full border border-yellow-200">
+                  <Star size={14} className="text-yellow-600 fill-current" />
+                  <span className="text-yellow-700 text-xs font-semibold">Popular</span>
                 </div>
               )}
             </div>
             {item.description && (
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 leading-relaxed text-sm">
                 {item.description}
               </p>
             )}
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              ৳{item.price.toFixed(2)}
-            </div>
+        </div>
+
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-xl font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            ৳{item.price.toFixed(2)}
+          </div>
+          <div className="flex items-center gap-2 text-gray-500 text-sm">
+            <Clock size={16} />
+            <span>5-10 min</span>
           </div>
         </div>
 
         {(item.variants.length > 0 || item.addons.length > 0) && (
-          <div className="flex flex-wrap gap-3 mb-6">
+          <div className="flex flex-wrap gap-3 mb-8">
             {item.variants.map((variant) => (
               <span
                 key={variant.id}
-                className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 text-sm font-medium border border-indigo-200"
+                className="inline-flex items-center px-4 py-2 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-sm font-medium border border-blue-200 shadow-sm"
               >
-                {variant.title} ({variant.options.length})
+                ✨ {variant.title} ({variant.options.length})
               </span>
             ))}
             {item.addons.length > 0 && (
-              <span className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-sm font-medium border border-emerald-200">
-                +{item.addons.length} add-on{item.addons.length !== 1 ? "s" : ""}
+              <span className="inline-flex items-center px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 text-sm font-medium border border-emerald-200 shadow-sm">
+                🍽️ +{item.addons.length} add-on{item.addons.length !== 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -360,7 +386,7 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
           <div>
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-800 transition-colors"
+              className="flex items-center gap-2 text-blue-600 font-medium hover:text-blue-800 transition-all hover:bg-blue-50 px-3 py-2 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 text-sm"
             >
               {showDetails ? "Hide options" : "View options"}
               <ChevronDown 
@@ -370,22 +396,23 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
             </button>
 
             {showDetails && (
-              <div className="mt-8 pt-8 border-t border-gray-100 space-y-8">
+              <div className="mt-10 pt-8 border-t border-gray-200 space-y-10">
                 {item.variants.map((variant) => (
                   <div key={variant.id}>
-                    <h4 className="font-bold text-gray-900 mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
+                      <Sparkles size={16} className="text-blue-500" />
                       {variant.title}
                     </h4>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {variant.options.map((option) => (
                         <div
                           key={option.id}
-                          className="flex justify-between items-center p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 hover:bg-gradient-to-r hover:from-indigo-100 hover:to-purple-100 transition-all"
+                          className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 hover:from-blue-100 hover:to-indigo-100 transition-all shadow-sm"
                         >
-                          <span className="font-medium text-gray-800">
+                          <span className="font-medium text-gray-800 text-sm">
                             {option.name}
                           </span>
-                          <span className="font-bold text-indigo-600">
+                          <span className="font-semibold text-blue-600 bg-white px-2 py-1 rounded-full text-xs">
                             {option.price > 0
                               ? `+৳${option.price.toFixed(2)}`
                               : "Free"}
@@ -398,17 +425,20 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
 
                 {item.addons.length > 0 && (
                   <div>
-                    <h4 className="font-bold text-gray-900 mb-4">Add-ons</h4>
-                    <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
+                      <span className="text-emerald-500">🍽️</span>
+                      Add-ons
+                    </h4>
+                    <div className="space-y-4">
                       {item.addons.map((addon) => (
                         <div
                           key={addon.id}
-                          className="flex justify-between items-center p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 hover:bg-gradient-to-r hover:from-emerald-100 hover:to-teal-100 transition-all"
+                          className="flex justify-between items-center p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl border border-emerald-100 hover:from-emerald-100 hover:to-green-100 transition-all shadow-sm"
                         >
-                          <span className="font-medium text-emerald-800">
+                          <span className="font-medium text-emerald-800 text-sm">
                             {addon.name}
                           </span>
-                          <span className="font-bold text-emerald-600">
+                          <span className="font-semibold text-emerald-600 bg-white px-2 py-1 rounded-full text-xs">
                             +৳{addon.price.toFixed(2)}
                           </span>
                         </div>

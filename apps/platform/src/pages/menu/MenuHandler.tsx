@@ -43,8 +43,8 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
 
   if (qrData.type === "digital") {
     // Route to appropriate theme component based on restaurant's theme
-    const themeId = qrData.restaurant?.theme_id || "minimal";
-    
+    const themeId = qrData.restaurant?.theme_id || "modern";
+
     switch (themeId) {
       case "modern":
         return <CustomerMenuViewerModern qrCode={qrCode} />;

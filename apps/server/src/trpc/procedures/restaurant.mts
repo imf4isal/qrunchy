@@ -218,13 +218,54 @@ export const restaurantProcedures = router({
     .input(restaurantUpdateThemeSchema)
     .mutation(async ({ input }) => {
       try {
+        console.log("🎨 Theme update request received:", {
+          restaurantId: input.id,
+          newTheme: input.theme_id
+        });
+        
+        // First, check if restaurant exists
+        const existingRestaurant = await db
+          .selectFrom("restaurant")
+          .select(["id", "name", "theme_id", "is_active"])
+          .where("id", "=", input.id)
+          .executeTakeFirst();
+        
+        if (!existingRestaurant) {
+          console.error("❌ Restaurant not found:", input.id);
+          throw new Error(`Restaurant with ID ${input.id} not found`);
+        }
+        
+        if (!existingRestaurant.is_active) {
+          console.error("❌ Restaurant is inactive:", input.id);
+          throw new Error(`Restaurant with ID ${input.id} is inactive`);
+        }
+        
+        console.log("📊 Current restaurant state:", {
+          id: existingRestaurant.id,
+          name: existingRestaurant.name,
+          currentTheme: existingRestaurant.theme_id,
+          isActive: existingRestaurant.is_active
+        });
+        
+        // Perform the update
         const updatedRestaurant = await db
           .updateTable("restaurant")
-          .set({ theme_id: input.theme_id })
+          .set({ 
+            theme_id: input.theme_id,
+            updated_at: new Date()
+          })
           .where("id", "=", input.id)
           .where("is_active", "=", true)
           .returningAll()
           .executeTakeFirstOrThrow();
+
+        console.log("✅ Theme update successful:", {
+          id: updatedRestaurant.id,
+          name: updatedRestaurant.name,
+          oldTheme: existingRestaurant.theme_id,
+          newTheme: updatedRestaurant.theme_id,
+          updatedAt: updatedRestaurant.updated_at
+        });
 
         return {
           id: updatedRestaurant.id,
@@ -233,8 +274,18 @@ export const restaurantProcedures = router({
           updated_at: updatedRestaurant.updated_at.toISOString(),
         };
       } catch (error) {
-        console.error("Error updating restaurant theme:", error);
-        throw new Error("Failed to update restaurant theme");
+        console.error("❌ Error updating restaurant theme:", {
+          error: error.message,
+          stack: error.stack,
+          input
+        });
+        
+        // Re-throw with more specific error message
+        if (error.message.includes('not found') || error.message.includes('inactive')) {
+          throw error; // Re-throw specific errors as-is
+        }
+        
+        throw new Error(`Failed to update restaurant theme: ${error.message}`);
       }
     }),
 });

@@ -26,6 +26,7 @@ interface AuthContextType {
   login: (mobile_number: string) => Promise<void>;
   logout: () => void;
   refreshSession: () => Promise<void>;
+  updateRestaurant: (restaurantId: number, updates: Partial<Restaurant>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -107,6 +108,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // TODO: Implement session refresh when needed
     console.log('Session refresh not implemented yet');
   };
+  
+  const updateRestaurant = (restaurantId: number, updates: Partial<Restaurant>) => {
+    console.log('🔄 Updating restaurant in context:', { restaurantId, updates });
+    
+    setRestaurants(prev => {
+      const updated = prev.map(restaurant => 
+        restaurant.id === restaurantId 
+          ? { ...restaurant, ...updates }
+          : restaurant
+      );
+      
+      // Update localStorage as well
+      localStorage.setItem('qrunchy_restaurants', JSON.stringify(updated));
+      
+      return updated;
+    });
+  };
 
   const value: AuthContextType = {
     user,
@@ -116,6 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     refreshSession,
+    updateRestaurant,
   };
 
   return (
