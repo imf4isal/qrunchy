@@ -235,29 +235,42 @@ export default function RestaurantMenuManager() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Left section - Back button and title */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <Button variant="ghost" size="sm" asChild className="self-start">
                 <Link href="/dashboard">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
+                  <span className="hidden sm:inline">Back to Dashboard</span>
+                  <span className="sm:hidden">Back</span>
                 </Link>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
                   Manage Menu - {restaurant.name}
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm sm:text-base">
                   Edit your restaurant's digital menu
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            {/* Right section - Action buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowPreview(!showPreview)}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 lg:hidden"
+                size="sm"
+              >
+                <Eye className="w-4 h-4" />
+                {showPreview ? "Hide Preview" : "Show Preview"}
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={() => setShowPreview(!showPreview)}
+                className="hidden lg:flex items-center gap-2"
               >
                 <Eye className="w-4 h-4" />
                 {showPreview ? "Hide Preview" : "Show Preview"}
@@ -266,30 +279,39 @@ export default function RestaurantMenuManager() {
               <Button
                 onClick={handleSaveMenu}
                 disabled={isSaving || !hasUnsavedChanges}
-                className={`flex items-center gap-2 ${
+                className={`flex items-center justify-center gap-2 ${
                   saveStatus === 'success' ? 'bg-green-600 hover:bg-green-700' :
                   saveStatus === 'error' ? 'bg-red-600 hover:bg-red-700' : ''
                 }`}
+                size="sm"
               >
                 {isSaving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Saving...
+                    <span className="hidden sm:inline">Saving...</span>
+                    <span className="sm:hidden">Save</span>
                   </>
                 ) : saveStatus === 'success' ? (
                   <>
                     <CheckCircle className="w-4 h-4" />
-                    Saved!
+                    <span className="hidden sm:inline">Saved!</span>
+                    <span className="sm:hidden">Saved</span>
                   </>
                 ) : saveStatus === 'error' ? (
                   <>
                     <AlertCircle className="w-4 h-4" />
-                    Failed
+                    <span className="hidden sm:inline">Failed</span>
+                    <span className="sm:hidden">Error</span>
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    {hasUnsavedChanges ? 'Save Changes' : 'No Changes'}
+                    <span className="hidden sm:inline">
+                      {hasUnsavedChanges ? 'Save Changes' : 'No Changes'}
+                    </span>
+                    <span className="sm:hidden">
+                      {hasUnsavedChanges ? 'Save' : 'Saved'}
+                    </span>
                   </>
                 )}
               </Button>
