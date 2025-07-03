@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { Link, useParams, useLocation } from "wouter";
 import { ArrowLeft, Eye, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,29 @@ export default function RestaurantMenuManager() {
   });
   const [showPreview, setShowPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
   
   // Keep track of the initial state to detect changes
   const initialMenuRef = useRef<DigitalMenu | null>(null);
+  
+  // Compute hasUnsavedChanges based on actual differences
+  const hasUnsavedChanges = useMemo(() => {
+    if (!initialMenuRef.current) return false;
+    
+    // Deep compare current menu with initial menu
+    const currentMenuString = JSON.stringify({
+      categories: menu.categories.sort((a, b) => a.id.localeCompare(b.id)),
+      items: menu.items.sort((a, b) => a.id.localeCompare(b.id)),
+    });
+    
+    const initialMenuString = JSON.stringify({
+      categories: initialMenuRef.current.categories.sort((a, b) => a.id.localeCompare(b.id)),
+      items: initialMenuRef.current.items.sort((a, b) => a.id.localeCompare(b.id)),
+    });
+    
+    return currentMenuString !== initialMenuString;
+  }, [menu.categories, menu.items]);
   
   // Batch save mutations
   const utils = trpc.useUtils();
@@ -85,20 +102,17 @@ export default function RestaurantMenuManager() {
       };
       setMenu(menuData);
       initialMenuRef.current = JSON.parse(JSON.stringify(menuData));
-      setHasUnsavedChanges(false);
       setSaveStatus('idle');
     }
   }, [existingMenu, restaurant]);
 
   const handleCategoriesChange = useCallback((categories: Category[]) => {
     setMenu(prev => ({ ...prev, categories }));
-    setHasUnsavedChanges(true);
     setSaveStatus('idle');
   }, []);
 
   const handleItemsChange = useCallback((items: MenuItem[]) => {
     setMenu(prev => ({ ...prev, items }));
-    setHasUnsavedChanges(true);
     setSaveStatus('idle');
   }, []);
   
@@ -108,7 +122,6 @@ export default function RestaurantMenuManager() {
       newTheme,
       restaurantId
     });
-    setHasUnsavedChanges(true);
     setSaveStatus('idle');
   }, [restaurant?.theme_id, restaurantId]);
 
@@ -150,7 +163,6 @@ export default function RestaurantMenuManager() {
       
       // Update saved state
       initialMenuRef.current = JSON.parse(JSON.stringify(menu));
-      setHasUnsavedChanges(false);
       setSaveStatus('success');
       setLastSaveTime(new Date());
       
