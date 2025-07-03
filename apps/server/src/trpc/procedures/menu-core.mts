@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mts";
+import { publicProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 import { getCompleteMenuByRestaurant } from "../../db/queries/digitalMenu.mts";
 import { restaurantIdSchema } from "./shared/schemas.mts";
 import { transformMenuToFrontend, transformMenuForExport } from "./shared/transforms.mts";
 
-export const menuCoreProcedures = router({
+export const menuCoreProcedures = {
   // Get complete menu structure for a restaurant
   getComplete: publicProcedure
     .input(restaurantIdSchema)
@@ -58,4 +58,4 @@ export const menuCoreProcedures = router({
         throw new Error("Failed to export menu");
       }
     }),
-});
+};

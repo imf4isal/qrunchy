@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mts";
+import { publicProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 import {
   getItemsWithDetailsByCategory,
@@ -26,7 +26,7 @@ const generateQrCode = (): string => {
   return `QR_${result}`;
 };
 
-export const qrProcedures = router({
+export const qrProcedures = {
   // Generate QR code for digital menu
   generate: publicProcedure
     .input(qrGenerateSchema)
@@ -404,4 +404,4 @@ export const qrProcedures = router({
         throw new Error("Failed to fetch menu data");
       }
     }),
-});
+};

@@ -1,6 +1,6 @@
 import { trpc } from "@/utils/trpc";
-import CustomerMenuViewer from "./CustomerMenuViewer";
-import CustomerMenuViewerModern from "./CustomerMenuViewerModern";
+import CustomerMenuViewer from "./theme/CustomerMenuViewer";
+import CustomerMenuViewerModern from "./theme/CustomerMenuViewerModern";
 import LoadingScreen from "./components/LoadingScreen";
 import ErrorScreen from "./components/ErrorScreen";
 import ExpiredScreen from "./components/ExpiredScreen";

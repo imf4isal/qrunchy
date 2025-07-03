@@ -1,5 +1,17 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Search, Share2, MapPin, Phone, ChevronDown, ArrowUp, Filter, Star, Clock, Heart, Sparkles } from "lucide-react";
+import {
+  Search,
+  Share2,
+  MapPin,
+  Phone,
+  ChevronDown,
+  ArrowUp,
+  Filter,
+  Star,
+  Clock,
+  Heart,
+  Sparkles,
+} from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import type { Category, MenuItem } from "@/types/digitalMenu";
 
@@ -29,19 +41,17 @@ export default function CustomerMenuViewerModern({
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 400);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const filteredItems = useMemo(() => {
     if (!menuData) return [];
-    
+
     let items = menuData.items as MenuItem[];
 
     if (selectedCategory !== "all") {
-      items = items.filter(
-        (item) => item.categoryId === selectedCategory
-      );
+      items = items.filter((item) => item.categoryId === selectedCategory);
     }
 
     if (searchTerm) {
@@ -57,9 +67,7 @@ export default function CustomerMenuViewerModern({
   }, [menuData, searchTerm, selectedCategory]);
 
   const getItemsForCategory = (categoryId: string): MenuItem[] => {
-    return filteredItems.filter(
-      (item) => item.categoryId === categoryId
-    );
+    return filteredItems.filter((item) => item.categoryId === categoryId);
   };
 
   // Handle loading and error states
@@ -73,8 +81,12 @@ export default function CustomerMenuViewerModern({
             </div>
             <div className="absolute inset-0 w-24 h-24 bg-blue-500/20 rounded-2xl mx-auto animate-ping"></div>
           </div>
-          <p className="text-white text-xl font-semibold mb-2">Preparing your menu</p>
-          <p className="text-white/70 text-sm mb-6">Just a moment while we load everything...</p>
+          <p className="text-white text-xl font-semibold mb-2">
+            Preparing your menu
+          </p>
+          <p className="text-white/70 text-sm mb-6">
+            Just a moment while we load everything...
+          </p>
           <div className="w-48 h-1 bg-white/10 rounded-full mx-auto overflow-hidden">
             <div className="h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
           </div>
@@ -90,9 +102,14 @@ export default function CustomerMenuViewerModern({
           <div className="w-24 h-24 bg-white/5 rounded-3xl mx-auto mb-8 flex items-center justify-center border border-white/10 backdrop-blur-xl">
             <span className="text-white text-4xl">😔</span>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-4">Menu Unavailable</h2>
-          <p className="text-white/70 text-base mb-8">We're having trouble loading this menu. Please try refreshing the page.</p>
-          <button 
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Menu Unavailable
+          </h2>
+          <p className="text-white/70 text-base mb-8">
+            We're having trouble loading this menu. Please try refreshing the
+            page.
+          </p>
+          <button
             onClick={() => window.location.reload()}
             className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 border border-white/10"
           >
@@ -121,7 +138,7 @@ export default function CustomerMenuViewerModern({
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -131,12 +148,14 @@ export default function CustomerMenuViewerModern({
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent" />
         <div className="relative px-6 py-16">
-          
           <button
             onClick={handleShare}
             className="absolute top-8 right-6 bg-white/5 hover:bg-white/15 backdrop-blur-2xl text-white p-3 rounded-2xl border border-white/10 transition-all hover:scale-110 shadow-lg group"
           >
-            <Share2 size={20} className="group-hover:rotate-12 transition-transform" />
+            <Share2
+              size={20}
+              className="group-hover:rotate-12 transition-transform"
+            />
           </button>
 
           <div className="text-center text-white max-w-2xl mx-auto">
@@ -145,11 +164,15 @@ export default function CustomerMenuViewerModern({
                 <Sparkles className="text-white" size={24} />
               </div>
               <div className="text-left">
-                <span className="text-white font-semibold text-lg block">Qrunchy</span>
-                <span className="text-white/60 text-sm">Digital Menu Experience</span>
+                <span className="text-white font-semibold text-lg block">
+                  Qrunchy
+                </span>
+                <span className="text-white/60 text-sm">
+                  Digital Menu Experience
+                </span>
               </div>
             </div>
-            
+
             <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent leading-tight">
               {menuData.restaurant.name}
             </h1>
@@ -264,9 +287,12 @@ export default function CustomerMenuViewerModern({
             <div className="w-24 h-24 bg-white/5 rounded-3xl mx-auto mb-8 flex items-center justify-center backdrop-blur-xl border border-white/10">
               <Search size={32} className="text-white/40" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-4">No dishes found</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              No dishes found
+            </h3>
             <p className="text-white/70 text-base mb-10 max-w-md mx-auto">
-              We couldn't find any dishes matching your search. Try browsing other categories or clearing your search.
+              We couldn't find any dishes matching your search. Try browsing
+              other categories or clearing your search.
             </p>
             <button
               onClick={() => {
@@ -299,12 +325,17 @@ export default function CustomerMenuViewerModern({
               <Sparkles className="text-white" size={28} />
             </div>
             <div className="text-left">
-              <span className="font-semibold text-white text-xl block">Qrunchy</span>
-              <span className="text-white/50 text-sm">Elevating your dining experience</span>
+              <span className="font-semibold text-white text-xl block">
+                Qrunchy
+              </span>
+              <span className="text-white/50 text-sm">
+                Elevating your dining experience
+              </span>
             </div>
           </div>
           <p className="text-white/40 text-sm leading-relaxed">
-            Powered by modern technology to bring you the most delightful way to explore restaurant menus
+            Powered by modern technology to bring you the most delightful way to
+            explore restaurant menus
           </p>
         </div>
       </div>
@@ -327,9 +358,9 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
           onClick={() => setIsLiked(!isLiked)}
           className="absolute top-6 right-6 p-2 rounded-full transition-all hover:bg-gray-100 group-hover:scale-110"
         >
-          <Heart 
-            size={20} 
-            className={`transition-all ${isLiked ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-400'}`} 
+          <Heart
+            size={20}
+            className={`transition-all ${isLiked ? "text-red-500 fill-current" : "text-gray-400 hover:text-red-400"}`}
           />
         </button>
 
@@ -342,7 +373,9 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
               {Math.random() > 0.7 && (
                 <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full border border-yellow-200">
                   <Star size={14} className="text-yellow-600 fill-current" />
-                  <span className="text-yellow-700 text-xs font-bold">Popular</span>
+                  <span className="text-yellow-700 text-xs font-bold">
+                    Popular
+                  </span>
                 </div>
               )}
             </div>
@@ -376,7 +409,8 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
             ))}
             {item.addons.length > 0 && (
               <span className="inline-flex items-center px-5 py-2 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 text-sm font-bold border border-emerald-200 shadow-sm">
-                🍽️ +{item.addons.length} add-on{item.addons.length !== 1 ? "s" : ""}
+                🍽️ +{item.addons.length} add-on
+                {item.addons.length !== 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -389,9 +423,9 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
               className="flex items-center gap-3 text-blue-600 font-bold hover:text-blue-800 transition-all hover:bg-blue-50 px-4 py-2 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50"
             >
               {showDetails ? "🔼 Hide Options" : "🔽 View Options"}
-              <ChevronDown 
-                size={18} 
-                className={`transition-transform ${showDetails ? "rotate-180" : ""}`} 
+              <ChevronDown
+                size={18}
+                className={`transition-transform ${showDetails ? "rotate-180" : ""}`}
               />
             </button>
 
@@ -468,8 +502,8 @@ const styles = `
 `;
 
 // Inject styles
-if (typeof document !== 'undefined') {
-  const styleElement = document.createElement('style');
+if (typeof document !== "undefined") {
+  const styleElement = document.createElement("style");
   styleElement.textContent = styles;
   document.head.appendChild(styleElement);
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mts";
+import { publicProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 import type { ItemTable } from "../../types/database.mts";
 import {
@@ -188,7 +188,7 @@ const createItems = async (trx: any, input: any, categoryMap: Map<string, number
   return createdItems;
 };
 
-export const menuBulkImportProcedures = router({
+export const menuBulkImportProcedures = {
   // Bulk import menu from JSON
   bulkImport: publicProcedure
     .input(bulkImportSchema)
@@ -217,4 +217,4 @@ export const menuBulkImportProcedures = router({
         throw new Error("Failed to import menu");
       }
     }),
-});
+};

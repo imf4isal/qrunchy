@@ -6,11 +6,11 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "node --loader ts-node/esm src/index.mts",
-    "dev:watch": "nodemon --watch src --ext ts,mts --exec \"node --loader ts-node/esm src/index.mts\"",
+    "dev": "npx tsx src/index.mts",
+    "dev:watch": "nodemon --watch src --ext ts,mts --exec \"npx tsx src/index.mts\"",
     "build": "tsc",
-    "migrate": "node --loader ts-node/esm src/db/migrate.mts",
-    "migrate:down": "node --loader ts-node/esm src/db/migrate.mts down"
+    "migrate": "npx tsx src/db/migrate.mts",
+    "migrate:down": "npx tsx src/db/migrate.mts down"
   },
   "keywords": [],
   "author": "Faisal",
@@ -33,6 +33,7 @@
     "kysely-codegen": "^0.18.5",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
+    "tsx": "^4.7.1",
     "typescript": "^5.4.3"
   }
 }

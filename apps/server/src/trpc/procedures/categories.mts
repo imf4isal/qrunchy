@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mts";
+import { publicProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 import {
   getCategoriesByRestaurant,
@@ -14,7 +14,7 @@ import {
   idSchema,
 } from "./shared/schemas.mts";
 
-export const categoriesProcedures = router({
+export const categoriesProcedures = {
   getByRestaurant: publicProcedure
     .input(restaurantIdSchema)
     .query(async ({ input }) => {
@@ -128,4 +128,4 @@ export const categoriesProcedures = router({
         throw new Error("Failed to reorder categories");
       }
     }),
-});
+};

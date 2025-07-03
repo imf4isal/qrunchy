@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mts";
+import { publicProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 import {
   getItemsWithDetailsByCategory,
@@ -60,7 +60,7 @@ const transformItemToFrontend = (item: any) => ({
   })),
 });
 
-export const itemsProcedures = router({
+export const itemsProcedures = {
   getByRestaurant: publicProcedure
     .input(restaurantIdSchema)
     .query(async ({ input }) => {
@@ -386,4 +386,4 @@ export const itemsProcedures = router({
         throw new Error("Failed to reorder items");
       }
     }),
-});
+};

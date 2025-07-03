@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../index.mts";
+import { publicProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 
 const userCreateSchema = z.object({
@@ -14,7 +14,7 @@ const userGetByIdSchema = z.object({
   id: z.number().int().positive(),
 });
 
-export const userProcedures = router({
+export const userProcedures = {
   create: publicProcedure
     .input(userCreateSchema)
     .mutation(async ({ input }) => {
@@ -110,4 +110,4 @@ export const userProcedures = router({
         throw new Error("Failed to fetch user");
       }
     }),
-});
+};

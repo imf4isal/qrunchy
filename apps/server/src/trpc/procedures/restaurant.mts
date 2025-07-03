@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { sql } from "kysely";
-import { publicProcedure, router } from "../index.mts";
+import { publicProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 
 const restaurantCreateSchema = z.object({
@@ -33,7 +33,7 @@ const restaurantUpdateThemeSchema = z.object({
   theme_id: z.enum(["minimal", "modern"]),
 });
 
-export const restaurantProcedures = router({
+export const restaurantProcedures = {
   create: publicProcedure
     .input(restaurantCreateSchema)
     .mutation(async ({ input }) => {
@@ -288,4 +288,4 @@ export const restaurantProcedures = router({
         throw new Error(`Failed to update restaurant theme: ${error.message}`);
       }
     }),
-});
+};
