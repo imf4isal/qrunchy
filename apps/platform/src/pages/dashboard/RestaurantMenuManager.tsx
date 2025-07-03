@@ -345,32 +345,6 @@ export default function RestaurantMenuManager() {
           )}
         </div>
 
-        {/* Save Status Footer */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              {hasUnsavedChanges ? (
-                <span className="text-amber-600 font-medium">
-                  ⚠️ You have unsaved changes. Click "Save Changes" to save them.
-                </span>
-              ) : lastSaveTime ? (
-                <span className="text-green-600">
-                  ✅ All changes saved at {lastSaveTime.toLocaleTimeString()}
-                </span>
-              ) : (
-                "Make changes to your menu and click Save to update it."
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/menu/qr_${restaurantId}`} target="_blank">
-                  <Eye className="w-4 h-4 mr-1" />
-                  View Customer Menu
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     </MainLayout>
   );
