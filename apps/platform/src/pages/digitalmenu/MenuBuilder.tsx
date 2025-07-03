@@ -32,6 +32,7 @@ interface MenuBuilderProps {
   restaurantId?: number;
   onCategoriesChange: (categories: Category[]) => void;
   onItemsChange: (items: MenuItem[]) => void;
+  batchSaveMode?: boolean;
 }
 
 export default function MenuBuilder({
@@ -39,6 +40,7 @@ export default function MenuBuilder({
   restaurantId,
   onCategoriesChange,
   onItemsChange,
+  batchSaveMode = false,
 }: MenuBuilderProps) {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
