@@ -4,7 +4,7 @@ import { ArrowLeft, Eye, Save, Loader2, CheckCircle, AlertCircle } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MenuBuilder from "@/pages/digitalmenu/MenuBuilder";
-import MenuPreview from "@/pages/digitalmenu/MenuPreview";
+import ThemePreview from "@/components/ThemePreview";
 import MainLayout from "@/components/layout/MainLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { trpc } from "@/utils/trpc";
@@ -337,7 +337,15 @@ export default function RestaurantMenuManager() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <MenuPreview menu={menu} />
+                    <ThemePreview 
+                      menu={menu} 
+                      theme={restaurant?.theme_id as "minimal" | "modern" || "minimal"}
+                      restaurant={{
+                        name: restaurant?.name || menu.restaurantName,
+                        address: restaurant?.address,
+                        mobile: restaurant?.mobile,
+                      }}
+                    />
                   </CardContent>
                 </Card>
               </div>
