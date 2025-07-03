@@ -335,19 +335,19 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
 
         <div className="flex justify-between items-start mb-6 pr-12">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <h3 className="text-lg font-semibold text-gray-900 leading-tight">
+            <div className="flex items-center gap-3 mb-4">
+              <h3 className="text-2xl font-bold text-gray-900 leading-tight">
                 {item.name}
               </h3>
               {Math.random() > 0.7 && (
                 <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full border border-yellow-200">
                   <Star size={14} className="text-yellow-600 fill-current" />
-                  <span className="text-yellow-700 text-xs font-semibold">Popular</span>
+                  <span className="text-yellow-700 text-xs font-bold">Popular</span>
                 </div>
               )}
             </div>
             {item.description && (
-              <p className="text-gray-600 leading-relaxed text-sm">
+              <p className="text-gray-600 leading-relaxed text-base">
                 {item.description}
               </p>
             )}
@@ -355,7 +355,7 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
         </div>
 
         <div className="flex justify-between items-center mb-6">
-          <div className="text-xl font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
             ৳{item.price.toFixed(2)}
           </div>
           <div className="flex items-center gap-2 text-gray-500 text-sm">
@@ -369,13 +369,13 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
             {item.variants.map((variant) => (
               <span
                 key={variant.id}
-                className="inline-flex items-center px-4 py-2 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-sm font-medium border border-blue-200 shadow-sm"
+                className="inline-flex items-center px-5 py-2 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-sm font-bold border border-blue-200 shadow-sm"
               >
                 ✨ {variant.title} ({variant.options.length})
               </span>
             ))}
             {item.addons.length > 0 && (
-              <span className="inline-flex items-center px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 text-sm font-medium border border-emerald-200 shadow-sm">
+              <span className="inline-flex items-center px-5 py-2 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 text-sm font-bold border border-emerald-200 shadow-sm">
                 🍽️ +{item.addons.length} add-on{item.addons.length !== 1 ? "s" : ""}
               </span>
             )}
@@ -386,9 +386,9 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
           <div>
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="flex items-center gap-2 text-blue-600 font-medium hover:text-blue-800 transition-all hover:bg-blue-50 px-3 py-2 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 text-sm"
+              className="flex items-center gap-3 text-blue-600 font-bold hover:text-blue-800 transition-all hover:bg-blue-50 px-4 py-2 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50"
             >
-              {showDetails ? "Hide options" : "View options"}
+              {showDetails ? "🔼 Hide Options" : "🔽 View Options"}
               <ChevronDown 
                 size={18} 
                 className={`transition-transform ${showDetails ? "rotate-180" : ""}`} 
@@ -399,20 +399,20 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
               <div className="mt-10 pt-8 border-t border-gray-200 space-y-10">
                 {item.variants.map((variant) => (
                   <div key={variant.id}>
-                    <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
-                      <Sparkles size={16} className="text-blue-500" />
+                    <h4 className="font-bold text-gray-900 mb-6 text-lg flex items-center gap-2">
+                      <Sparkles size={18} className="text-blue-500" />
                       {variant.title}
                     </h4>
                     <div className="space-y-4">
                       {variant.options.map((option) => (
                         <div
                           key={option.id}
-                          className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 hover:from-blue-100 hover:to-indigo-100 transition-all shadow-sm"
+                          className="flex justify-between items-center p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl border border-blue-100 hover:from-blue-100 hover:to-indigo-100 transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                         >
-                          <span className="font-medium text-gray-800 text-sm">
+                          <span className="font-semibold text-gray-800">
                             {option.name}
                           </span>
-                          <span className="font-semibold text-blue-600 bg-white px-2 py-1 rounded-full text-xs">
+                          <span className="font-bold text-blue-600 bg-white px-3 py-1 rounded-full text-sm">
                             {option.price > 0
                               ? `+৳${option.price.toFixed(2)}`
                               : "Free"}
@@ -425,7 +425,7 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
 
                 {item.addons.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-4 text-base flex items-center gap-2">
+                    <h4 className="font-bold text-gray-900 mb-6 text-lg flex items-center gap-2">
                       <span className="text-emerald-500">🍽️</span>
                       Add-ons
                     </h4>
@@ -433,12 +433,12 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
                       {item.addons.map((addon) => (
                         <div
                           key={addon.id}
-                          className="flex justify-between items-center p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl border border-emerald-100 hover:from-emerald-100 hover:to-green-100 transition-all shadow-sm"
+                          className="flex justify-between items-center p-5 bg-gradient-to-r from-emerald-50 to-green-50 rounded-3xl border border-emerald-100 hover:from-emerald-100 hover:to-green-100 transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                         >
-                          <span className="font-medium text-emerald-800 text-sm">
+                          <span className="font-semibold text-emerald-800">
                             {addon.name}
                           </span>
-                          <span className="font-semibold text-emerald-600 bg-white px-2 py-1 rounded-full text-xs">
+                          <span className="font-bold text-emerald-600 bg-white px-3 py-1 rounded-full text-sm">
                             +৳{addon.price.toFixed(2)}
                           </span>
                         </div>
