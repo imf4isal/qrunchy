@@ -9,6 +9,7 @@ const restaurantCreateSchema = z.object({
   address: z.string().optional(),
   user_id: z.number().int().positive(),
   group_res_id: z.number().int().positive().optional(),
+  theme_id: z.enum(["minimal", "modern"]).optional(),
 });
 
 const restaurantUpdateSchema = z.object({
@@ -73,6 +74,7 @@ export const restaurantProcedures = {
             geolocation: sql`POINT(0, 0)`, // Default location using PostgreSQL POINT function
             user_id: input.user_id,
             group_res_id: input.group_res_id || null,
+            theme_id: input.theme_id || "minimal",
           })
           .returningAll()
           .executeTakeFirstOrThrow();

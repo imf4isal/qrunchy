@@ -2,9 +2,10 @@ import type {DigitalMenu} from "@/types/digitalMenu";
 
 interface MenuPreviewProps {
     menu: DigitalMenu;
+    selectedTheme?: "minimal" | "modern";
 }
 
-export default function MenuPreview({menu}: MenuPreviewProps) {
+export default function MenuPreview({menu, selectedTheme = "minimal"}: MenuPreviewProps) {
     const getItemsForCategory = (categoryId: string) => {
         return menu.items.filter((item) => item.categoryId === categoryId);
     };
@@ -17,9 +18,15 @@ export default function MenuPreview({menu}: MenuPreviewProps) {
         );
     }
 
+    const isModern = selectedTheme === "modern";
+    
     return (
         <div className="max-h-96 overflow-y-auto">
-            <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white relative">
+            <div className={`p-4 text-white relative ${
+                isModern 
+                    ? "bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900" 
+                    : "bg-gradient-to-r from-slate-600 to-gray-700"
+            }`}>
                 <div className="absolute top-2 right-2">
                     <div className="flex items-center text-xs opacity-75">
                         <div
@@ -132,11 +139,19 @@ export default function MenuPreview({menu}: MenuPreviewProps) {
                 )}
             </div>
 
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-t border-gray-100">
+            <div className={`p-4 border-t border-gray-100 ${
+                isModern 
+                    ? "bg-gradient-to-r from-indigo-50 to-purple-50" 
+                    : "bg-gradient-to-r from-slate-50 to-gray-50"
+            }`}>
                 <div className="flex items-center justify-center text-xs text-gray-500">
                     <div className="flex items-center">
                         <div
-                            className="w-4 h-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded mr-2 flex items-center justify-center text-white font-bold text-xs">
+                            className={`w-4 h-4 rounded mr-2 flex items-center justify-center text-white font-bold text-xs ${
+                                isModern
+                                    ? "bg-gradient-to-r from-indigo-600 to-purple-600"
+                                    : "bg-gradient-to-r from-slate-600 to-gray-600"
+                            }`}>
                             Q
                         </div>
                         <span className="font-medium">Powered by Qrunchy</span>

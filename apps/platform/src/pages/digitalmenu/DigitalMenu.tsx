@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import MenuBuilder from "./MenuBuilder";
 import MenuPreview from "./MenuPreview";
 import QRGenerator from "./QRGenerator";
+import ThemeSetupSelector from "@/components/ThemeSetupSelector";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
@@ -17,6 +18,7 @@ export default function DigitalMenu() {
     categories: [],
     items: [],
   });
+  const [selectedTheme, setSelectedTheme] = useState<"minimal" | "modern">("minimal");
   const [showPreview, setShowPreview] = useState(false);
   const [qrGenerated, setQrGenerated] = useState(false);
 
@@ -260,7 +262,7 @@ export default function DigitalMenu() {
                 {step === "setup"
                   ? "Just tell us your restaurant name to get started"
                   : step === "build"
-                    ? "Build your menu - add categories, items, variants and add-ons"
+                    ? "Choose your theme and build your menu - add categories, items, variants and add-ons"
                     : qrGenerated
                       ? "Your QR code is ready! Share it with customers"
                       : "Ready to go live? Create your account and generate QR code"}
@@ -311,6 +313,13 @@ export default function DigitalMenu() {
 
                 {step === "build" && (
                   <div>
+                    <div className="mb-8">
+                      <ThemeSetupSelector
+                        selectedTheme={selectedTheme}
+                        onThemeChange={setSelectedTheme}
+                      />
+                    </div>
+
                     <MenuBuilder
                       menu={menu}
                       restaurantId={currentRestaurant?.id}
@@ -345,6 +354,7 @@ export default function DigitalMenu() {
                     <QRGenerator
                       menu={menu}
                       restaurantId={currentRestaurant?.id}
+                      selectedTheme={selectedTheme}
                       onQrGenerated={handleQrGenerated}
                     />
 
@@ -383,7 +393,7 @@ export default function DigitalMenu() {
                     <div
                       className={`${showPreview ? "block" : "hidden lg:block"}`}
                     >
-                      <MenuPreview menu={menu} />
+                      <MenuPreview menu={menu} selectedTheme={selectedTheme} />
                     </div>
                   </div>
                 </div>

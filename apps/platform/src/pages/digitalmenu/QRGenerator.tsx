@@ -10,10 +10,11 @@ import type { DigitalMenu } from "@/types/digitalMenu";
 interface QRGeneratorProps {
   menu: DigitalMenu;
   restaurantId?: number;
+  selectedTheme?: "minimal" | "modern";
   onQrGenerated?: () => void;
 }
 
-export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
+export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGenerated }: QRGeneratorProps) {
   const { setCurrentRestaurant } = useRestaurant();
   const { refreshSession } = useAuth();
   const [isGenerated, setIsGenerated] = useState(false);
@@ -42,12 +43,13 @@ export default function QRGenerator({ menu, onQrGenerated }: QRGeneratorProps) {
         mobile_number: mobileNumber.trim(),
       });
 
-      // Step 2: Create restaurant with user_id
+      // Step 2: Create restaurant with user_id and theme
       const restaurant = await createRestaurantMutation.mutateAsync({
         name: menu.restaurantName,
         mobile: mobileNumber.trim(),
         address: "Not specified", // Can be updated later
         user_id: user.id,
+        theme_id: selectedTheme,
       });
 
       setCreatedRestaurantId(restaurant.id);
