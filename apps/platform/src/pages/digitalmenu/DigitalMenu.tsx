@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import MenuBuilder from "./MenuBuilder";
-import MenuPreview from "./MenuPreview";
+import ThemePreview from "@/components/ThemePreview";
 import QRGenerator from "./QRGenerator";
 import ThemeSetupSelector from "@/components/ThemeSetupSelector";
 import { useRestaurant } from "@/contexts/RestaurantContext";
@@ -393,7 +393,7 @@ export default function DigitalMenu() {
                     <div
                       className={`${showPreview ? "block" : "hidden lg:block"}`}
                     >
-                      <MenuPreview menu={menu} selectedTheme={selectedTheme} />
+                      <ThemePreview menu={menu} theme={selectedTheme} />
                     </div>
                   </div>
                 </div>
