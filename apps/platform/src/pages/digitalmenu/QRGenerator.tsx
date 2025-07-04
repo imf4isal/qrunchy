@@ -16,7 +16,7 @@ interface QRGeneratorProps {
 
 export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGenerated }: QRGeneratorProps) {
   const { setCurrentRestaurant } = useRestaurant();
-  const { refreshSession } = useAuth();
+  const { refreshSession, addRestaurant, login } = useAuth();
   const [isGenerated, setIsGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
@@ -38,10 +38,18 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGener
     setIsGenerating(true);
     
     try {
+      console.log('🚀 Starting restaurant creation process:', {
+        restaurantName: menu.restaurantName,
+        selectedTheme: selectedTheme,
+        mobileNumber: mobileNumber.trim()
+      });
+
       // Step 1: Create user with mobile number
       const user = await createUserMutation.mutateAsync({
         mobile_number: mobileNumber.trim(),
       });
+
+      console.log('👤 User created:', user);
 
       // Step 2: Create restaurant with user_id and theme
       const restaurant = await createRestaurantMutation.mutateAsync({
@@ -52,6 +60,8 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGener
         theme_id: selectedTheme,
       });
 
+      console.log('🏪 Restaurant created:', restaurant);
+
       setCreatedRestaurantId(restaurant.id);
 
       // Update restaurant context
@@ -60,6 +70,17 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGener
         name: restaurant.name,
         mobile: restaurant.mobile,
         address: restaurant.address,
+      });
+
+      // Add restaurant to auth context immediately
+      addRestaurant({
+        id: restaurant.id,
+        name: restaurant.name,
+        mobile: restaurant.mobile,
+        address: restaurant.address,
+        theme_id: restaurant.theme_id,
+        created_at: restaurant.created_at,
+        updated_at: restaurant.updated_at,
       });
 
       // Step 3: Save menu data if exists
@@ -109,8 +130,9 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGener
         onQrGenerated();
       }
 
-      // Refresh auth session to update user state
-      await refreshSession();
+      // Log the user in with the mobile number to ensure they're authenticated
+      // This will also refresh the restaurants list from the server
+      await login(mobileNumber.trim());
     } catch (error) {
       console.error("Failed to generate QR:", error);
       

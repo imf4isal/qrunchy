@@ -39,6 +39,15 @@ export const restaurantProcedures = {
     .input(restaurantCreateSchema)
     .mutation(async ({ input }) => {
       try {
+        console.log("🍕 Restaurant creation request received:", {
+          name: input.name,
+          mobile: input.mobile,
+          user_id: input.user_id,
+          theme_id: input.theme_id,
+          address: input.address,
+          group_res_id: input.group_res_id
+        });
+
         // Verify user exists
         const user = await db
           .selectFrom("user")
@@ -78,6 +87,14 @@ export const restaurantProcedures = {
           })
           .returningAll()
           .executeTakeFirstOrThrow();
+
+        console.log("✅ Restaurant created successfully:", {
+          id: restaurant.id,
+          name: restaurant.name,
+          theme_id: restaurant.theme_id,
+          user_id: restaurant.user_id,
+          created_at: restaurant.created_at
+        });
 
         return {
           id: restaurant.id,

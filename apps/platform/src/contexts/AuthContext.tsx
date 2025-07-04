@@ -27,6 +27,7 @@ interface AuthContextType {
   logout: () => void;
   refreshSession: () => Promise<void>;
   updateRestaurant: (restaurantId: number, updates: Partial<Restaurant>) => void;
+  addRestaurant: (restaurant: Restaurant) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -105,8 +106,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshSession = async () => {
     if (!user) return;
 
-    // TODO: Implement session refresh when needed
-    console.log('Session refresh not implemented yet');
+    console.log('🔄 Refreshing session for user:', user.id);
+    
+    try {
+      // Fetch fresh user data and restaurants using the existing login mutation
+      const result = await loginMutation.mutateAsync({ 
+        mobile_number: user.mobile_number 
+      });
+      
+      // Update state with fresh data
+      setUser(result.user);
+      setRestaurants(result.restaurants);
+      
+      // Update localStorage
+      localStorage.setItem('qrunchy_user', JSON.stringify(result.user));
+      localStorage.setItem('qrunchy_restaurants', JSON.stringify(result.restaurants));
+      
+      console.log('✅ Session refreshed successfully. Restaurant count:', result.restaurants.length);
+    } catch (error) {
+      console.error('❌ Failed to refresh session:', error);
+      // Don't clear auth data on refresh failure, just log the error
+    }
   };
   
   const updateRestaurant = (restaurantId: number, updates: Partial<Restaurant>) => {
@@ -126,6 +146,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const addRestaurant = (restaurant: Restaurant) => {
+    console.log('➕ Adding new restaurant to context:', restaurant);
+    
+    setRestaurants(prev => {
+      // Check if restaurant already exists
+      if (prev.some(r => r.id === restaurant.id)) {
+        console.log('Restaurant already exists, updating instead');
+        return prev.map(r => r.id === restaurant.id ? restaurant : r);
+      }
+      
+      // Add new restaurant at the beginning (most recent first)
+      const updated = [restaurant, ...prev];
+      
+      // Update localStorage
+      localStorage.setItem('qrunchy_restaurants', JSON.stringify(updated));
+      
+      return updated;
+    });
+  };
+
   const value: AuthContextType = {
     user,
     restaurants,
@@ -135,6 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     refreshSession,
     updateRestaurant,
+    addRestaurant,
   };
 
   return (
