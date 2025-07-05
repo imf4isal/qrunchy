@@ -15,7 +15,7 @@ interface QRGeneratorProps {
 }
 
 export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGenerated }: QRGeneratorProps) {
-  const { setCurrentRestaurant } = useRestaurant();
+  const { setCurrentRestaurant, clearRestaurant } = useRestaurant();
   const { refreshSession, addRestaurant, login } = useAuth();
   const [isGenerated, setIsGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -133,6 +133,12 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGener
       // Log the user in with the mobile number to ensure they're authenticated
       // This will also refresh the restaurants list from the server
       await login(mobileNumber.trim());
+
+      // Clear restaurant data for next menu creation after a short delay
+      // This allows user to see the success message first
+      setTimeout(() => {
+        clearRestaurant();
+      }, 3000);
     } catch (error) {
       console.error("Failed to generate QR:", error);
       
