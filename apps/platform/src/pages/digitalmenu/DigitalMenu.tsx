@@ -11,7 +11,7 @@ import { useRestaurant } from "@/contexts/RestaurantContext";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function DigitalMenu() {
-  const { currentRestaurant } = useRestaurant();
+  const { currentRestaurant, clearRestaurant } = useRestaurant();
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
   const [menu, setMenu] = useState<DigitalMenu>({
     restaurantName: currentRestaurant?.name || "",
@@ -53,6 +53,18 @@ export default function DigitalMenu() {
 
   const handleQrGenerated = () => {
     setQrGenerated(true);
+  };
+
+  const handleStartFresh = () => {
+    // Clear restaurant context
+    clearRestaurant();
+    
+    // Reset local menu state
+    setMenu({
+      restaurantName: "",
+      categories: [],
+      items: [],
+    });
   };
 
   return (
@@ -298,6 +310,17 @@ export default function DigitalMenu() {
                         />
                       </div>
                     </div>
+
+                    {currentRestaurant && (
+                      <div className="mt-6 text-center">
+                        <button
+                          onClick={handleStartFresh}
+                          className="text-sm text-gray-500 hover:text-gray-700 underline"
+                        >
+                          or start fresh with empty fields
+                        </button>
+                      </div>
+                    )}
 
                     <div className="mt-8 flex justify-end">
                       <Button
