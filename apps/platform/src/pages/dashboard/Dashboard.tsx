@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
 import ChainManagement from "@/components/chain/ChainManagement";
+import AddToChainButton from "@/components/restaurant/AddToChainButton";
 import { Plus, QrCode, Edit3, BarChart3, Building2, Store } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { useMemo } from "react";
@@ -102,7 +103,7 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" asChild>
               <Link href={`/dashboard/restaurant/${restaurant.id}/menu`}>
                 <Edit3 className="w-4 h-4 mr-1" />
@@ -125,6 +126,11 @@ export default function Dashboard() {
                 No QR Code
               </Button>
             )}
+            <AddToChainButton
+              restaurantId={restaurant.id}
+              restaurantName={restaurant.name}
+              currentChainId={restaurant.group_res_id}
+            />
           </div>
         </div>
       </CardContent>

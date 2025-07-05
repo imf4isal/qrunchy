@@ -164,6 +164,34 @@ export default function MenuBuilder({
     })
   );
 
+  // Load draft from localStorage on mount (only for new restaurants)
+  useEffect(() => {
+    if (!restaurantId) {
+      const draft = localStorage.getItem('qrunchy_menu_draft');
+      if (draft) {
+        try {
+          const { categories, items } = JSON.parse(draft);
+          onCategoriesChange(categories);
+          onItemsChange(items);
+        } catch (error) {
+          console.error('Failed to load menu draft:', error);
+          localStorage.removeItem('qrunchy_menu_draft');
+        }
+      }
+    }
+  }, [restaurantId, onCategoriesChange, onItemsChange]);
+
+  // Save draft to localStorage whenever categories or items change (only for new restaurants)
+  useEffect(() => {
+    if (!restaurantId && (menu.categories.length > 0 || menu.items.length > 0)) {
+      localStorage.setItem('qrunchy_menu_draft', JSON.stringify({
+        categories: menu.categories,
+        items: menu.items,
+        timestamp: new Date().toISOString()
+      }));
+    }
+  }, [menu.categories, menu.items, restaurantId]);
+
   // Sync backend data to local state
   useEffect(() => {
     if (backendCategories) {
@@ -414,6 +442,13 @@ export default function MenuBuilder({
           // Update local state
           onCategoriesChange(categories);
           onItemsChange(items);
+
+          // Save to localStorage as draft
+          localStorage.setItem('qrunchy_menu_draft', JSON.stringify({
+            categories,
+            items,
+            timestamp: new Date().toISOString()
+          }));
 
           alert("Menu imported successfully! It will be saved when you generate the QR code.");
         }

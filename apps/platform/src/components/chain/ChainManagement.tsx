@@ -13,6 +13,7 @@ import type { Chain } from '@/contexts/AuthContext';
 interface ChainFormData {
   name: string;
   description: string;
+  selectedRestaurants: number[];
 }
 
 interface ChainFormProps {
@@ -20,35 +21,77 @@ interface ChainFormProps {
   setFormData: React.Dispatch<React.SetStateAction<ChainFormData>>;
   onSubmit: (e: React.FormEvent) => void;
   title: string;
+  availableRestaurants: any[];
 }
 
-const ChainForm = React.memo(({ formData, setFormData, onSubmit, title }: ChainFormProps) => (
-  <form onSubmit={onSubmit} className="space-y-4">
-    <div className="space-y-2">
-      <Label htmlFor="name">Chain Name</Label>
-      <Input
-        id="name"
-        value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        placeholder="Enter chain name"
-        required
-      />
-    </div>
-    <div className="space-y-2">
-      <Label htmlFor="description">Description</Label>
-      <Textarea
-        id="description"
-        value={formData.description}
-        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        placeholder="Enter chain description (optional)"
-        rows={3}
-      />
-    </div>
-    <Button type="submit" className="w-full">
-      {title}
-    </Button>
-  </form>
-));
+const ChainForm = React.memo(({ formData, setFormData, onSubmit, title, availableRestaurants }: ChainFormProps) => {
+  const handleRestaurantToggle = (restaurantId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedRestaurants: prev.selectedRestaurants.includes(restaurantId)
+        ? prev.selectedRestaurants.filter(id => id !== restaurantId)
+        : [...prev.selectedRestaurants, restaurantId]
+    }));
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Chain Name</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          placeholder="Enter chain name"
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          placeholder="Enter chain description (optional)"
+          rows={3}
+        />
+      </div>
+      
+      {availableRestaurants.length > 0 && (
+        <div className="space-y-2">
+          <Label>Select Restaurants</Label>
+          <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
+            {availableRestaurants.map((restaurant) => (
+              <div key={restaurant.id} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={`restaurant-${restaurant.id}`}
+                  checked={formData.selectedRestaurants.includes(restaurant.id)}
+                  onChange={() => handleRestaurantToggle(restaurant.id)}
+                  className="h-4 w-4 text-blue-600 rounded"
+                />
+                <label 
+                  htmlFor={`restaurant-${restaurant.id}`} 
+                  className="flex-1 text-sm cursor-pointer"
+                >
+                  <div className="font-medium">{restaurant.name}</div>
+                  <div className="text-gray-500 text-xs">{restaurant.mobile}</div>
+                </label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500">
+            Select restaurants to include in this chain. You can also assign restaurants to chains later.
+          </p>
+        </div>
+      )}
+      
+      <Button type="submit" className="w-full">
+        {title}
+      </Button>
+    </form>
+  );
+});
 
 export default function ChainManagement() {
   const { user, chains, restaurants, addChain, updateChain, deleteChain } = useAuth();
@@ -57,12 +100,14 @@ export default function ChainManagement() {
   const [editingChain, setEditingChain] = useState<Chain | null>(null);
   const [formData, setFormData] = useState<ChainFormData>({
     name: '',
-    description: ''
+    description: '',
+    selectedRestaurants: []
   });
 
   const createChainMutation = trpc.restaurant.createChain.useMutation();
   const updateChainMutation = trpc.restaurant.updateChain.useMutation();
   const deleteChainMutation = trpc.restaurant.deleteChain.useMutation();
+  const updateRestaurantMutation = trpc.restaurant.update.useMutation();
 
   const handleCreateChain = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,9 +120,20 @@ export default function ChainManagement() {
         user_id: user.id
       });
 
+      // Update selected restaurants to belong to this chain
+      for (const restaurantId of formData.selectedRestaurants) {
+        await updateRestaurantMutation.mutateAsync({
+          id: restaurantId,
+          group_res_id: result.id
+        });
+      }
+
       addChain(result);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', description: '', selectedRestaurants: [] });
       setIsCreateDialogOpen(false);
+      
+      // Refresh page to update restaurant chain assignments
+      window.location.reload();
     } catch (error) {
       console.error('Error creating chain:', error);
     }
@@ -94,10 +150,37 @@ export default function ChainManagement() {
         description: formData.description || undefined,
       });
 
+      // Get current restaurants in this chain
+      const currentChainRestaurants = restaurants.filter(r => r.group_res_id === editingChain.id);
+      const currentRestaurantIds = currentChainRestaurants.map(r => r.id);
+
+      // Remove restaurants that are no longer selected
+      for (const restaurant of currentChainRestaurants) {
+        if (!formData.selectedRestaurants.includes(restaurant.id)) {
+          await updateRestaurantMutation.mutateAsync({
+            id: restaurant.id,
+            group_res_id: null
+          });
+        }
+      }
+
+      // Add newly selected restaurants
+      for (const restaurantId of formData.selectedRestaurants) {
+        if (!currentRestaurantIds.includes(restaurantId)) {
+          await updateRestaurantMutation.mutateAsync({
+            id: restaurantId,
+            group_res_id: editingChain.id
+          });
+        }
+      }
+
       updateChain(editingChain.id, result);
       setEditingChain(null);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', description: '', selectedRestaurants: [] });
       setIsEditDialogOpen(false);
+      
+      // Refresh page to update restaurant chain assignments
+      window.location.reload();
     } catch (error) {
       console.error('Error updating chain:', error);
     }
@@ -118,15 +201,27 @@ export default function ChainManagement() {
 
   const openEditDialog = (chain: Chain) => {
     setEditingChain(chain);
+    const chainRestaurants = restaurants.filter(r => r.group_res_id === chain.id);
     setFormData({
       name: chain.name,
-      description: chain.description || ''
+      description: chain.description || '',
+      selectedRestaurants: chainRestaurants.map(r => r.id)
     });
     setIsEditDialogOpen(true);
   };
 
   const getChainRestaurants = (chainId: number) => {
     return restaurants.filter(restaurant => restaurant.group_res_id === chainId);
+  };
+
+  const getAvailableRestaurantsForCreate = () => {
+    // For creating new chain, show restaurants not in any chain
+    return restaurants.filter(restaurant => !restaurant.group_res_id);
+  };
+
+  const getAvailableRestaurantsForEdit = () => {
+    // For editing existing chain, show all restaurants
+    return restaurants;
   };
 
 
@@ -152,7 +247,8 @@ export default function ChainManagement() {
               formData={formData}
               setFormData={setFormData}
               onSubmit={handleCreateChain} 
-              title="Create Chain" 
+              title="Create Chain"
+              availableRestaurants={getAvailableRestaurantsForCreate()}
             />
           </DialogContent>
         </Dialog>
@@ -261,7 +357,8 @@ export default function ChainManagement() {
             formData={formData}
             setFormData={setFormData}
             onSubmit={handleUpdateChain} 
-            title="Update Chain" 
+            title="Update Chain"
+            availableRestaurants={getAvailableRestaurantsForEdit()}
           />
         </DialogContent>
       </Dialog>
