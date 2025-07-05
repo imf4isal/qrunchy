@@ -67,15 +67,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const storedUser = localStorage.getItem('qrunchy_user');
         const storedRestaurants = localStorage.getItem('qrunchy_restaurants');
+        const storedChains = localStorage.getItem('qrunchy_chains');
 
         if (storedUser && storedRestaurants) {
           const parsedUser = JSON.parse(storedUser);
           const parsedRestaurants = JSON.parse(storedRestaurants);
+          const parsedChains = storedChains ? JSON.parse(storedChains) : [];
 
           // For now, just trust localStorage data
           // TODO: Add session verification when needed
           setUser(parsedUser);
           setRestaurants(parsedRestaurants);
+          setChains(parsedChains);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);

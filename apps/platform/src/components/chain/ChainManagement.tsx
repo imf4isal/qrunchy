@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { trpc } from '@/utils/trpc';
 import { Plus, Edit3, Trash2, Link2, Building2 } from 'lucide-react';
@@ -14,6 +14,41 @@ interface ChainFormData {
   name: string;
   description: string;
 }
+
+interface ChainFormProps {
+  formData: ChainFormData;
+  setFormData: React.Dispatch<React.SetStateAction<ChainFormData>>;
+  onSubmit: (e: React.FormEvent) => void;
+  title: string;
+}
+
+const ChainForm = React.memo(({ formData, setFormData, onSubmit, title }: ChainFormProps) => (
+  <form onSubmit={onSubmit} className="space-y-4">
+    <div className="space-y-2">
+      <Label htmlFor="name">Chain Name</Label>
+      <Input
+        id="name"
+        value={formData.name}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        placeholder="Enter chain name"
+        required
+      />
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="description">Description</Label>
+      <Textarea
+        id="description"
+        value={formData.description}
+        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        placeholder="Enter chain description (optional)"
+        rows={3}
+      />
+    </div>
+    <Button type="submit" className="w-full">
+      {title}
+    </Button>
+  </form>
+));
 
 export default function ChainManagement() {
   const { user, chains, restaurants, addChain, updateChain, deleteChain } = useAuth();
@@ -94,33 +129,6 @@ export default function ChainManagement() {
     return restaurants.filter(restaurant => restaurant.group_res_id === chainId);
   };
 
-  const ChainForm = ({ onSubmit, title }: { onSubmit: (e: React.FormEvent) => void; title: string }) => (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Chain Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Enter chain name"
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Enter chain description (optional)"
-          rows={3}
-        />
-      </div>
-      <Button type="submit" className="w-full">
-        {title}
-      </Button>
-    </form>
-  );
 
   return (
     <div className="space-y-6">
@@ -136,8 +144,16 @@ export default function ChainManagement() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create New Chain</DialogTitle>
+              <DialogDescription>
+                Create a new restaurant chain to group your restaurants together.
+              </DialogDescription>
             </DialogHeader>
-            <ChainForm onSubmit={handleCreateChain} title="Create Chain" />
+            <ChainForm 
+              formData={formData}
+              setFormData={setFormData}
+              onSubmit={handleCreateChain} 
+              title="Create Chain" 
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -237,8 +253,16 @@ export default function ChainManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Chain</DialogTitle>
+            <DialogDescription>
+              Update the chain details below.
+            </DialogDescription>
           </DialogHeader>
-          <ChainForm onSubmit={handleUpdateChain} title="Update Chain" />
+          <ChainForm 
+            formData={formData}
+            setFormData={setFormData}
+            onSubmit={handleUpdateChain} 
+            title="Update Chain" 
+          />
         </DialogContent>
       </Dialog>
     </div>
