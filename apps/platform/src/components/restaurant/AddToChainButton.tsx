@@ -21,7 +21,7 @@ export default function AddToChainButton({
 }: AddToChainButtonProps) {
   const { user, chains, updateRestaurant } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedChainId, setSelectedChainId] = useState<number | null>(currentChainId || null);
+  const [selectedChainId, setSelectedChainId] = useState<number | null>(null);
   
   const updateRestaurantMutation = trpc.restaurant.update.useMutation();
 
@@ -52,8 +52,16 @@ export default function AddToChainButton({
 
   const currentChain = chains.find(c => c.id === currentChainId);
 
+  // Reset selection when dialog opens
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setSelectedChainId(currentChainId || null);
+    }
+    setIsDialogOpen(open);
+  };
+
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Building2 className="w-4 h-4 mr-2" />

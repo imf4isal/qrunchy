@@ -26,12 +26,21 @@ interface ChainFormProps {
 
 const ChainForm = React.memo(({ formData, setFormData, onSubmit, title, availableRestaurants }: ChainFormProps) => {
   const handleRestaurantToggle = (restaurantId: number) => {
-    setFormData(prev => ({
-      ...prev,
-      selectedRestaurants: prev.selectedRestaurants.includes(restaurantId)
+    console.log('Toggling restaurant:', restaurantId);
+    console.log('Current selected restaurants:', formData.selectedRestaurants);
+    
+    setFormData(prev => {
+      const newSelected = prev.selectedRestaurants.includes(restaurantId)
         ? prev.selectedRestaurants.filter(id => id !== restaurantId)
-        : [...prev.selectedRestaurants, restaurantId]
-    }));
+        : [...prev.selectedRestaurants, restaurantId];
+      
+      console.log('New selected restaurants:', newSelected);
+      
+      return {
+        ...prev,
+        selectedRestaurants: newSelected
+      };
+    });
   };
 
   return (
@@ -114,14 +123,20 @@ export default function ChainManagement() {
     if (!user) return;
 
     try {
+      console.log('Creating chain with data:', formData);
+      
       const result = await createChainMutation.mutateAsync({
         name: formData.name,
         description: formData.description || undefined,
         user_id: user.id
       });
 
+      console.log('Chain created:', result);
+      console.log('Selected restaurants to assign:', formData.selectedRestaurants);
+
       // Update selected restaurants to belong to this chain
       for (const restaurantId of formData.selectedRestaurants) {
+        console.log('Assigning restaurant', restaurantId, 'to chain', result.id);
         await updateRestaurantMutation.mutateAsync({
           id: restaurantId,
           group_res_id: result.id
