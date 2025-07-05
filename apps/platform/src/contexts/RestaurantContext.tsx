@@ -14,6 +14,7 @@ interface RestaurantContextType {
   isLoading: boolean;
   error: string | null;
   createRestaurant: (data: { name: string; mobile: string; address?: string }) => Promise<Restaurant>;
+  clearRestaurant: () => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
@@ -73,6 +74,12 @@ export function RestaurantProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const clearRestaurant = () => {
+    setCurrentRestaurant(null);
+    setAvailableRestaurants([]);
+    setError(null);
+  };
+
   return (
     <RestaurantContext.Provider
       value={{
@@ -82,6 +89,7 @@ export function RestaurantProvider({ children }: { children: React.ReactNode }) 
         isLoading,
         error,
         createRestaurant,
+        clearRestaurant,
       }}
     >
       {children}
