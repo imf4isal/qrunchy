@@ -77,26 +77,6 @@ export default function AddToChainButton({
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* No Chain Option */}
-          <Card 
-            className={`cursor-pointer transition-colors hover:border-blue-300 ${
-              selectedChainId === null ? 'border-blue-500 bg-blue-50' : ''
-            }`}
-            onClick={() => setSelectedChainId(null)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Individual Restaurant</div>
-                  <div className="text-sm text-gray-500">Not part of any chain</div>
-                </div>
-                {selectedChainId === null && (
-                  <Check className="w-5 h-5 text-blue-600" />
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Available Chains */}
           {chains.length > 0 ? (
             <div className="space-y-2">
@@ -145,12 +125,21 @@ export default function AddToChainButton({
             >
               Cancel
             </Button>
+            {currentChainId && (
+              <Button 
+                variant="destructive"
+                onClick={() => handleChainSelection(null)}
+                className="flex-1"
+              >
+                Remove from Chain
+              </Button>
+            )}
             <Button 
               onClick={() => handleChainSelection(selectedChainId)}
               className="flex-1"
-              disabled={selectedChainId === currentChainId}
+              disabled={selectedChainId === currentChainId || selectedChainId === null}
             >
-              {selectedChainId === null ? 'Remove from Chain' : 'Assign to Chain'}
+              Assign to Chain
             </Button>
           </div>
         </div>

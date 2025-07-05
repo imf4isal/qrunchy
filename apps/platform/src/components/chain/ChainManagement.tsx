@@ -24,7 +24,10 @@ interface ChainFormProps {
   availableRestaurants: any[];
 }
 
-const ChainForm = React.memo(({ formData, setFormData, onSubmit, title, availableRestaurants }: ChainFormProps) => {
+const ChainForm = ({ formData, setFormData, onSubmit, title, availableRestaurants }: ChainFormProps) => {
+  console.log('ChainForm render - formData:', formData);
+  console.log('ChainForm render - availableRestaurants:', availableRestaurants);
+
   const handleRestaurantToggle = (restaurantId: number) => {
     console.log('Toggling restaurant:', restaurantId);
     console.log('Current selected restaurants:', formData.selectedRestaurants);
@@ -100,7 +103,7 @@ const ChainForm = React.memo(({ formData, setFormData, onSubmit, title, availabl
       </Button>
     </form>
   );
-});
+};
 
 export default function ChainManagement() {
   const { user, chains, restaurants, addChain, updateChain, deleteChain } = useAuth();
