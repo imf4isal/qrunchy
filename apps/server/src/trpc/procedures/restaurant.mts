@@ -120,10 +120,24 @@ export const restaurantProcedures = {
       try {
         const restaurants = await db
           .selectFrom("restaurant")
-          .selectAll()
-          .where("user_id", "=", input.user_id)
-          .where("is_active", "=", true)
-          .orderBy("created_at", "desc")
+          .leftJoin("group_res", "restaurant.group_res_id", "group_res.id")
+          .select([
+            "restaurant.id",
+            "restaurant.name",
+            "restaurant.mobile",
+            "restaurant.address",
+            "restaurant.user_id",
+            "restaurant.group_res_id",
+            "restaurant.theme_id",
+            "restaurant.created_at",
+            "restaurant.updated_at",
+            "restaurant.is_active",
+            "group_res.name as chain_name",
+            "group_res.type as chain_type"
+          ])
+          .where("restaurant.user_id", "=", input.user_id)
+          .where("restaurant.is_active", "=", true)
+          .orderBy("restaurant.created_at", "desc")
           .execute();
 
         return restaurants.map(restaurant => ({
@@ -137,6 +151,8 @@ export const restaurantProcedures = {
           created_at: restaurant.created_at.toISOString(),
           updated_at: restaurant.updated_at.toISOString(),
           is_active: restaurant.is_active,
+          chain_name: restaurant.chain_name,
+          chain_type: restaurant.chain_type,
         }));
       } catch (error) {
         console.error("Error fetching restaurants by user:", error);

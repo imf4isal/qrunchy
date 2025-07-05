@@ -1,5 +1,6 @@
 import { publicProcedure, router } from "../index.mts";
 import { restaurantProcedures } from "../procedures/restaurant.mts";
+import { chainProcedures } from "../procedures/chain.mts";
 
 export const restaurantRouter = router({
   // Simple test endpoint
@@ -15,4 +16,12 @@ export const restaurantRouter = router({
   
   // Theme management
   updateTheme: restaurantProcedures.updateTheme,
+
+  // Chain management
+  createChain: chainProcedures.create,
+  getChainsByUser: chainProcedures.getByUser,
+  getChainById: chainProcedures.getById,
+  updateChain: chainProcedures.update,
+  deleteChain: chainProcedures.delete,
+  getChainsWithRestaurants: chainProcedures.getWithRestaurants,
 });
