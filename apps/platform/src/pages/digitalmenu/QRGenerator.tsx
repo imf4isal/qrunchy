@@ -139,10 +139,11 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
       // This will also refresh the restaurants list from the server
       await login(mobileNumber.trim());
 
-      // Clear restaurant data for next menu creation after a short delay
+      // Clear restaurant data and draft for next menu creation after a short delay
       // This allows user to see the success message first
       setTimeout(() => {
         clearRestaurant();
+        localStorage.removeItem('qrunchy_menu_draft');
       }, 3000);
     } catch (error) {
       console.error("Failed to generate QR:", error);

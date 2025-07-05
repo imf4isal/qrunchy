@@ -72,6 +72,9 @@ export default function DigitalMenu() {
     
     // Reset chain selection
     setSelectedChain(null);
+    
+    // Clear draft from localStorage
+    localStorage.removeItem('qrunchy_menu_draft');
   };
 
   return (

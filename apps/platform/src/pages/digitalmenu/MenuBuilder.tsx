@@ -50,6 +50,7 @@ export default function MenuBuilder({
   const [bulkUploadMode, setBulkUploadMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showSampleFormat, setShowSampleFormat] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
   
   // Ref to track scroll position during drag operations
   const scrollPositionRef = useRef<{ top: number; left: number }>({ top: 0, left: 0 });
@@ -173,6 +174,7 @@ export default function MenuBuilder({
           const { categories, items } = JSON.parse(draft);
           onCategoriesChange(categories);
           onItemsChange(items);
+          setDraftLoaded(true);
         } catch (error) {
           console.error('Failed to load menu draft:', error);
           localStorage.removeItem('qrunchy_menu_draft');
@@ -960,11 +962,26 @@ export default function MenuBuilder({
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">Build Your Menu</h2>
-      <p className="text-gray-600 mb-6">
-        Add categories and menu items manually, or upload a complete menu from
-        JSON file.
-      </p>
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h2 className="text-xl font-bold">Build Your Menu</h2>
+          <p className="text-gray-600 mt-1">
+            Add categories and menu items manually, or upload a complete menu from JSON file.
+          </p>
+        </div>
+        {!restaurantId && (
+          <div className="text-right">
+            {draftLoaded && (
+              <div className="text-sm text-blue-600 mb-1">
+                📄 Draft loaded from previous session
+              </div>
+            )}
+            <div className="text-xs text-gray-500">
+              Auto-saving draft...
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Bulk Upload Toggle */}
       <Card className="mb-6">
