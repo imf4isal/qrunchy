@@ -14,13 +14,29 @@ export interface Restaurant {
   mobile: string;
   address: string | null;
   theme_id?: string;
+  group_res_id?: number | null;
+  chain_name?: string | null;
+  chain_type?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface Chain {
+  id: number;
+  name: string;
+  description: string | null;
+  user_id: number;
+  type: string;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+  restaurants?: Restaurant[];
 }
 
 interface AuthContextType {
   user: User | null;
   restaurants: Restaurant[];
+  chains: Chain[];
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (mobile_number: string) => Promise<void>;
@@ -28,6 +44,9 @@ interface AuthContextType {
   refreshSession: () => Promise<void>;
   updateRestaurant: (restaurantId: number, updates: Partial<Restaurant>) => void;
   addRestaurant: (restaurant: Restaurant) => void;
+  addChain: (chain: Chain) => void;
+  updateChain: (chainId: number, updates: Partial<Chain>) => void;
+  deleteChain: (chainId: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,6 +54,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [chains, setChains] = useState<Chain[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // tRPC mutations
@@ -71,8 +91,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const clearAuthData = () => {
     localStorage.removeItem('qrunchy_user');
     localStorage.removeItem('qrunchy_restaurants');
+    localStorage.removeItem('qrunchy_chains');
     setUser(null);
     setRestaurants([]);
+    setChains([]);
   };
 
   const login = async (mobile_number: string) => {
@@ -166,9 +188,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const addChain = (chain: Chain) => {
+    console.log('➕ Adding new chain to context:', chain);
+    
+    setChains(prev => {
+      // Check if chain already exists
+      if (prev.some(c => c.id === chain.id)) {
+        console.log('Chain already exists, updating instead');
+        return prev.map(c => c.id === chain.id ? chain : c);
+      }
+      
+      // Add new chain at the beginning (most recent first)
+      const updated = [chain, ...prev];
+      
+      // Update localStorage
+      localStorage.setItem('qrunchy_chains', JSON.stringify(updated));
+      
+      return updated;
+    });
+  };
+
+  const updateChain = (chainId: number, updates: Partial<Chain>) => {
+    console.log('🔄 Updating chain in context:', { chainId, updates });
+    
+    setChains(prev => {
+      const updated = prev.map(chain => 
+        chain.id === chainId 
+          ? { ...chain, ...updates }
+          : chain
+      );
+      
+      // Update localStorage as well
+      localStorage.setItem('qrunchy_chains', JSON.stringify(updated));
+      
+      return updated;
+    });
+  };
+
+  const deleteChain = (chainId: number) => {
+    console.log('🗑️ Deleting chain from context:', chainId);
+    
+    setChains(prev => {
+      const updated = prev.filter(chain => chain.id !== chainId);
+      
+      // Update localStorage
+      localStorage.setItem('qrunchy_chains', JSON.stringify(updated));
+      
+      return updated;
+    });
+  };
+
   const value: AuthContextType = {
     user,
     restaurants,
+    chains,
     isAuthenticated: !!user,
     isLoading,
     login,
@@ -176,6 +249,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshSession,
     updateRestaurant,
     addRestaurant,
+    addChain,
+    updateChain,
+    deleteChain,
   };
 
   return (

@@ -2,13 +2,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
-import { Plus, QrCode, Edit3, BarChart3 } from "lucide-react";
+import ChainManagement from "@/components/chain/ChainManagement";
+import { Plus, QrCode, Edit3, BarChart3, Building2, Store } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { useMemo } from "react";
+import type { Restaurant } from "@/contexts/AuthContext";
 
 export default function Dashboard() {
-  const { user, restaurants } = useAuth();
+  const { user, restaurants, chains } = useAuth();
 
   // Fetch QR codes for all restaurants
   const qrQueries = restaurants.map((restaurant) =>
@@ -37,6 +40,96 @@ export default function Dashboard() {
 
     return map;
   }, [restaurants, qrQueries]);
+
+  // Group restaurants by chains
+  const groupedRestaurants = useMemo(() => {
+    const grouped: {
+      unassigned: Restaurant[];
+      chains: Array<{ chain: any; restaurants: Restaurant[] }>;
+    } = {
+      unassigned: [],
+      chains: []
+    };
+
+    // First, group restaurants by their chain
+    const chainRestaurantMap = new Map<number, Restaurant[]>();
+    
+    restaurants.forEach(restaurant => {
+      if (restaurant.group_res_id) {
+        if (!chainRestaurantMap.has(restaurant.group_res_id)) {
+          chainRestaurantMap.set(restaurant.group_res_id, []);
+        }
+        chainRestaurantMap.get(restaurant.group_res_id)!.push(restaurant);
+      } else {
+        grouped.unassigned.push(restaurant);
+      }
+    });
+
+    // Match with chain data
+    chains.forEach(chain => {
+      const chainRestaurants = chainRestaurantMap.get(chain.id) || [];
+      grouped.chains.push({
+        chain,
+        restaurants: chainRestaurants
+      });
+    });
+
+    return grouped;
+  }, [restaurants, chains]);
+
+  const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => (
+    <Card key={restaurant.id} className="hover:shadow-md transition-shadow">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              {restaurant.name}
+            </h3>
+            <p className="text-gray-600 text-sm mb-2">
+              {restaurant.mobile}
+            </p>
+            {restaurant.address && (
+              <p className="text-gray-500 text-sm">
+                {restaurant.address}
+              </p>
+            )}
+            {restaurant.chain_name && (
+              <div className="flex items-center mt-2">
+                <Building2 className="w-3 h-3 text-blue-600 mr-1" />
+                <span className="text-xs text-blue-600 font-medium">
+                  {restaurant.chain_name}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/restaurant/${restaurant.id}/menu`}>
+                <Edit3 className="w-4 h-4 mr-1" />
+                Edit Menu
+              </Link>
+            </Button>
+            {restaurantQrMap[restaurant.id] ? (
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={restaurantQrMap[restaurant.id]!.menu_url}
+                  target="_blank"
+                >
+                  <QrCode className="w-4 h-4 mr-1" />
+                  View Menu
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" disabled>
+                <QrCode className="w-4 h-4 mr-1" />
+                No QR Code
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <MainLayout>
@@ -100,94 +193,94 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Restaurants List */}
+          {/* Main Content Area */}
           <div className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Your Restaurants</h2>
-              <Button asChild>
-                <Link href="/digital-menu">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Restaurant
-                </Link>
-              </Button>
-            </div>
+            <Tabs defaultValue="restaurants" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="restaurants" className="flex items-center gap-2">
+                  <Store className="w-4 h-4" />
+                  Restaurants
+                </TabsTrigger>
+                <TabsTrigger value="chains" className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  Chains
+                </TabsTrigger>
+              </TabsList>
 
-            {restaurants.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <Plus className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No restaurants yet
-                  </h3>
-                  <p className="text-gray-600 text-center mb-4">
-                    Get started by creating your first digital menu
-                  </p>
-                  <div className="flex gap-2">
-                    <Button asChild>
-                      <Link href="/digital-menu">Create Digital Menu</Link>
-                    </Button>
-                    <Button variant="outline" asChild>
-                      <Link href="/photo-menu">Create Photo Menu</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {restaurants.map((restaurant) => (
-                  <Card
-                    key={restaurant.id}
-                    className="hover:shadow-md transition-shadow"
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                            {restaurant.name}
-                          </h3>
-                          <p className="text-gray-600 text-sm mb-2">
-                            {restaurant.mobile}
-                          </p>
-                          {restaurant.address && (
-                            <p className="text-gray-500 text-sm">
-                              {restaurant.address}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" asChild>
-                            <Link
-                              href={`/dashboard/restaurant/${restaurant.id}/menu`}
-                            >
-                              <Edit3 className="w-4 h-4 mr-1" />
-                              Edit Menu
-                            </Link>
-                          </Button>
-                          {restaurantQrMap[restaurant.id] ? (
-                            <Button variant="outline" size="sm" asChild>
-                              <Link
-                                href={restaurantQrMap[restaurant.id]!.menu_url}
-                                target="_blank"
-                              >
-                                <QrCode className="w-4 h-4 mr-1" />
-                                View Menu
-                              </Link>
-                            </Button>
-                          ) : (
-                            <Button variant="outline" size="sm" disabled>
-                              <QrCode className="w-4 h-4 mr-1" />
-                              No QR Code
-                            </Button>
-                          )}
-                        </div>
+              <TabsContent value="restaurants" className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Your Restaurants</h2>
+                  <Button asChild>
+                    <Link href="/digital-menu">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Restaurant
+                    </Link>
+                  </Button>
+                </div>
+
+                {restaurants.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <Plus className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No restaurants yet
+                      </h3>
+                      <p className="text-gray-600 text-center mb-4">
+                        Get started by creating your first digital menu
+                      </p>
+                      <div className="flex gap-2">
+                        <Button asChild>
+                          <Link href="/digital-menu">Create Digital Menu</Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                          <Link href="/photo-menu">Create Photo Menu</Link>
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
-            )}
+                ) : (
+                  <div className="space-y-6">
+                    {/* Chain Groups */}
+                    {groupedRestaurants.chains.map(({ chain, restaurants: chainRestaurants }) => (
+                      chainRestaurants.length > 0 && (
+                        <div key={chain.id} className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <Building2 className="w-5 h-5 text-blue-600" />
+                            <h3 className="text-lg font-medium text-gray-900">{chain.name}</h3>
+                            <span className="text-sm text-gray-500">
+                              ({chainRestaurants.length} restaurant{chainRestaurants.length !== 1 ? 's' : ''})
+                            </span>
+                          </div>
+                          <div className="space-y-3 ml-7">
+                            {chainRestaurants.map((restaurant) => (
+                              <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    ))}
+
+                    {/* Unassigned Restaurants */}
+                    {groupedRestaurants.unassigned.length > 0 && (
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-medium text-gray-900">Individual Restaurants</h3>
+                        <div className="space-y-3">
+                          {groupedRestaurants.unassigned.map((restaurant) => (
+                            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="chains">
+                <ChainManagement />
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* Quick Actions */}
