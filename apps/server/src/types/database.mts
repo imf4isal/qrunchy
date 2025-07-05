@@ -4,6 +4,7 @@ type Point = ColumnType<string, string, string>;
 
 type QrType = "photo" | "digital";
 type QrStatus = "available" | "used" | "expired";
+type GroupResType = "chain" | "foodcourt";
 
 export interface Database {
   user: UserTable;
@@ -28,11 +29,10 @@ export interface UserTable {
 export interface GroupResTable {
   id: Generated<number>;
   name: string;
-  mobile: string | null;
-  address: string;
   geolocation: Point;
   description: string | null;
   user_id: number;
+  type: Generated<GroupResType>;
   created_at: Generated<Date>;
   updated_at: Generated<Date>;
   is_active: Generated<boolean>;

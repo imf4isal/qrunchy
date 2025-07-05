@@ -16,7 +16,7 @@ interface QRGeneratorProps {
 
 export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGenerated }: QRGeneratorProps) {
   const { setCurrentRestaurant, clearRestaurant } = useRestaurant();
-  const { refreshSession, addRestaurant, login } = useAuth();
+  const { addRestaurant, login } = useAuth();
   const [isGenerated, setIsGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
