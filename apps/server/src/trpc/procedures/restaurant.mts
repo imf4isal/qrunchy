@@ -8,7 +8,7 @@ const restaurantCreateSchema = z.object({
   mobile: z.string().min(1, "Mobile number is required"),
   address: z.string().optional(),
   user_id: z.number().int().positive(),
-  group_res_id: z.number().int().positive().optional(),
+  group_res_id: z.number().int().positive().nullable().optional(),
   theme_id: z.enum(["minimal", "modern"]).optional(),
 });
 
@@ -17,7 +17,7 @@ const restaurantUpdateSchema = z.object({
   name: z.string().min(1, "Restaurant name is required").optional(),
   mobile: z.string().min(1, "Mobile number is required").optional(),
   address: z.string().optional(),
-  group_res_id: z.number().int().positive().optional(),
+  group_res_id: z.number().int().positive().nullable().optional(),
   theme_id: z.enum(["minimal", "modern"]).optional(),
 });
 
