@@ -1,18 +1,22 @@
 // src/pages/digitalmenu/DigitalMenu.tsx
 import { useState, useCallback } from "react";
-import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import MenuBuilder from "./MenuBuilder";
 import ThemePreview from "@/components/ThemePreview";
 import QRGenerator from "./QRGenerator";
 import ThemeSetupSelector from "@/components/ThemeSetupSelector";
 import { useRestaurant } from "@/contexts/RestaurantContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function DigitalMenu() {
   const { currentRestaurant, clearRestaurant } = useRestaurant();
+  const { chains } = useAuth();
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
+  const [selectedChain, setSelectedChain] = useState<number | null>(currentRestaurant?.group_res_id || null);
   const [menu, setMenu] = useState<DigitalMenu>({
     restaurantName: currentRestaurant?.name || "",
     categories: [],
@@ -65,6 +69,9 @@ export default function DigitalMenu() {
       categories: [],
       items: [],
     });
+    
+    // Reset chain selection
+    setSelectedChain(null);
   };
 
   return (
@@ -298,6 +305,9 @@ export default function DigitalMenu() {
 
                     <div className="space-y-6">
                       <div>
+                        <Label htmlFor="restaurantName" className="text-sm font-medium text-gray-700 mb-2 block">
+                          Restaurant Name
+                        </Label>
                         <Input
                           id="restaurantName"
                           type="text"
@@ -309,6 +319,56 @@ export default function DigitalMenu() {
                           className="w-full text-lg py-3"
                         />
                       </div>
+
+                      {chains.length > 0 && (
+                        <div>
+                          <Label htmlFor="chainSelect" className="text-sm font-medium text-gray-700 mb-2 block">
+                            Restaurant Chain (Optional)
+                          </Label>
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-3 p-3 border rounded-lg hover:border-blue-300 transition-colors">
+                              <input
+                                type="radio"
+                                id="no-chain"
+                                name="chain"
+                                value=""
+                                checked={selectedChain === null}
+                                onChange={() => setSelectedChain(null)}
+                                className="h-4 w-4 text-blue-600"
+                              />
+                              <label htmlFor="no-chain" className="flex-1 text-sm font-medium text-gray-700">
+                                Individual restaurant (not part of a chain)
+                              </label>
+                            </div>
+                            
+                            {chains.map((chain) => (
+                              <div key={chain.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:border-blue-300 transition-colors">
+                                <input
+                                  type="radio"
+                                  id={`chain-${chain.id}`}
+                                  name="chain"
+                                  value={chain.id}
+                                  checked={selectedChain === chain.id}
+                                  onChange={() => setSelectedChain(chain.id)}
+                                  className="h-4 w-4 text-blue-600"
+                                />
+                                <div className="flex-1">
+                                  <label htmlFor={`chain-${chain.id}`} className="flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer">
+                                    <Building2 className="w-4 h-4 text-blue-600" />
+                                    <span>{chain.name}</span>
+                                  </label>
+                                  {chain.description && (
+                                    <p className="text-xs text-gray-500 mt-1 ml-6">{chain.description}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Select a chain to group this restaurant with your other locations for better organization.
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {currentRestaurant && (
@@ -378,6 +438,7 @@ export default function DigitalMenu() {
                       menu={menu}
                       restaurantId={currentRestaurant?.id}
                       selectedTheme={selectedTheme}
+                      selectedChain={selectedChain}
                       onQrGenerated={handleQrGenerated}
                     />
 

@@ -11,10 +11,11 @@ interface QRGeneratorProps {
   menu: DigitalMenu;
   restaurantId?: number;
   selectedTheme?: "minimal" | "modern";
+  selectedChain?: number | null;
   onQrGenerated?: () => void;
 }
 
-export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGenerated }: QRGeneratorProps) {
+export default function QRGenerator({ menu, selectedTheme = "minimal", selectedChain = null, onQrGenerated }: QRGeneratorProps) {
   const { setCurrentRestaurant, clearRestaurant } = useRestaurant();
   const { addRestaurant, login } = useAuth();
   const [isGenerated, setIsGenerated] = useState(false);
@@ -58,6 +59,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGener
         address: "Not specified", // Can be updated later
         user_id: user.id,
         theme_id: selectedTheme,
+        group_res_id: selectedChain,
       });
 
       console.log('🏪 Restaurant created:', restaurant);
@@ -79,6 +81,9 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", onQrGener
         mobile: restaurant.mobile,
         address: restaurant.address,
         theme_id: restaurant.theme_id,
+        group_res_id: restaurant.group_res_id,
+        chain_name: restaurant.chain_name,
+        chain_type: restaurant.chain_type,
         created_at: restaurant.created_at,
         updated_at: restaurant.updated_at,
       });
