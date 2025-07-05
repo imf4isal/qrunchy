@@ -59,7 +59,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
         address: "Not specified", // Can be updated later
         user_id: user.id,
         theme_id: selectedTheme,
-        group_res_id: selectedChain,
+        group_res_id: selectedChain ?? undefined,
       });
 
       console.log('🏪 Restaurant created:', restaurant);
@@ -82,8 +82,8 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
         address: restaurant.address,
         theme_id: restaurant.theme_id,
         group_res_id: restaurant.group_res_id,
-        chain_name: restaurant.chain_name,
-        chain_type: restaurant.chain_type,
+        chain_name: restaurant.chain_name ?? null,
+        chain_type: restaurant.chain_type ?? null,
         created_at: restaurant.created_at,
         updated_at: restaurant.updated_at,
       });

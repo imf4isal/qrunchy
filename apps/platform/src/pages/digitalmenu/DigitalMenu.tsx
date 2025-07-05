@@ -16,7 +16,7 @@ export default function DigitalMenu() {
   const { currentRestaurant, clearRestaurant } = useRestaurant();
   const { chains } = useAuth();
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
-  const [selectedChain, setSelectedChain] = useState<number | null>(currentRestaurant?.group_res_id || null);
+  const [selectedChain, setSelectedChain] = useState<number | null>(currentRestaurant?.group_res_id ?? null);
   const [menu, setMenu] = useState<DigitalMenu>({
     restaurantName: currentRestaurant?.name || "",
     categories: [],
