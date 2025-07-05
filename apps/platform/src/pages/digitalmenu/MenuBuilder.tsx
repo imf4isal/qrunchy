@@ -354,12 +354,6 @@ export default function MenuBuilder({
   };
 
   const handleFileUpload = async (file: File) => {
-    if (!restaurantId) {
-      alert("Restaurant ID not found. Please refresh and try again.");
-      setBulkUploadMode(false);
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
@@ -374,14 +368,56 @@ export default function MenuBuilder({
           return;
         }
 
-        // Use backend bulk import instead of local state update
-        await bulkImportMutation.mutateAsync({
-          restaurant_id: restaurantId,
-          menu_data: jsonData,
-          replace_existing: true,
-        });
+        if (restaurantId) {
+          // Existing restaurant: Upload directly to backend
+          await bulkImportMutation.mutateAsync({
+            restaurant_id: restaurantId,
+            menu_data: jsonData,
+            replace_existing: true,
+          });
 
-        alert("Menu imported successfully!");
+          alert("Menu imported successfully!");
+        } else {
+          // New restaurant: Store in local state for later upload
+          const categories = jsonData.categories.map((cat: any, index: number) => ({
+            id: crypto.randomUUID(),
+            name: cat.name,
+            sort_order: index,
+          }));
+
+          const items = jsonData.items.map((item: any, index: number) => {
+            const category = categories.find((cat: any) => cat.name === item.categoryName);
+            return {
+              id: crypto.randomUUID(),
+              name: item.name,
+              price: item.price,
+              description: item.description || "",
+              categoryId: category?.id || categories[0]?.id || crypto.randomUUID(),
+              sort_order: index,
+              variants: item.variants.map((variant: any) => ({
+                id: crypto.randomUUID(),
+                title: variant.title,
+                options: variant.options.map((option: any) => ({
+                  id: crypto.randomUUID(),
+                  name: option.name,
+                  price: option.price,
+                })),
+              })),
+              addons: item.addons.map((addon: any) => ({
+                id: crypto.randomUUID(),
+                name: addon.name,
+                price: addon.price,
+              })),
+            };
+          });
+
+          // Update local state
+          onCategoriesChange(categories);
+          onItemsChange(items);
+
+          alert("Menu imported successfully! It will be saved when you generate the QR code.");
+        }
+
         setBulkUploadMode(false);
       } catch (error) {
         console.error("Failed to import menu:", error);
