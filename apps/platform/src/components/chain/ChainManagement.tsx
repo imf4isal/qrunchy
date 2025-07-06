@@ -208,6 +208,14 @@ export default function ChainManagement() {
   };
 
   const handleDeleteChain = async (chainId: number) => {
+    // Check if chain has restaurants before attempting deletion
+    const chainRestaurants = getChainRestaurants(chainId);
+    
+    if (chainRestaurants.length > 0) {
+      alert(`Cannot delete chain with active restaurants. Please remove the ${chainRestaurants.length} restaurant(s) from this chain first.`);
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this chain? This action cannot be undone.')) {
       return;
     }
@@ -217,6 +225,7 @@ export default function ChainManagement() {
       deleteChain(chainId);
     } catch (error) {
       console.error('Error deleting chain:', error);
+      alert('Failed to delete chain. Please try again.');
     }
   };
 
