@@ -184,13 +184,14 @@ export const chainProcedures = {
       try {
         console.log("🗑️ Chain deletion request received:", { id: input.id });
 
-        // First check if chain exists
+        // First check if chain exists (without type filter to debug)
         const existingChain = await db
           .selectFrom("group_res")
-          .select(["id", "name", "is_active"])
+          .select(["id", "name", "is_active", "type"])
           .where("id", "=", input.id)
-          .where("type", "=", "chain")
           .executeTakeFirst();
+
+        console.log("📊 Chain lookup result:", existingChain);
 
         if (!existingChain) {
           throw new Error("Chain not found");
@@ -200,7 +201,10 @@ export const chainProcedures = {
           throw new Error("Chain is already deleted");
         }
 
-        console.log("📊 Chain found:", existingChain);
+        // Check if it's actually a chain type
+        if (existingChain.type !== "chain") {
+          throw new Error(`Not a chain - type is: ${existingChain.type}`);
+        }
 
         // Check if chain has any restaurants
         const restaurantsCount = await db
@@ -216,30 +220,32 @@ export const chainProcedures = {
           throw new Error("Cannot delete chain with active restaurants. Please remove restaurants from chain first.");
         }
 
-        // Soft delete the chain
-        const deletedChain = await db
+        // Soft delete the chain (simplified query)
+        const updateResult = await db
           .updateTable("group_res")
           .set({ is_active: false })
           .where("id", "=", input.id)
-          .where("type", "=", "chain")
-          .where("is_active", "=", true)
-          .returningAll()
-          .executeTakeFirst();
+          .execute();
 
-        if (!deletedChain) {
+        console.log("📊 Update result:", updateResult);
+
+        if (!updateResult || updateResult.length === 0 || Number(updateResult[0].numUpdatedRows) === 0) {
           throw new Error("Failed to delete chain - no rows affected");
         }
 
-        console.log("✅ Chain deleted successfully:", {
-          id: deletedChain.id,
-          name: deletedChain.name,
-          is_active: deletedChain.is_active
-        });
+        // Get the updated chain
+        const deletedChain = await db
+          .selectFrom("group_res")
+          .select(["id", "name", "is_active"])
+          .where("id", "=", input.id)
+          .executeTakeFirst();
+
+        console.log("✅ Chain deleted successfully:", deletedChain);
 
         return {
-          id: deletedChain.id,
-          name: deletedChain.name,
-          is_active: deletedChain.is_active,
+          id: deletedChain!.id,
+          name: deletedChain!.name,
+          is_active: deletedChain!.is_active,
         };
       } catch (error) {
         console.error("❌ Error deleting chain:", error);
