@@ -171,9 +171,16 @@ export default function MenuBuilder({
       const draft = localStorage.getItem('qrunchy_menu_draft');
       if (draft) {
         try {
-          const { categories, items } = JSON.parse(draft);
-          onCategoriesChange(categories);
-          onItemsChange(items);
+          const draftData = JSON.parse(draft);
+          // Check if it's the new format (with menu object) or old format
+          if (draftData.menu) {
+            onCategoriesChange(draftData.menu.categories || []);
+            onItemsChange(draftData.menu.items || []);
+          } else if (draftData.categories && draftData.items) {
+            // Old format - backward compatibility
+            onCategoriesChange(draftData.categories);
+            onItemsChange(draftData.items);
+          }
           setDraftLoaded(true);
         } catch (error) {
           console.error('Failed to load menu draft:', error);
@@ -183,16 +190,8 @@ export default function MenuBuilder({
     }
   }, [restaurantId, onCategoriesChange, onItemsChange]);
 
-  // Save draft to localStorage whenever categories or items change (only for new restaurants)
-  useEffect(() => {
-    if (!restaurantId && (menu.categories.length > 0 || menu.items.length > 0)) {
-      localStorage.setItem('qrunchy_menu_draft', JSON.stringify({
-        categories: menu.categories,
-        items: menu.items,
-        timestamp: new Date().toISOString()
-      }));
-    }
-  }, [menu.categories, menu.items, restaurantId]);
+  // Don't save draft here anymore - let DigitalMenu handle it to avoid conflicts
+  // The DigitalMenu component will save the complete draft including categories and items
 
   // Sync backend data to local state
   useEffect(() => {
@@ -241,7 +240,7 @@ export default function MenuBuilder({
   };
 
   const handleEditCategory = (categoryId: string) => {
-    const category = menu.categories.find((cat) => cat.id === categoryId);
+    const category = menu.categories?.find((cat) => cat.id === categoryId);
     if (category) {
       setEditingCategory(categoryId);
       setEditingCategoryName(category.name);
@@ -292,16 +291,16 @@ export default function MenuBuilder({
   const handleSaveItem = async (item: MenuItem) => {
     if (batchSaveMode) {
       // In batch save mode, just update local state
-      const existingItemIndex = menu.items.findIndex(existingItem => existingItem.id === item.id);
+      const existingItemIndex = menu.items?.findIndex(existingItem => existingItem.id === item.id) ?? -1;
       
       let updatedItems;
       if (existingItemIndex >= 0) {
         // Update existing item
-        updatedItems = [...menu.items];
+        updatedItems = [...(menu.items || [])];
         updatedItems[existingItemIndex] = item;
       } else {
         // Add new item
-        updatedItems = [...menu.items, item];
+        updatedItems = [...(menu.items || []), item];
       }
       
       onItemsChange(updatedItems);
@@ -312,7 +311,7 @@ export default function MenuBuilder({
       if (!restaurantId) return;
 
       try {
-        const existingItem = menu.items.find((existingItem) => existingItem.id === item.id);
+        const existingItem = menu.items?.find((existingItem) => existingItem.id === item.id);
         
         if (existingItem) {
           // Update existing item
@@ -621,7 +620,7 @@ export default function MenuBuilder({
   };
 
   const getItemsForCategory = (categoryId: string) => {
-    return menu.items.filter((item) => item.categoryId === categoryId);
+    return menu.items?.filter((item) => item.categoryId === categoryId) || [];
   };
 
   // Scroll position utilities
@@ -653,10 +652,10 @@ export default function MenuBuilder({
       // Save scroll position before any state changes
       saveScrollPosition();
 
-      const oldIndex = menu.categories.findIndex((item) => item.id === active.id);
-      const newIndex = menu.categories.findIndex((item) => item.id === over?.id);
+      const oldIndex = menu.categories?.findIndex((item) => item.id === active.id) ?? -1;
+      const newIndex = menu.categories?.findIndex((item) => item.id === over?.id) ?? -1;
 
-      const reorderedCategories = arrayMove(menu.categories, oldIndex, newIndex);
+      const reorderedCategories = arrayMove(menu.categories || [], oldIndex, newIndex);
       
       // Update local state immediately for better UX
       onCategoriesChange(reorderedCategories);
@@ -679,7 +678,7 @@ export default function MenuBuilder({
         } catch (error) {
           console.error("Failed to reorder categories:", error);
           // Revert local state on error
-          onCategoriesChange(menu.categories);
+          onCategoriesChange(menu.categories || []);
           restoreScrollPosition();
         }
       }
@@ -700,7 +699,7 @@ export default function MenuBuilder({
       const reorderedItems = arrayMove(categoryItems, oldIndex, newIndex);
       
       // Update local state immediately
-      const updatedAllItems = menu.items.map((item) => {
+      const updatedAllItems = (menu.items || []).map((item) => {
         if (item.categoryId === categoryId) {
           const reorderedItem = reorderedItems.find((ri) => ri.id === item.id);
           return reorderedItem || item;
@@ -727,7 +726,7 @@ export default function MenuBuilder({
         } catch (error) {
           console.error("Failed to reorder items:", error);
           // Revert local state on error
-          onItemsChange(menu.items);
+          onItemsChange(menu.items || []);
           restoreScrollPosition();
         }
       }
@@ -892,13 +891,13 @@ export default function MenuBuilder({
             </div>
             <div className="text-sm text-gray-500">
               ${item.price.toFixed(2)}
-              {item.variants.length > 0 && (
+              {item.variants && item.variants.length > 0 && (
                 <span className="ml-2 text-blue-500">
                   {item.variants.length} variant
                   {item.variants.length !== 1 ? "s" : ""}
                 </span>
               )}
-              {item.addons.length > 0 && (
+              {item.addons && item.addons.length > 0 && (
                 <span className="ml-2 text-green-500">
                   {item.addons.length} addon
                   {item.addons.length !== 1 ? "s" : ""}
@@ -1189,18 +1188,18 @@ export default function MenuBuilder({
         onDragEnd={handleCategoryDragEnd}
       >
         <SortableContext
-          items={menu.categories.map((category) => category.id)}
+          items={menu.categories?.map((category) => category.id) || []}
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-6">
-            {menu.categories.map((category) => (
+            {menu.categories?.map((category) => (
               <SortableCategory key={category.id} category={category} />
             ))}
           </div>
         </SortableContext>
       </DndContext>
 
-      {menu.categories.length === 0 && (
+      {(!menu.categories || menu.categories.length === 0) && (
         <div className="text-center py-12 text-gray-500">
           <p>
             {bulkUploadMode
@@ -1214,7 +1213,7 @@ export default function MenuBuilder({
       {showItemEditor && editingItem && (
         <ItemEditor
           item={editingItem}
-          categories={menu.categories}
+          categories={menu.categories || []}
           onSave={handleSaveItem}
           onClose={handleCloseItemEditor}
         />

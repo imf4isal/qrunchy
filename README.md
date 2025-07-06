@@ -85,21 +85,19 @@ Learn more about the power of Turborepo:
   –––––––––
 
 ```
-I want you to deep dive into whole codebase. it's a turbo monorepo architecture codebase. where there are two apps inside apps folder. one is server which is basically the backend and another is platform, which is basically the frontend. so, the brief of the project is , it's qrunchy. where restaurant owner can create their menu instead of paper menu. now, we are keeping two flow.
+Our project is a turbo monorepo architecture codebase. where there are two apps inside apps folder. one is server which is basically the backend and another is platform, which is basically the frontend. so, the brief of the project is , it's qrunchy. where restaurant owner can create their menu instead of paper menu. now, we are keeping two flow.
 
 One is to build photomenu, where user just need to take photos of their menuq, upload, sort photo, generate qr, then boom. it will be
-ready. that flow is in the platform –> src –> pages –> photoMenu. it's just frontend ui. We have not implemented the backend for this part yet. It's just dummy.
+ready. that flow is in the platform –> src –> pages –> photoMenu. it's just frontend ui. We have not implemented the backend for this part yet. It's just dummy. so, you don't need to deep dive into it right now.  we will come back to it, later.
 
-Then, thereare also digitalmenu inside pages folder, which is basically manual menu creation flow for better UI for custoemr. User will put their menu information – category, item, variants, addons, etc .
+Then, there are also digitalmenu inside pages folder, which is basically manual menu creation flow for better UI for custoemr. User will put their menu information – category, item, variants, addons, etc .
 Then it will generate better ui than the photomenu.   –––– there are also other ui stuff in the platform.
 Currently, at the first step, the user put the restaurant information, then continue - two options, user can bulk upload json menu data, it will automatically take all from formatted json. Or, user can put menu data manually. Categories, Items, variants, addons etc etc. The UI of this flow is kinda done. And most of the critical API has been implemented..
 
- To understand things better, i want you to start analyzing with server code. there are migrations file. go through each of the
-  migrations file, so you understand the data model. the migrations file are inside server –> src –> db–> migrations. then we have implemented the backend part for the digitalMenu(manual menu information input) creation flow. In server's src –> trpc –> routers –> index has router of digitalMenu. inside
-  digital menu router, there are routes for categories, items, menu and qr. go through in depth into each of them. You will get the detail implementation of the procedures inside procedures folder. The backend, which are implemented so far, are already tested. so you don't need to test any server code.
+And in our project, inside apps/server, there are server side code. inside src/db, you will find migrations file for our database. and one queries for digitalmenu.
+Inside src/trpc folder, there are procedures and router. we have implemented all necessary procedures and routes for the digital manual creation and viewing part.
 
-I just want you to understand the whole thing really very much in depth so that we can proceed
-  further. Oh, here is the data model of the project's database(dbdiagram format).
+ Oh, here is the initial data model of the project's database(dbdiagram format).
 
 ```
 
@@ -197,6 +195,228 @@ price decimal(10,2)
 
 ```
 
-Start with server code. we won't change anything in server right now. Then dive into the platform again. Deep dive into platform –>src–> pages –> digitalMenu –> all file.there are some api
-implementations. i want you to understand all very deeply. From each angle. Then we will start coding further. First, ensure that, everything is making sense to you.
+Analyze the whole project very briefly, so that you understand well what's going on, and we can proceed further.
 ```
+
+## Theme
+
+Qrunchy Turbo Monorepo - Project Structure and Theme Implementation │ │
+│ │ Overview │ │
+│ │ │ │
+│ │ Project Structure │ │
+│ │ │ │
+│ │ This is a Turbo monorepo with the following structure: │ │
+│ │ │ │
+│ │ Apps │ │
+│ │ │ │
+│ │ - apps/platform/ - Frontend React application (Vite + TypeScript) │ │
+│ │ - apps/server/ - Backend Node.js API server (TypeScript + tRPC + │ │
+│ │ Kysely) │ │
+│ │ │ │
+│ │ Key Technologies │ │
+│ │ │ │
+│ │ - Frontend: React, TypeScript, Vite, Tailwind CSS, tRPC client │ │
+│ │ - Backend: Node.js, TypeScript, tRPC, Kysely ORM, PostgreSQL │ │
+│ │ - Build: Turbo for monorepo management │ │
+│ │ │ │
+│ │ Theme Implementation Deep Dive │ │
+│ │ │ │
+│ │ 1. Database Schema (Backend) │ │
+│ │ │ │
+│ │ Theme Storage: │ │
+│ │ - apps/server/src/db/migrations/011_add_theme_to_restaurants.mts │ │
+│ │ - Adds theme_id column to restaurant table │ │
+│ │ - Default value: "minimal" │ │
+│ │ - Supports two themes: "minimal" and "modern" │ │
+│ │ │ │
+│ │ Restaurant Table Structure: │ │
+│ │ restaurant ( │ │
+│ │ id: serial, │ │
+│ │ name: varchar, │ │
+│ │ mobile: varchar, │ │
+│ │ address: text, │ │
+│ │ theme_id: varchar DEFAULT 'minimal', -- Added in migration 011 │ │
+│ │ user_id: integer, │ │
+│ │ created_at: timestamp, │ │
+│ │ updated_at: timestamp, │ │
+│ │ is_active: boolean │ │
+│ │ ) │ │
+│ │ │ │
+│ │ 2. Backend API (tRPC Procedures) │ │
+│ │ │ │
+│ │ Theme Management: │ │
+│ │ - apps/server/src/trpc/procedures/restaurant.mts │ │
+│ │ - updateTheme procedure: Updates restaurant theme with validation │ │
+│ │ - Supports "minimal" and "modern" themes │ │
+│ │ - Includes extensive logging and error handling │ │
+│ │ │ │
+│ │ QR Code Integration: │ │
+│ │ - apps/server/src/trpc/procedures/qr.mts │ │
+│ │ - getMenuByQr procedure: Fetches menu data with restaurant theme │ │
+│ │ - getQrData procedure: Returns QR code data including theme info │ │
+│ │ - Theme is included in restaurant data returned to frontend │ │
+│ │ │ │
+│ │ 3. Frontend Components │ │
+│ │ │ │
+│ │ Theme Selection: │ │
+│ │ - apps/platform/src/components/ThemeSelector.tsx │ │
+│ │ - Admin component for selecting restaurant themes │ │
+│ │ - Shows theme previews and handles theme switching │ │
+│ │ - Integrates with tRPC updateTheme mutation │ │
+│ │ - Optimistic UI updates with error handling │ │
+│ │ │ │
+│ │ Theme Preview: │ │
+│ │ - apps/platform/src/components/ThemePreview.tsx │ │
+│ │ - Shows real-time preview of how menu looks in selected theme │ │
+│ │ - Supports both minimal and modern themes │ │
+│ │ - Used in menu builder for live preview │ │
+│ │ │ │
+│ │ Customer-Facing Theme Components: │ │
+│ │ - apps/platform/src/pages/menu/theme/CustomerMenuViewer.tsx - Minimal │ │
+│ │ theme implementation │ │
+│ │ - apps/platform/src/pages/menu/theme/CustomerMenuViewerModern.tsx - │ │
+│ │ Modern theme implementation │ │
+│ │ │ │
+│ │ 4. Theme Designs │ │
+│ │ │ │
+│ │ Minimal Theme: │ │
+│ │ - Clean, elegant design with subtle colors │ │
+│ │ - Slate/gray color palette │ │
+│ │ - Simple layout with clear typography │ │
+│ │ - Minimal visual elements │ │
+│ │ │ │
+│ │ Modern Theme: │ │
+│ │ - Bold, vibrant design with dynamic gradients │ │
+│ │ - Blue/purple/indigo color palette │ │
+│ │ - Glassmorphism effects with backdrop blur │ │
+│ │ - Rich visual elements and animations │ │
+│ │ - Enhanced customer experience with interactive elements │ │
+│ │ │ │
+│ │ 5. Data Flow │ │
+│ │ │ │
+│ │ Restaurant Admin -> ThemeSelector -> tRPC updateTheme -> Database │ │
+│ │ ↓ │ │
+│ │ Customer QR Scan -> MenuViewer -> tRPC getMenuByQr -> Theme-specific │ │
+│ │ component │ │
+│ │ │ │
+│ │ 6. Key Features │ │
+│ │ │ │
+│ │ Theme Switching: │ │
+│ │ - Real-time theme updates │ │
+│ │ - Optimistic UI with rollback on error │ │
+│ │ - Cache invalidation for immediate updates │ │
+│ │ - Mobile-responsive design for both themes │ │
+│ │ │ │
+│ │ QR Code Integration: │ │
+│ │ - Theme information included in QR data │ │
+│ │ - Automatic theme application when customers scan QR codes │ │
+│ │ - Support for both self-serve and assisted setup │ │
+│ │ │ │
+│ │ Data Management: │ │
+│ │ - Theme stored at restaurant level │ │
+│ │ - Default theme: "minimal" │ │
+│ │ - Type-safe theme validation │ │
+│ │ - Comprehensive error handling │ │
+│ │ │ │
+│ │ Implementation Quality │ │
+│ │ │ │
+│ │ The theme system is well-architected with: │ │
+│ │ - Separation of concerns: Theme logic separated from business logic │ │
+│ │ - Type safety: Full TypeScript implementation with proper schemas │ │
+│ │ - Error handling: Comprehensive error states and user feedback │ │
+│ │ - Performance: Optimistic updates and proper caching │ │
+│ │ - Mobile responsiveness: Both themes work well on mobile devices │ │
+│ │ - Extensibility: Easy to add new themes following the same pattern │ │
+│ │
+
+---
+
+Analysis of Current Architecture
+
+Based on your existing schema, you already have the foundation for both
+features:
+
+Current Structure:
+
+- group_res table: id, name, mobile, address, geolocation, description,
+  user_id, created_at, updated_at, is_active
+- restaurant table: includes group_res_id (nullable foreign key)
+- qr_code table: linked to restaurant_id only
+
+Feature Requirements Analysis
+
+1. Restaurant Chains (Management Only)
+
+- Purpose: Dashboard organization for restaurant owners with multiple
+  outlets
+- User Experience: No customer-facing changes, each restaurant keeps
+  individual QR codes
+- Current Support: ✅ Already supported with existing group_res table
+  and group_res_id
+
+2. Food Courts (Customer Experience)
+
+- Purpose: Single QR code showing multiple restaurants to customers
+- User Experience: Scan QR → See restaurant grid/list → Select
+  restaurant → View menu
+- Current Support: ❌ Needs architecture extension
+  ⎿ User rejected Claude's plan:
+  ╭──────────────────────────────────────────────────────────────────╮
+  │ Implementation Plan for Restaurant Chains & Food Courts │
+  │ │
+  │ Phase 1: Database Schema Updates │
+  │ │
+  │ 1. Extend group_res table: │
+  │ - Add type enum column: 'chain' | 'foodcourt' │
+  │ - Remove redundant mobile and address columns (as you suggested) │
+  │ - Add logo_url for food court branding │
+  │ │
+  │ 2. Extend qr_code table: │
+  │ - Add group_res_id column (nullable) │
+  │ - Modify to allow QR codes linked to either restaurant_id OR │
+  │ group_res_id │
+  │ - Add constraint ensuring only one is set │
+  │ │
+  │ 3. Create foodcourt_restaurants junction table: │
+  │ - For food court managers to add restaurants to their food court │
+  │ - Include approval status for restaurant owners │
+  │ │
+  │ Phase 2: Backend API Development │
+  │ │
+  │ 1. Extend tRPC routers: │
+  │ - foodcourt router: create, manage, add/remove restaurants │
+  │ - restaurant router: approve/reject food court invitations │
+  │ - qr router: generate food court QR codes │
+  │ - menu router: handle food court menu viewing │
+  │ │
+  │ 2. Update existing endpoints: │
+  │ - Modify restaurant listing to support grouping │
+  │ - Update QR code resolution logic │
+  │ │
+  │ Phase 3: Frontend Implementation │
+  │ │
+  │ 1. Dashboard enhancements: │
+  │ - Restaurant chains: grouping UI in dashboard │
+  │ - Food courts: creation and management interface │
+  │ - Restaurant search and invitation system │
+  │ │
+  │ 2. Customer menu viewing: │
+  │ - Food court grid/list view │
+  │ - Individual restaurant menu navigation │
+  │ - Breadcrumb navigation │
+  │ │
+  │ 3. QR code generation: │
+  │ - Support both restaurant and food court QR codes │
+  │ │
+  │ Phase 4: Testing & Deployment │
+  │ │
+  │ 1. Database migrations │
+  │ 2. API testing │
+  │ 3. Frontend integration │
+  │ 4. E2E testing │
+  │ │
+  │ Key Benefits: │
+  │ - Reuses existing architecture │
+  │ - Minimal breaking changes │
+  │ - Supports both use cases elegantly │
+  │ - Maintains type safety throughout

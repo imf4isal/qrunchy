@@ -13,10 +13,10 @@ interface ThemePreviewProps {
 
 export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewProps) {
   const getItemsForCategory = (categoryId: string) => {
-    return menu.items.filter((item) => item.categoryId === categoryId);
+    return (menu.items || []).filter((item) => item.categoryId === categoryId);
   };
 
-  if (!menu.restaurantName && menu.categories.length === 0) {
+  if (!menu.restaurantName && (!menu.categories || menu.categories.length === 0)) {
     return (
       <div className="p-6 text-center text-gray-500">
         <p>Preview will appear here as you build your menu</p>
@@ -49,7 +49,7 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
 
         {/* Content */}
         <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-          {menu.categories
+          {(menu.categories || [])
             .sort((a, b) => a.sortOrder - b.sortOrder)
             .map((category) => {
               const categoryItems = getItemsForCategory(category.id);
@@ -126,13 +126,13 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
               );
             })}
 
-          {menu.categories.length === 0 && (
+          {(!menu.categories || menu.categories.length === 0) && (
             <div className="text-center py-8 text-gray-500">
               <p>No categories added yet</p>
             </div>
           )}
 
-          {menu.categories.length > 0 && menu.items.length === 0 && (
+          {(menu.categories && menu.categories.length > 0) && (!menu.items || menu.items.length === 0) && (
             <div className="text-center py-8 text-gray-500">
               <p>Add items to your categories to see them here</p>
             </div>
@@ -183,7 +183,7 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
 
       {/* Content */}
       <div className="px-3 sm:px-6 pb-4 sm:pb-6 space-y-6 sm:space-y-8">
-        {menu.categories
+        {(menu.categories || [])
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map((category) => {
             const categoryItems = getItemsForCategory(category.id);
@@ -247,13 +247,13 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
             );
           })}
 
-        {menu.categories.length === 0 && (
+        {(!menu.categories || menu.categories.length === 0) && (
           <div className="text-center py-12 text-blue-200">
             <p>No categories added yet</p>
           </div>
         )}
 
-        {menu.categories.length > 0 && menu.items.length === 0 && (
+        {(menu.categories && menu.categories.length > 0) && (!menu.items || menu.items.length === 0) && (
           <div className="text-center py-12 text-blue-200">
             <p>Add items to your categories to see them here</p>
           </div>

@@ -1,6 +1,6 @@
 // src/pages/digitalmenu/DigitalMenu.tsx
-import { useState, useCallback } from "react";
-import { ArrowLeft, ArrowRight, Eye, Building2 } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { ArrowLeft, ArrowRight, Eye, Building2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ export default function DigitalMenu() {
   const { currentRestaurant, clearRestaurant } = useRestaurant();
   const { chains } = useAuth();
   const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
-  const [selectedChain, setSelectedChain] = useState<number | null>(currentRestaurant?.group_res_id ?? null);
+  const [selectedChain, setSelectedChain] = useState<number | null>((currentRestaurant as any)?.group_res_id || null);
   const [menu, setMenu] = useState<DigitalMenu>({
     restaurantName: currentRestaurant?.name || "",
     categories: [],
@@ -25,6 +25,75 @@ export default function DigitalMenu() {
   const [selectedTheme, setSelectedTheme] = useState<"minimal" | "modern">("minimal");
   const [showPreview, setShowPreview] = useState(false);
   const [qrGenerated, setQrGenerated] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+
+  // Save draft to localStorage whenever any form data changes
+  useEffect(() => {
+    if (!currentRestaurant) { // Only save drafts for new restaurants
+      // Only save if there's meaningful data
+      const hasData = menu.restaurantName || 
+                     (menu.categories && menu.categories.length > 0) ||
+                     (menu.items && menu.items.length > 0);
+      
+      if (hasData) {
+        const draftData = {
+          step,
+          menu,
+          selectedTheme,
+          selectedChain,
+          timestamp: new Date().toISOString()
+        };
+        console.log('Saving draft:', draftData); // Debug log
+        localStorage.setItem('qrunchy_menu_draft', JSON.stringify(draftData));
+      }
+    } else {
+      console.log('Not saving draft - currentRestaurant exists:', currentRestaurant); // Debug log
+    }
+  }, [step, menu, selectedTheme, selectedChain, currentRestaurant]);
+
+  // Load draft from localStorage on component mount
+  useEffect(() => {
+    console.log('Loading draft - currentRestaurant:', currentRestaurant); // Debug log
+    if (!currentRestaurant) { // Only load drafts for new restaurants
+      const draft = localStorage.getItem('qrunchy_menu_draft');
+      console.log('Found draft in localStorage:', draft); // Debug log
+      if (draft) {
+        try {
+          const draftData = JSON.parse(draft);
+          console.log('Parsed draft data:', draftData); // Debug log
+          // Only show draft notification if there's meaningful data
+          const hasData = draftData.menu?.restaurantName || 
+                         (draftData.menu?.categories && draftData.menu.categories.length > 0) ||
+                         (draftData.menu?.items && draftData.menu.items.length > 0);
+          
+          console.log('Has meaningful data:', hasData); // Debug log
+          if (hasData) {
+            console.log('Restoring draft data'); // Debug log
+            setStep(draftData.step || "setup");
+            setMenu({
+              restaurantName: draftData.menu?.restaurantName || "",
+              categories: draftData.menu?.categories || [],
+              items: draftData.menu?.items || []
+            });
+            setSelectedTheme(draftData.selectedTheme || "minimal");
+            setSelectedChain(draftData.selectedChain || null);
+            setHasDraft(true);
+          } else {
+            console.log('No meaningful data, cleaning up draft'); // Debug log
+            // Clean up empty draft
+            localStorage.removeItem('qrunchy_menu_draft');
+          }
+        } catch (error) {
+          console.error('Failed to load menu draft:', error);
+          localStorage.removeItem('qrunchy_menu_draft');
+        }
+      } else {
+        console.log('No draft found in localStorage'); // Debug log
+      }
+    } else {
+      console.log('Not loading draft - currentRestaurant exists'); // Debug log
+    }
+  }, [currentRestaurant]);
 
   const handleNext = () => {
     if (step === "setup") {
@@ -63,15 +132,17 @@ export default function DigitalMenu() {
     // Clear restaurant context
     clearRestaurant();
     
-    // Reset local menu state
+    // Reset all form state
+    setStep("setup");
     setMenu({
       restaurantName: "",
       categories: [],
       items: [],
     });
-    
-    // Reset chain selection
+    setSelectedTheme("minimal");
     setSelectedChain(null);
+    setQrGenerated(false);
+    setHasDraft(false);
     
     // Clear draft from localStorage
     localStorage.removeItem('qrunchy_menu_draft');
@@ -95,6 +166,27 @@ export default function DigitalMenu() {
               Build a beautiful, structured menu with categories, items, and
               variants
             </p>
+            
+            {hasDraft && (
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-blue-800">Draft Restored</span>
+                </div>
+                <p className="text-sm text-blue-600 mb-3">
+                  Your previous work has been automatically restored. Continue where you left off or start fresh.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleStartFresh}
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  <RefreshCw size={14} className="mr-2" />
+                  Start from scratch
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Progress Bar */}
@@ -323,7 +415,7 @@ export default function DigitalMenu() {
                         />
                       </div>
 
-                      {chains.length > 0 && (
+                      {chains && chains.length > 0 && (
                         <div>
                           <Label htmlFor="chainSelect" className="text-sm font-medium text-gray-700 mb-2 block">
                             Restaurant Chain (Optional)
@@ -344,7 +436,7 @@ export default function DigitalMenu() {
                               </label>
                             </div>
                             
-                            {chains.map((chain) => (
+                            {chains?.map((chain) => (
                               <div key={chain.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:border-blue-300 transition-colors">
                                 <input
                                   type="radio"
@@ -374,16 +466,6 @@ export default function DigitalMenu() {
                       )}
                     </div>
 
-                    {currentRestaurant && (
-                      <div className="mt-6 text-center">
-                        <button
-                          onClick={handleStartFresh}
-                          className="text-sm text-gray-500 hover:text-gray-700 underline"
-                        >
-                          or start fresh with empty fields
-                        </button>
-                      </div>
-                    )}
 
                     <div className="mt-8 flex justify-end">
                       <Button
@@ -424,8 +506,8 @@ export default function DigitalMenu() {
                       <Button
                         onClick={handleNext}
                         disabled={
-                          menu.categories.length === 0 ||
-                          menu.items.length === 0
+                          !menu.categories || menu.categories.length === 0 ||
+                          !menu.items || menu.items.length === 0
                         }
                         className="flex items-center gap-2"
                       >
