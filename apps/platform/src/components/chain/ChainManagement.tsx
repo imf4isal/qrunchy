@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useAuth } from '@/contexts/AuthContext';
 import { trpc } from '@/utils/trpc';
 import { Plus, Edit3, Trash2, Link2, Building2 } from 'lucide-react';
-import type { Chain } from '@/contexts/AuthContext';
+import type { Chain, Restaurant } from '@/contexts/AuthContext';
 
 interface ChainFormData {
   name: string;
@@ -21,7 +21,7 @@ interface ChainFormProps {
   setFormData: React.Dispatch<React.SetStateAction<ChainFormData>>;
   onSubmit: (e: React.FormEvent) => void;
   title: string;
-  availableRestaurants: any[];
+  availableRestaurants: Restaurant[];
 }
 
 const ChainForm = ({ formData, setFormData, onSubmit, title, availableRestaurants }: ChainFormProps) => {
@@ -144,14 +144,14 @@ export default function ChainManagement() {
           id: restaurantId,
           group_res_id: result.id
         });
+        
+        // Update the restaurant in the context immediately
+        updateRestaurant(restaurantId, { group_res_id: result.id });
       }
 
       addChain(result);
       setFormData({ name: '', description: '', selectedRestaurants: [] });
       setIsCreateDialogOpen(false);
-      
-      // Refresh page to update restaurant chain assignments
-      window.location.reload();
     } catch (error) {
       console.error('Error creating chain:', error);
     }
@@ -179,6 +179,9 @@ export default function ChainManagement() {
             id: restaurant.id,
             group_res_id: null
           });
+          
+          // Update the restaurant in the context immediately
+          updateRestaurant(restaurant.id, { group_res_id: null });
         }
       }
 
@@ -189,6 +192,9 @@ export default function ChainManagement() {
             id: restaurantId,
             group_res_id: editingChain.id
           });
+          
+          // Update the restaurant in the context immediately
+          updateRestaurant(restaurantId, { group_res_id: editingChain.id });
         }
       }
 
@@ -196,9 +202,6 @@ export default function ChainManagement() {
       setEditingChain(null);
       setFormData({ name: '', description: '', selectedRestaurants: [] });
       setIsEditDialogOpen(false);
-      
-      // Refresh page to update restaurant chain assignments
-      window.location.reload();
     } catch (error) {
       console.error('Error updating chain:', error);
     }
