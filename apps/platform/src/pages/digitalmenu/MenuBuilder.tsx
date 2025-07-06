@@ -214,8 +214,22 @@ export default function MenuBuilder({
   }, [backendItems, onItemsChange]);
 
   const handleAddCategory = async () => {
-    if (!newCategoryName.trim() || !restaurantId) return;
+    if (!newCategoryName.trim()) return;
 
+    if (!restaurantId) {
+      // For new restaurants, add to local state only
+      const newCategory = {
+        id: crypto.randomUUID(),
+        name: newCategoryName.trim(),
+        sortOrder: menu.categories?.length || 0,
+      };
+      
+      onCategoriesChange([...(menu.categories || []), newCategory]);
+      setNewCategoryName("");
+      return;
+    }
+
+    // For existing restaurants, save to backend
     try {
       await createCategoryMutation.mutateAsync({
         name: newCategoryName.trim(),
@@ -228,8 +242,17 @@ export default function MenuBuilder({
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (!restaurantId) return;
+    if (!restaurantId) {
+      // For new restaurants, remove from local state only
+      const updatedCategories = menu.categories?.filter(cat => cat.id !== categoryId) || [];
+      const updatedItems = menu.items?.filter(item => item.categoryId !== categoryId) || [];
+      
+      onCategoriesChange(updatedCategories);
+      onItemsChange(updatedItems);
+      return;
+    }
 
+    // For existing restaurants, delete from backend
     try {
       await deleteCategoryMutation.mutateAsync({
         id: parseInt(categoryId, 10),
@@ -248,9 +271,23 @@ export default function MenuBuilder({
   };
 
   const handleSaveCategory = async () => {
-    if (!editingCategoryName.trim() || !editingCategory || !restaurantId)
-      return;
+    if (!editingCategoryName.trim() || !editingCategory) return;
 
+    if (!restaurantId) {
+      // For new restaurants, update local state only
+      const updatedCategories = menu.categories?.map(cat => 
+        cat.id === editingCategory 
+          ? { ...cat, name: editingCategoryName.trim() }
+          : cat
+      ) || [];
+      
+      onCategoriesChange(updatedCategories);
+      setEditingCategory(null);
+      setEditingCategoryName("");
+      return;
+    }
+
+    // For existing restaurants, update backend
     try {
       await updateCategoryMutation.mutateAsync({
         id: parseInt(editingCategory, 10),
@@ -289,8 +326,8 @@ export default function MenuBuilder({
   };
 
   const handleSaveItem = async (item: MenuItem) => {
-    if (batchSaveMode) {
-      // In batch save mode, just update local state
+    if (batchSaveMode || !restaurantId) {
+      // In batch save mode or for new restaurants, just update local state
       const existingItemIndex = menu.items?.findIndex(existingItem => existingItem.id === item.id) ?? -1;
       
       let updatedItems;
@@ -307,9 +344,7 @@ export default function MenuBuilder({
       setShowItemEditor(false);
       setEditingItem(null);
     } else {
-      // Immediate save mode (backward compatibility)
-      if (!restaurantId) return;
-
+      // Immediate save mode for existing restaurants
       try {
         const existingItem = menu.items?.find((existingItem) => existingItem.id === item.id);
         
@@ -366,8 +401,14 @@ export default function MenuBuilder({
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    if (!restaurantId) return;
+    if (!restaurantId) {
+      // For new restaurants, remove from local state only
+      const updatedItems = menu.items?.filter(item => item.id !== itemId) || [];
+      onItemsChange(updatedItems);
+      return;
+    }
 
+    // For existing restaurants, delete from backend
     try {
       await deleteItemMutation.mutateAsync({
         id: parseInt(itemId, 10),
@@ -1165,10 +1206,10 @@ export default function MenuBuilder({
                 <Button
                   onClick={handleAddCategory}
                   disabled={
-                    !newCategoryName.trim() || createCategoryMutation.isPending
+                    !newCategoryName.trim() || (!!restaurantId && createCategoryMutation.isPending)
                   }
                 >
-                  {createCategoryMutation.isPending ? (
+                  {(restaurantId && createCategoryMutation.isPending) ? (
                     <Loader2 size={16} className="animate-spin" />
                   ) : (
                     <Plus size={16} />

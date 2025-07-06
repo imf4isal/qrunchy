@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { QrCode, Download, Copy, Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,19 @@ interface QRGeneratorProps {
 
 export default function QRGenerator({ menu, selectedTheme = "minimal", selectedChain = null, onQrGenerated }: QRGeneratorProps) {
   const { setCurrentRestaurant, clearRestaurant } = useRestaurant();
-  const { addRestaurant, login } = useAuth();
+  const { user, addRestaurant, login, isAuthenticated } = useAuth();
   const [isGenerated, setIsGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [mobileNumber, setMobileNumber] = useState("");
+  const [mobileNumber, setMobileNumber] = useState(user?.mobile_number || "");
   const [isGenerating, setIsGenerating] = useState(false);
   const [createdRestaurantId, setCreatedRestaurantId] = useState<number | null>(null);
+
+  // Update mobile number when user data changes
+  useEffect(() => {
+    if (user?.mobile_number) {
+      setMobileNumber(user.mobile_number);
+    }
+  }, [user]);
 
   // TRPC mutations
   const createUserMutation = trpc.user.create.useMutation();
@@ -42,22 +49,29 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
       console.log('🚀 Starting restaurant creation process:', {
         restaurantName: menu.restaurantName,
         selectedTheme: selectedTheme,
-        mobileNumber: mobileNumber.trim()
+        mobileNumber: mobileNumber.trim(),
+        isAuthenticated: isAuthenticated,
+        userId: user?.id
       });
 
-      // Step 1: Create user with mobile number
-      const user = await createUserMutation.mutateAsync({
-        mobile_number: mobileNumber.trim(),
-      });
+      let currentUser = user;
 
-      console.log('👤 User created:', user);
+      // Step 1: Create user only if not already logged in
+      if (!isAuthenticated || !user) {
+        currentUser = await createUserMutation.mutateAsync({
+          mobile_number: mobileNumber.trim(),
+        });
+        console.log('👤 New user created:', currentUser);
+      } else {
+        console.log('👤 Using existing logged-in user:', currentUser);
+      }
 
       // Step 2: Create restaurant with user_id and theme
       const restaurant = await createRestaurantMutation.mutateAsync({
         name: menu.restaurantName,
         mobile: mobileNumber.trim(),
         address: "Not specified", // Can be updated later
-        user_id: user.id,
+        user_id: currentUser!.id,
         theme_id: selectedTheme,
         group_res_id: selectedChain ?? undefined,
       });
@@ -135,9 +149,11 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
         onQrGenerated();
       }
 
-      // Log the user in with the mobile number to ensure they're authenticated
+      // Log the user in only if they weren't already authenticated
       // This will also refresh the restaurants list from the server
-      await login(mobileNumber.trim());
+      if (!isAuthenticated || !user) {
+        await login(mobileNumber.trim());
+      }
 
       // Clear restaurant data and draft for next menu creation after a short delay
       // This allows user to see the success message first
@@ -227,7 +243,10 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
                 🎉 Your menu looks amazing!
               </h3>
               <p className="text-gray-600">
-                Ready to share it with customers? Just need your mobile number to create your account and generate your QR code.
+                {isAuthenticated 
+                  ? `Ready to share it with customers? Generate your QR code to add this restaurant to your account.`
+                  : `Ready to share it with customers? Just need your mobile number to create your account and generate your QR code.`
+                }
               </p>
             </div>
 
@@ -235,15 +254,28 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Mobile Number
+                  {isAuthenticated && (
+                    <span className="text-green-600 text-xs ml-2 font-normal">
+                      ✓ From your account
+                    </span>
+                  )}
                 </label>
                 <input
                   type="tel"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg ${
+                    isAuthenticated ? 'bg-green-50 border-green-200' : ''
+                  }`}
                   placeholder="e.g. +880 1712-345678"
-                  disabled={isGenerating}
+                  disabled={isGenerating || isAuthenticated}
+                  readOnly={isAuthenticated}
                 />
+                {isAuthenticated && (
+                  <p className="text-xs text-green-600 mt-1">
+                    Using mobile number from your logged-in account
+                  </p>
+                )}
               </div>
 
               <Button
@@ -255,18 +287,21 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
                 {isGenerating ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Creating Account & Generating QR...
+                    {isAuthenticated ? "Creating Restaurant & Generating QR..." : "Creating Account & Generating QR..."}
                   </>
                 ) : (
                   <>
                     <QrCode size={20} className="mr-2" />
-                    Create Account & Generate QR Code
+                    {isAuthenticated ? "Add Restaurant & Generate QR Code" : "Create Account & Generate QR Code"}
                   </>
                 )}
               </Button>
 
               <p className="text-xs text-gray-500 text-center">
-                By continuing, you agree to create a Qrunchy account. No spam, just menu management! 📱
+                {isAuthenticated 
+                  ? "This restaurant will be added to your existing Qrunchy account 📱"
+                  : "By continuing, you agree to create a Qrunchy account. No spam, just menu management! 📱"
+                }
               </p>
             </div>
           </div>
