@@ -106,7 +106,7 @@ const ChainForm = ({ formData, setFormData, onSubmit, title, availableRestaurant
 };
 
 export default function ChainManagement() {
-  const { user, chains, restaurants, addChain, updateChain, deleteChain, updateRestaurant } = useAuth();
+  const { user, chains, restaurants, addChain, updateChain, deleteChain, updateRestaurant, refreshSession } = useAuth();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingChain, setEditingChain] = useState<Chain | null>(null);
@@ -208,24 +208,36 @@ export default function ChainManagement() {
   };
 
   const handleDeleteChain = async (chainId: number) => {
-    // Check if chain has restaurants before attempting deletion
-    const chainRestaurants = getChainRestaurants(chainId);
-    
-    if (chainRestaurants.length > 0) {
-      alert(`Cannot delete chain with active restaurants. Please remove the ${chainRestaurants.length} restaurant(s) from this chain first.`);
-      return;
-    }
-
-    if (!confirm('Are you sure you want to delete this chain? This action cannot be undone.')) {
-      return;
-    }
-
     try {
+      // Refresh data to get the latest state
+      await refreshSession();
+      
+      // Check if chain has restaurants after refresh
+      const chainRestaurants = getChainRestaurants(chainId);
+      
+      console.log('Frontend restaurants for chain', chainId, ':', chainRestaurants);
+      console.log('All restaurants in context:', restaurants);
+      
+      if (chainRestaurants.length > 0) {
+        alert(`Cannot delete chain with active restaurants. Please remove the ${chainRestaurants.length} restaurant(s) from this chain first:\n\n${chainRestaurants.map(r => `• ${r.name}`).join('\n')}`);
+        return;
+      }
+
+      if (!confirm('Are you sure you want to delete this chain? This action cannot be undone.')) {
+        return;
+      }
+
       await deleteChainMutation.mutateAsync({ id: chainId });
       deleteChain(chainId);
     } catch (error) {
       console.error('Error deleting chain:', error);
-      alert('Failed to delete chain. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('active restaurants')) {
+        alert('This chain still has restaurants assigned to it. Please remove all restaurants from the chain before deleting it.');
+      } else {
+        alert(`Failed to delete chain: ${errorMessage}`);
+      }
     }
   };
 
