@@ -106,7 +106,7 @@ const ChainForm = ({ formData, setFormData, onSubmit, title, availableRestaurant
 };
 
 export default function ChainManagement() {
-  const { user, chains, restaurants, addChain, updateChain, deleteChain } = useAuth();
+  const { user, chains, restaurants, addChain, updateChain, deleteChain, updateRestaurant } = useAuth();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingChain, setEditingChain] = useState<Chain | null>(null);
