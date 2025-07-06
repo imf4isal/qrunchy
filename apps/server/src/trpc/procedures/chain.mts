@@ -182,6 +182,26 @@ export const chainProcedures = {
     .input(chainDeleteSchema)
     .mutation(async ({ input }) => {
       try {
+        console.log("🗑️ Chain deletion request received:", { id: input.id });
+
+        // First check if chain exists
+        const existingChain = await db
+          .selectFrom("group_res")
+          .select(["id", "name", "is_active"])
+          .where("id", "=", input.id)
+          .where("type", "=", "chain")
+          .executeTakeFirst();
+
+        if (!existingChain) {
+          throw new Error("Chain not found");
+        }
+
+        if (!existingChain.is_active) {
+          throw new Error("Chain is already deleted");
+        }
+
+        console.log("📊 Chain found:", existingChain);
+
         // Check if chain has any restaurants
         const restaurantsCount = await db
           .selectFrom("restaurant")
@@ -189,6 +209,8 @@ export const chainProcedures = {
           .where("group_res_id", "=", input.id)
           .where("is_active", "=", true)
           .executeTakeFirst();
+
+        console.log("📊 Restaurants count:", restaurantsCount);
 
         if (restaurantsCount && Number(restaurantsCount.count) > 0) {
           throw new Error("Cannot delete chain with active restaurants. Please remove restaurants from chain first.");
@@ -202,7 +224,17 @@ export const chainProcedures = {
           .where("type", "=", "chain")
           .where("is_active", "=", true)
           .returningAll()
-          .executeTakeFirstOrThrow();
+          .executeTakeFirst();
+
+        if (!deletedChain) {
+          throw new Error("Failed to delete chain - no rows affected");
+        }
+
+        console.log("✅ Chain deleted successfully:", {
+          id: deletedChain.id,
+          name: deletedChain.name,
+          is_active: deletedChain.is_active
+        });
 
         return {
           id: deletedChain.id,
@@ -210,8 +242,8 @@ export const chainProcedures = {
           is_active: deletedChain.is_active,
         };
       } catch (error) {
-        console.error("Error deleting chain:", error);
-        throw new Error("Failed to delete chain");
+        console.error("❌ Error deleting chain:", error);
+        throw new Error(`Failed to delete chain: ${error.message}`);
       }
     }),
 
