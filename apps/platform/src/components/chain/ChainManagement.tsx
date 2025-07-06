@@ -160,7 +160,7 @@ export default function ChainManagement() {
 
   const handleUpdateChain = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingChain) return;
+    if (!editingChain || !user) return;
 
     try {
       const result = await updateChainMutation.mutateAsync({
@@ -169,13 +169,25 @@ export default function ChainManagement() {
         description: formData.description || undefined,
       });
 
-      // Get current restaurants in this chain
-      const currentChainRestaurants = restaurants.filter(r => r.group_res_id === editingChain.id);
+      console.log('=== DEBUGGING CHAIN UPDATE ===');
+      console.log('Chain ID:', editingChain.id);
+      console.log('Selected restaurants in form:', formData.selectedRestaurants);
+
+      // Fetch fresh restaurant data from API to get current assignments
+      const freshRestaurantData = await getRestaurantsByUserQuery.refetch();
+      const apiRestaurants = freshRestaurantData.data || [];
+      
+      // Get current restaurants in this chain from API data (not context)
+      const currentChainRestaurants = apiRestaurants.filter(r => r.group_res_id === editingChain.id);
       const currentRestaurantIds = currentChainRestaurants.map(r => r.id);
+
+      console.log('Current restaurants from API:', currentChainRestaurants);
+      console.log('Current restaurant IDs:', currentRestaurantIds);
 
       // Remove restaurants that are no longer selected
       for (const restaurant of currentChainRestaurants) {
         if (!formData.selectedRestaurants.includes(restaurant.id)) {
+          console.log('Removing restaurant from chain:', restaurant.id, restaurant.name);
           await updateRestaurantMutation.mutateAsync({
             id: restaurant.id,
             group_res_id: null
@@ -189,6 +201,7 @@ export default function ChainManagement() {
       // Add newly selected restaurants
       for (const restaurantId of formData.selectedRestaurants) {
         if (!currentRestaurantIds.includes(restaurantId)) {
+          console.log('Adding restaurant to chain:', restaurantId);
           await updateRestaurantMutation.mutateAsync({
             id: restaurantId,
             group_res_id: editingChain.id
@@ -199,6 +212,7 @@ export default function ChainManagement() {
         }
       }
 
+      console.log('Chain update completed');
       updateChain(editingChain.id, result);
       setEditingChain(null);
       setFormData({ name: '', description: '', selectedRestaurants: [] });
