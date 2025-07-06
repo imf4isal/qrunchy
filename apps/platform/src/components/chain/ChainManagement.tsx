@@ -120,6 +120,7 @@ export default function ChainManagement() {
   const updateChainMutation = trpc.restaurant.updateChain.useMutation();
   const deleteChainMutation = trpc.restaurant.deleteChain.useMutation();
   const updateRestaurantMutation = trpc.restaurant.update.useMutation();
+  const getRestaurantsByUserQuery = trpc.restaurant.getByUser.useQuery({ user_id: user?.id || 0 }, { enabled: false });
 
   const handleCreateChain = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,17 +210,28 @@ export default function ChainManagement() {
 
   const handleDeleteChain = async (chainId: number) => {
     try {
-      // Refresh data to get the latest state
-      await refreshSession();
+      if (!user) return;
+
+      // Fetch fresh restaurant data directly from API
+      console.log('Fetching fresh restaurant data from API...');
+      const freshRestaurantData = await getRestaurantsByUserQuery.refetch();
+      const apiRestaurants = freshRestaurantData.data || [];
       
-      // Check if chain has restaurants after refresh
-      const chainRestaurants = getChainRestaurants(chainId);
+      // Check restaurants from API data
+      const chainRestaurantsFromAPI = apiRestaurants.filter(r => r.group_res_id === chainId);
       
-      console.log('Frontend restaurants for chain', chainId, ':', chainRestaurants);
-      console.log('All restaurants in context:', restaurants);
+      // Check restaurants from context
+      const chainRestaurantsFromContext = getChainRestaurants(chainId);
       
-      if (chainRestaurants.length > 0) {
-        alert(`Cannot delete chain with active restaurants. Please remove the ${chainRestaurants.length} restaurant(s) from this chain first:\n\n${chainRestaurants.map(r => `• ${r.name}`).join('\n')}`);
+      console.log('=== DEBUGGING CHAIN DELETION ===');
+      console.log('Chain ID to delete:', chainId);
+      console.log('Restaurants from API:', chainRestaurantsFromAPI.length, chainRestaurantsFromAPI);
+      console.log('Restaurants from context:', chainRestaurantsFromContext.length, chainRestaurantsFromContext);
+      console.log('All API restaurants:', apiRestaurants.map(r => ({ id: r.id, name: r.name, group_res_id: r.group_res_id })));
+      console.log('All context restaurants:', restaurants.map(r => ({ id: r.id, name: r.name, group_res_id: r.group_res_id })));
+      
+      if (chainRestaurantsFromAPI.length > 0) {
+        alert(`Cannot delete chain with active restaurants. The database shows ${chainRestaurantsFromAPI.length} restaurant(s) still assigned to this chain:\n\n${chainRestaurantsFromAPI.map(r => `• ${r.name} (ID: ${r.id})`).join('\n')}\n\nPlease edit the chain to remove these restaurants first.`);
         return;
       }
 
@@ -227,14 +239,16 @@ export default function ChainManagement() {
         return;
       }
 
+      console.log('Attempting to delete chain', chainId);
       await deleteChainMutation.mutateAsync({ id: chainId });
       deleteChain(chainId);
+      console.log('Chain deleted successfully');
     } catch (error) {
       console.error('Error deleting chain:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       if (errorMessage.includes('active restaurants')) {
-        alert('This chain still has restaurants assigned to it. Please remove all restaurants from the chain before deleting it.');
+        alert('The backend database shows this chain still has restaurants assigned to it. There may be a data synchronization issue. Please try editing the chain to remove all restaurants first.');
       } else {
         alert(`Failed to delete chain: ${errorMessage}`);
       }
