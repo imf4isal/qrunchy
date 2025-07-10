@@ -1,18 +1,34 @@
 import { trpc } from "@/utils/trpc";
 import CustomerMenuViewer from "./theme/CustomerMenuViewer";
 import CustomerMenuViewerModern from "./theme/CustomerMenuViewerModern";
+import PhotoMenuViewer from "./theme/PhotoMenuViewer";
 import LoadingScreen from "./components/LoadingScreen";
 import ErrorScreen from "./components/ErrorScreen";
 import ExpiredScreen from "./components/ExpiredScreen";
 import ActivationScreen from "./components/ActivationScreen";
 import PhotoMenuPlaceholder from "./components/PhotoMenuPlaceholder";
+import { getPhotoMenu } from "@/utils/photoMenuStorage";
 
 interface MenuHandlerProps {
   qrCode: string;
 }
 
 export default function MenuHandler({ qrCode }: MenuHandlerProps) {
-  // Use tRPC to fetch QR data from the real backend
+  // Check if this is a photo menu QR code (starts with "photo_")
+  const isPhotoMenuQR = qrCode.startsWith("photo_");
+  
+  if (isPhotoMenuQR) {
+    // Check if we have photo menu data for this QR code
+    const photoMenu = getPhotoMenu(qrCode);
+    if (photoMenu) {
+      return <PhotoMenuViewer qrCode={qrCode} />;
+    } else {
+      // Photo menu QR not found in storage
+      return <ErrorScreen onRetry={() => window.location.reload()} />;
+    }
+  }
+
+  // Use tRPC to fetch QR data from the real backend for digital menus
   const {
     data: qrData,
     isLoading: loading,
