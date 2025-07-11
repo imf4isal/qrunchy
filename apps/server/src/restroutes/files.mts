@@ -6,6 +6,8 @@ import { uploadMultiple } from '../middleware/upload.mts';
 
 const router = express.Router();
 
+console.log('File routes module loaded');
+
 // Serve static files from uploads directory (for local storage)
 router.use('/files', express.static(path.join(process.cwd(), 'uploads')));
 
@@ -18,7 +20,7 @@ router.post('/upload/photomenu', uploadMultiple, async (req, res) => {
 
     const uploadResults = [];
     const baseDir = 'uploads';
-    const baseUrl = '/api/files';
+    const baseUrl = 'http://localhost:3000/api/files';
 
     for (const file of req.files) {
       const folder = 'photomenu';
@@ -66,7 +68,7 @@ router.post('/upload/single', uploadMultiple, async (req, res) => {
 
     const file = req.files[0];
     const baseDir = 'uploads';
-    const baseUrl = '/api/files';
+    const baseUrl = 'http://localhost:3000/api/files';
     const folder = 'photomenu';
     const ext = path.extname(file.originalname);
     const filename = `${randomUUID()}${ext}`;

@@ -16,13 +16,13 @@ import {
 // Validation schemas
 const photoMenuCreateSchema = z.object({
   restaurant_id: z.number().int().positive(),
-  image_url: z.string().url("Invalid image URL"),
+  image_url: z.string().min(1, "Image URL cannot be empty"),
   sort_order: z.number().int().optional(),
 });
 
 const photoMenuCreateMultipleSchema = z.object({
   restaurant_id: z.number().int().positive(),
-  image_urls: z.array(z.string().url("Invalid image URL")).min(1).max(10),
+  image_urls: z.array(z.string().min(1, "Image URL cannot be empty")).min(1).max(10),
 });
 
 const photoMenuUpdateSchema = z.object({

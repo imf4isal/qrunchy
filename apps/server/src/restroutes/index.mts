@@ -4,6 +4,8 @@ import fileRoutes from "./files.mts";
 
 const router = express.Router();
 
+console.log('Loading file routes...');
+
 // File upload and serving routes
 router.use("/api", fileRoutes);
 
