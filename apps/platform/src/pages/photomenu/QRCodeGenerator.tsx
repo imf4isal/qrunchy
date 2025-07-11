@@ -1,29 +1,58 @@
 // src/pages/photomenu/QRCodeGenerator.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { QrCode, Download, Copy, Check, Loader2 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
+import { useRestaurant } from "@/contexts/RestaurantContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { UploadedImage } from "./ImageUploader";
 
 interface QRCodeGeneratorProps {
   images: UploadedImage[];
   restaurantId: number;
   restaurantName: string;
-  onQrGenerated?: (qrData: any) => void;
+  selectedTheme: "minimal" | "modern";
+  selectedChain: number | null;
+  onQrGenerated?: (restaurantId: number) => void;
 }
 
-const QRCodeGenerator = ({ restaurantId, restaurantName, onQrGenerated }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({ 
+  images, 
+  restaurantId, 
+  restaurantName, 
+  selectedTheme, 
+  selectedChain, 
+  onQrGenerated 
+}: QRCodeGeneratorProps) => {
+  const { setCurrentRestaurant } = useRestaurant();
+  const { user, addRestaurant, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+  
   const [qrType, setQrType] = useState<"self" | "assisted" | null>(null);
   const [qrGenerated, setQrGenerated] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    phoneNumber: "",
+    phoneNumber: user?.mobile_number || "",
     address: "",
   });
   const [copied, setCopied] = useState(false);
   const [qrData, setQrData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [createdRestaurantId, setCreatedRestaurantId] = useState<number>(restaurantId);
 
+  // Update mobile number when user data changes
+  useEffect(() => {
+    if (user?.mobile_number) {
+      setFormData(prev => ({ ...prev, phoneNumber: user.mobile_number }));
+    }
+  }, [user]);
+
+  // TRPC mutations
+  const createUserMutation = trpc.user.create.useMutation();
+  const createRestaurantMutation = trpc.restaurant.create.useMutation();
+  const createMultiplePhotoMenusMutation = trpc.photoMenu.createMultiple.useMutation();
   const generateQrMutation = trpc.photoMenu.generateQr.useMutation();
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,29 +75,145 @@ const QRCodeGenerator = ({ restaurantId, restaurantName, onQrGenerated }: QRCode
 
     if (!qrType) return;
 
+    const mobileNumber = qrType === "assisted" ? formData.phoneNumber.trim() : (user?.mobile_number || "1234567890");
+    
+    if (qrType === "assisted" && !mobileNumber) {
+      setError("Please provide your mobile number to continue");
+      return;
+    }
+
+    setIsGenerating(true);
     setError(null);
 
     try {
-      const result = await generateQrMutation.mutateAsync({
-        restaurant_id: restaurantId,
+      console.log('🚀 Starting photomenu restaurant creation process:', {
+        restaurantName,
+        restaurantId,
+        selectedTheme,
+        selectedChain,
+        imagesCount: images.length,
+        mobileNumber,
+        isAuthenticated,
+        userId: user?.id
+      });
+
+      let currentUser = user;
+      let finalRestaurantId = createdRestaurantId;
+
+      // Step 1: Create user only if not already logged in and assisted setup
+      if (qrType === "assisted" && (!isAuthenticated || !user)) {
+        currentUser = await createUserMutation.mutateAsync({
+          mobile_number: mobileNumber,
+        });
+        console.log('👤 New user created for photomenu:', currentUser);
+      } else {
+        console.log('👤 Using existing logged-in user for photomenu:', currentUser);
+      }
+
+      // Step 2: Create restaurant if needed (restaurantId === 0 means new restaurant)
+      if (finalRestaurantId === 0) {
+        const restaurant = await createRestaurantMutation.mutateAsync({
+          name: restaurantName,
+          mobile: mobileNumber,
+          address: qrType === "assisted" ? formData.address || "Not specified" : "Not specified",
+          user_id: currentUser!.id,
+          theme_id: selectedTheme,
+          group_res_id: selectedChain ?? undefined,
+        });
+
+        console.log('🏪 Restaurant created for photomenu:', restaurant);
+        finalRestaurantId = restaurant.id;
+        setCreatedRestaurantId(finalRestaurantId);
+
+        // Update restaurant context
+        setCurrentRestaurant({
+          id: restaurant.id,
+          name: restaurant.name,
+          mobile: restaurant.mobile,
+          address: restaurant.address,
+        });
+
+        // Add restaurant to auth context
+        addRestaurant({
+          id: restaurant.id,
+          name: restaurant.name,
+          mobile: restaurant.mobile,
+          address: restaurant.address,
+          theme_id: restaurant.theme_id,
+          group_res_id: restaurant.group_res_id,
+          chain_name: null,
+          chain_type: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true,
+        });
+      }
+
+      // Step 3: Upload images to server and create photo menu entries
+      if (images.length > 0) {
+        // First upload images to server
+        const formData = new FormData();
+        images.forEach((image) => {
+          formData.append('images', image.file);
+        });
+
+        const uploadResponse = await fetch('http://localhost:3000/api/upload/photomenu', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload images');
+        }
+
+        const uploadResult = await uploadResponse.json();
+        
+        if (uploadResult.success && uploadResult.files) {
+          // Create photo menu entries in database
+          const imageUrls = uploadResult.files.map((file: any) => file.url);
+          await createMultiplePhotoMenusMutation.mutateAsync({
+            restaurant_id: finalRestaurantId,
+            image_urls: imageUrls,
+          });
+          console.log('📸 Photo menu entries created:', imageUrls.length);
+        } else {
+          throw new Error('Image upload failed');
+        }
+      }
+
+      // Step 4: Generate QR code
+      const qrResult = await generateQrMutation.mutateAsync({
+        restaurant_id: finalRestaurantId,
         setup_type: qrType,
         assisted_data: qrType === "assisted" ? {
-          phone_number: formData.phoneNumber,
+          phone_number: mobileNumber,
           address: formData.address,
         } : undefined,
       });
 
-      setQrData(result);
+      console.log('✅ Photomenu QR generated successfully:', qrResult);
+
+      setQrData(qrResult);
       setQrGenerated(true);
       setShowForm(false);
 
-      // Call the parent's callback to update the step indicator
+      // Call parent callback with restaurant ID
       if (onQrGenerated) {
-        onQrGenerated(result);
+        onQrGenerated(finalRestaurantId);
       }
+
+      // Reset generating state
+      setIsGenerating(false);
+
+      // Redirect to dashboard after a short delay
+      setTimeout(() => {
+        setLocation("/dashboard");
+      }, 3000);
+
     } catch (error) {
-      console.error('QR generation error:', error);
+      console.error('❌ Photomenu QR generation error:', error);
       setError(error instanceof Error ? error.message : 'Failed to generate QR code');
+      setIsGenerating(false);
     }
   };
 
@@ -166,11 +311,11 @@ const QRCodeGenerator = ({ restaurantId, restaurantName, onQrGenerated }: QRCode
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={generateQrMutation.isPending}>
-                    {generateQrMutation.isPending ? (
+                  <Button type="submit" className="w-full" disabled={isGenerating}>
+                    {isGenerating ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating QR Code...
+                        Creating Restaurant & Uploading Images...
                       </>
                     ) : (
                       'Generate QR Code'
@@ -183,11 +328,11 @@ const QRCodeGenerator = ({ restaurantId, restaurantName, onQrGenerated }: QRCode
 
           {qrType === "self" && !showForm && (
             <div className="mt-6 flex justify-center">
-              <Button onClick={() => handleGenerateQR()} disabled={generateQrMutation.isPending}>
-                {generateQrMutation.isPending ? (
+              <Button onClick={() => handleGenerateQR()} disabled={isGenerating}>
+                {isGenerating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating QR Code...
+                    Creating Restaurant & Uploading Images...
                   </>
                 ) : (
                   'Generate QR Code'
