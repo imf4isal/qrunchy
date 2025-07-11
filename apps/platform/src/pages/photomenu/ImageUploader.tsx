@@ -1,25 +1,36 @@
 import { useState, useRef } from "react";
 import type { ChangeEvent } from "react";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
 
-interface UploadedImage {
+export interface UploadedImage {
   id: string;
   file: File;
   preview: string;
+  url?: string; // Server URL after upload
+  uploading?: boolean;
+  uploaded?: boolean;
+  error?: string;
 }
 
 interface ImageUploaderProps {
   onImagesAdded: (images: UploadedImage[]) => void;
-  onImageRemoved: (id: string) => void; // New prop for removing images
+  onImageRemoved: (id: string) => void;
+  onImagesUploaded?: (uploadedUrls: string[]) => void; // Callback for server uploads
   existingImages?: UploadedImage[];
+  useServerUpload?: boolean; // Whether to upload to server immediately
+  restaurantId?: number; // Required for server uploads
 }
 
 const ImageUploader = ({
   onImagesAdded,
-  onImageRemoved, // Add this prop
+  onImageRemoved,
+  onImagesUploaded,
   existingImages = [],
+  useServerUpload = false,
+  restaurantId,
 }: ImageUploaderProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -31,16 +42,65 @@ const ImageUploader = ({
     e.target.value = "";
   };
 
-  const processFiles = (files: File[]) => {
+  const processFiles = async (files: File[]) => {
     const imageFiles = files.filter((file) => file.type.startsWith("image/"));
 
     const newImages = imageFiles.map((file) => ({
       id: Math.random().toString(36).substring(2, 11),
       file,
       preview: URL.createObjectURL(file),
+      uploading: useServerUpload,
+      uploaded: false,
     }));
 
     onImagesAdded(newImages);
+
+    // If server upload is enabled, upload files immediately
+    if (useServerUpload && restaurantId) {
+      setIsUploading(true);
+      await uploadToServer(newImages);
+      setIsUploading(false);
+    }
+  };
+
+  const uploadToServer = async (images: UploadedImage[]) => {
+    try {
+      const formData = new FormData();
+      images.forEach((image) => {
+        formData.append('images', image.file);
+      });
+
+      const response = await fetch('http://localhost:3000/api/upload/photomenu', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.files) {
+        const uploadedUrls = result.files.map((file: any) => file.url);
+        onImagesUploaded?.(uploadedUrls);
+        
+        // Update images with server URLs
+        images.forEach((image, index) => {
+          image.url = result.files[index]?.url;
+          image.uploading = false;
+          image.uploaded = true;
+        });
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      // Mark images as failed
+      images.forEach((image) => {
+        image.uploading = false;
+        image.uploaded = false;
+        image.error = 'Upload failed';
+      });
+    }
   };
 
   const removeImage = (id: string) => {
@@ -83,14 +143,16 @@ const ImageUploader = ({
 
       <div
         className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors ${
-          isDragging
+          isUploading
+            ? "border-blue-500 bg-blue-50 pointer-events-none"
+            : isDragging
             ? "border-blue-500 bg-blue-50"
             : "border-gray-300 hover:border-gray-400"
         }`}
-        onClick={handleAreaClick}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onClick={!isUploading ? handleAreaClick : undefined}
+        onDragOver={!isUploading ? handleDragOver : undefined}
+        onDragLeave={!isUploading ? handleDragLeave : undefined}
+        onDrop={!isUploading ? handleDrop : undefined}
       >
         <input
           type="file"
@@ -101,13 +163,24 @@ const ImageUploader = ({
           onChange={handleFileSelect}
         />
 
-        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-        <p className="mt-3 text-sm text-gray-600">
-          Drag and drop images here, or click to select files
-        </p>
-        <p className="mt-1 text-xs text-gray-500">
-          Supports: JPG, PNG, GIF, WebP
-        </p>
+        {isUploading ? (
+          <>
+            <Loader2 className="mx-auto h-12 w-12 text-blue-500 animate-spin" />
+            <p className="mt-3 text-sm text-blue-600">
+              Uploading images to server...
+            </p>
+          </>
+        ) : (
+          <>
+            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+            <p className="mt-3 text-sm text-gray-600">
+              Drag and drop images here, or click to select files
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Supports: JPG, PNG, GIF, WebP
+            </p>
+          </>
+        )}
       </div>
 
       {existingImages.length > 0 && (
@@ -123,10 +196,31 @@ const ImageUploader = ({
                 className="relative group overflow-hidden rounded-lg"
               >
                 <img
-                  src={image.preview}
+                  src={image.url || image.preview}
                   alt={image.file.name}
                   className="h-32 w-full object-cover transition-transform group-hover:scale-105"
                 />
+
+                {/* Upload status overlay */}
+                {image.uploading && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  </div>
+                )}
+
+                {image.error && (
+                  <div className="absolute inset-0 bg-red-500 bg-opacity-50 flex items-center justify-center">
+                    <X className="h-6 w-6 text-white" />
+                  </div>
+                )}
+
+                {image.uploaded && !image.uploading && (
+                  <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full p-1">
+                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
 
                 <button
                   type="button"
@@ -137,7 +231,15 @@ const ImageUploader = ({
                   <X size={16} />
                 </button>
 
-                <p className="text-xs mt-1 truncate px-1">{image.file.name}</p>
+                <div className="px-1 mt-1">
+                  <p className="text-xs truncate">{image.file.name}</p>
+                  {image.error && (
+                    <p className="text-xs text-red-500">{image.error}</p>
+                  )}
+                  {image.uploaded && (
+                    <p className="text-xs text-green-600">Uploaded</p>
+                  )}
+                </div>
               </div>
             ))}
           </div>

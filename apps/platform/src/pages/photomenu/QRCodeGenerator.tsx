@@ -1,29 +1,30 @@
 // src/pages/photomenu/QRCodeGenerator.tsx
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { QrCode, Download, Copy, Check } from "lucide-react";
-
-interface UploadedImage {
-  id: string;
-  file: File;
-  preview: string;
-}
+import { QrCode, Download, Copy, Check, Loader2 } from "lucide-react";
+import { trpc } from "@/utils/trpc";
+import type { UploadedImage } from "./ImageUploader";
 
 interface QRCodeGeneratorProps {
   images: UploadedImage[];
-  onQrGenerated?: () => void;
+  restaurantId: number;
+  restaurantName: string;
+  onQrGenerated?: (qrData: any) => void;
 }
 
-const QRCodeGenerator = ({ images: _images, onQrGenerated }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({ images, restaurantId, restaurantName, onQrGenerated }: QRCodeGeneratorProps) => {
   const [qrType, setQrType] = useState<"self" | "assisted" | null>(null);
   const [qrGenerated, setQrGenerated] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    restaurantName: "",
     phoneNumber: "",
     address: "",
   });
   const [copied, setCopied] = useState(false);
+  const [qrData, setQrData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const generateQrMutation = trpc.photoMenu.generateQr.useMutation();
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -40,23 +41,43 @@ const QRCodeGenerator = ({ images: _images, onQrGenerated }: QRCodeGeneratorProp
     }
   };
 
-  const handleGenerateQR = (e?: React.FormEvent) => {
+  const handleGenerateQR = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    setQrGenerated(true);
-    setShowForm(false);
+    if (!qrType) return;
 
-    // Call the parent's callback to update the step indicator
-    if (onQrGenerated) {
-      onQrGenerated();
+    setError(null);
+
+    try {
+      const result = await generateQrMutation.mutateAsync({
+        restaurant_id: restaurantId,
+        setup_type: qrType,
+        assisted_data: qrType === "assisted" ? {
+          phone_number: formData.phoneNumber,
+          address: formData.address,
+        } : undefined,
+      });
+
+      setQrData(result);
+      setQrGenerated(true);
+      setShowForm(false);
+
+      // Call the parent's callback to update the step indicator
+      if (onQrGenerated) {
+        onQrGenerated(result);
+      }
+    } catch (error) {
+      console.error('QR generation error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to generate QR code');
     }
   };
 
   const handleCopyLink = () => {
-    // In a real app, you'd copy the actual QR code URL
-    navigator.clipboard.writeText("https://qrunchy.com/menu/sample-qr-code");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (qrData?.menu_url) {
+      navigator.clipboard.writeText(qrData.menu_url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -103,26 +124,12 @@ const QRCodeGenerator = ({ images: _images, onQrGenerated }: QRCodeGeneratorProp
           {showForm && (
             <div className="mt-6 p-6 border rounded-lg">
               <h3 className="text-lg font-medium mb-4">Restaurant Details</h3>
+              <div className="mb-4 p-3 bg-gray-50 rounded">
+                <span className="text-sm text-gray-600">Restaurant:</span>
+                <span className="ml-2 font-medium">{restaurantName}</span>
+              </div>
               <form onSubmit={handleGenerateQR}>
                 <div className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="restaurantName"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Restaurant Name
-                    </label>
-                    <input
-                      type="text"
-                      id="restaurantName"
-                      name="restaurantName"
-                      value={formData.restaurantName}
-                      onChange={handleFormChange}
-                      required
-                      className="w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
                   <div>
                     <label
                       htmlFor="phoneNumber"
@@ -159,8 +166,15 @@ const QRCodeGenerator = ({ images: _images, onQrGenerated }: QRCodeGeneratorProp
                     />
                   </div>
 
-                  <Button type="submit" className="w-full">
-                    Generate QR Code
+                  <Button type="submit" className="w-full" disabled={generateQrMutation.isLoading}>
+                    {generateQrMutation.isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating QR Code...
+                      </>
+                    ) : (
+                      'Generate QR Code'
+                    )}
                   </Button>
                 </div>
               </form>
@@ -169,9 +183,22 @@ const QRCodeGenerator = ({ images: _images, onQrGenerated }: QRCodeGeneratorProp
 
           {qrType === "self" && !showForm && (
             <div className="mt-6 flex justify-center">
-              <Button onClick={() => handleGenerateQR()}>
-                Generate QR Code
+              <Button onClick={() => handleGenerateQR()} disabled={generateQrMutation.isLoading}>
+                {generateQrMutation.isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating QR Code...
+                  </>
+                ) : (
+                  'Generate QR Code'
+                )}
               </Button>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
         </>
@@ -182,11 +209,22 @@ const QRCodeGenerator = ({ images: _images, onQrGenerated }: QRCodeGeneratorProp
           </div>
 
           <p className="text-lg font-medium mb-2">Your QR Code is Ready!</p>
-          <p className="text-sm text-gray-600 text-center max-w-md mb-6">
+          <p className="text-sm text-gray-600 text-center max-w-md mb-2">
             {qrType === "self"
               ? "Scan this QR code to view your menu. Remember to create an account within 7 days to keep it active."
               : "Your QR code has been generated and your account details will be sent to your phone."}
           </p>
+          
+          {qrData && (
+            <div className="text-center mb-6">
+              <p className="text-xs text-gray-500 mb-1">QR Code: {qrData.qr_code}</p>
+              {qrData.expires_at && (
+                <p className="text-xs text-gray-500">
+                  Expires: {new Date(qrData.expires_at).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-3 justify-center">
             <Button variant="outline" className="flex items-center gap-2">
@@ -198,12 +236,17 @@ const QRCodeGenerator = ({ images: _images, onQrGenerated }: QRCodeGeneratorProp
               variant="outline"
               className="flex items-center gap-2"
               onClick={handleCopyLink}
+              disabled={!qrData?.menu_url}
             >
               {copied ? <Check size={16} /> : <Copy size={16} />}
               {copied ? "Copied!" : "Copy Link"}
             </Button>
 
-            <Button className="flex items-center gap-2">
+            <Button 
+              className="flex items-center gap-2"
+              onClick={() => qrData?.menu_url && window.open(qrData.menu_url, '_blank')}
+              disabled={!qrData?.menu_url}
+            >
               <QrCode size={16} />
               View Menu
             </Button>
