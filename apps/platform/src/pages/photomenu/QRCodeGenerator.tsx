@@ -248,9 +248,14 @@ const QRCodeGenerator = ({
                   <div>
                     <label
                       htmlFor="phoneNumber"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      Phone Number
+                      Mobile Number
+                      {isAuthenticated && (
+                        <span className="text-green-600 text-xs ml-2 font-normal">
+                          ✓ From your account
+                        </span>
+                      )}
                     </label>
                     <input
                       type="tel"
@@ -259,16 +264,26 @@ const QRCodeGenerator = ({
                       value={formData.phoneNumber}
                       onChange={handleFormChange}
                       required
-                      className="w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg ${
+                        isAuthenticated ? 'bg-green-50 border-green-200' : ''
+                      }`}
+                      placeholder="e.g. +880 1712-345678"
+                      disabled={isGenerating || isAuthenticated}
+                      readOnly={isAuthenticated}
                     />
+                    {isAuthenticated && (
+                      <p className="text-xs text-green-600 mt-1">
+                        Using mobile number from your logged-in account
+                      </p>
+                    )}
                   </div>
 
                   <div>
                     <label
                       htmlFor="address"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      Address
+                      Address (Optional)
                     </label>
                     <input
                       type="text"
@@ -276,8 +291,8 @@ const QRCodeGenerator = ({
                       name="address"
                       value={formData.address}
                       onChange={handleFormChange}
-                      required
-                      className="w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                      placeholder="e.g. 123 Main Street, City"
                     />
                   </div>
 
