@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
-import { ArrowLeft, Upload, Trash2, GripVertical, Eye, QrCode, Palette } from "lucide-react";
+import { ArrowLeft, Upload, Trash2, GripVertical, Eye, QrCode } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -32,7 +32,6 @@ export default function RestaurantPhotoMenuManager() {
   const restaurantId = parseInt(params.id as string);
   
   const [images, setImages] = useState<any[]>([]);
-  const [selectedTheme, setSelectedTheme] = useState<"minimal" | "modern">("minimal");
   const [isUploading, setIsUploading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -49,6 +48,7 @@ export default function RestaurantPhotoMenuManager() {
   const createMultipleMutation = trpc.photoMenu.createMultiple.useMutation();
   const updateSortOrderMutation = trpc.photoMenu.updateSortOrder.useMutation();
   const deleteMutation = trpc.photoMenu.delete.useMutation();
+  const deleteAllMutation = trpc.photoMenu.deleteAll.useMutation();
   const generateQrMutation = trpc.photoMenu.generateQr.useMutation();
 
   // Load existing photos
@@ -174,6 +174,21 @@ export default function RestaurantPhotoMenuManager() {
     }
   };
 
+  const handleDeleteEntireMenu = async () => {
+    if (!confirm(
+      `Are you sure you want to delete the entire photo menu for "${restaurant?.name}"? This action cannot be undone and will remove all photos.`
+    )) return;
+
+    try {
+      await deleteAllMutation.mutateAsync({ restaurant_id: restaurantId });
+      alert('Entire photo menu deleted successfully!');
+      refetchPhotoMenu();
+    } catch (error) {
+      console.error('Delete entire menu error:', error);
+      alert('Failed to delete entire menu');
+    }
+  };
+
   // Sortable item component
   const SortableItem = ({ image, index }: { image: any; index: number }) => {
     const {
@@ -268,6 +283,12 @@ export default function RestaurantPhotoMenuManager() {
               <QrCode className="w-4 h-4 mr-2" />
               Generate QR
             </Button>
+            {images.length > 0 && (
+              <Button onClick={handleDeleteEntireMenu} variant="destructive">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Entire Menu
+              </Button>
+            )}
           </div>
         </div>
 
@@ -303,45 +324,6 @@ export default function RestaurantPhotoMenuManager() {
           </CardContent>
         </Card>
 
-        {/* Theme Selection */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="w-5 h-5" />
-              Theme Selection
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div 
-                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                  selectedTheme === "minimal" 
-                    ? "border-blue-500 bg-blue-50" 
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-                onClick={() => setSelectedTheme("minimal")}
-              >
-                <h3 className="font-medium mb-2">Minimal</h3>
-                <p className="text-sm text-gray-600">
-                  Clean and simple layout focused on your menu photos
-                </p>
-              </div>
-              <div 
-                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                  selectedTheme === "modern" 
-                    ? "border-blue-500 bg-blue-50" 
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-                onClick={() => setSelectedTheme("modern")}
-              >
-                <h3 className="font-medium mb-2">Modern</h3>
-                <p className="text-sm text-gray-600">
-                  Contemporary design with enhanced visual effects
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Photo Management */}
         <Card>
