@@ -12,7 +12,6 @@ interface QRCodeGeneratorProps {
   images: UploadedImage[];
   restaurantId: number;
   restaurantName: string;
-  selectedTheme: "minimal" | "modern";
   selectedChain: number | null;
   onQrGenerated?: (restaurantId: number) => void;
 }
@@ -21,7 +20,6 @@ const QRCodeGenerator = ({
   images, 
   restaurantId, 
   restaurantName, 
-  selectedTheme, 
   selectedChain, 
   onQrGenerated 
 }: QRCodeGeneratorProps) => {
@@ -29,9 +27,8 @@ const QRCodeGenerator = ({
   const { user, addRestaurant, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   
-  const [qrType, setQrType] = useState<"self" | "assisted" | null>(null);
   const [qrGenerated, setQrGenerated] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(!isAuthenticated);
   const [formData, setFormData] = useState({
     phoneNumber: user?.mobile_number || "",
     address: "",
@@ -60,24 +57,13 @@ const QRCodeGenerator = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleQrTypeSelect = (type: "self" | "assisted") => {
-    setQrType(type);
-    if (type === "assisted") {
-      setShowForm(true);
-    } else {
-      setShowForm(false);
-      // For self-serve, we'll show a button to generate QR
-    }
-  };
 
   const handleGenerateQR = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    if (!qrType) return;
-
-    const mobileNumber = qrType === "assisted" ? formData.phoneNumber.trim() : (user?.mobile_number || "1234567890");
+    const mobileNumber = isAuthenticated ? (user?.mobile_number || "") : formData.phoneNumber.trim();
     
-    if (qrType === "assisted" && !mobileNumber) {
+    if (!isAuthenticated && !mobileNumber) {
       setError("Please provide your mobile number to continue");
       return;
     }
@@ -89,7 +75,6 @@ const QRCodeGenerator = ({
       console.log('🚀 Starting photomenu restaurant creation process:', {
         restaurantName,
         restaurantId,
-        selectedTheme,
         selectedChain,
         imagesCount: images.length,
         mobileNumber,
@@ -100,8 +85,8 @@ const QRCodeGenerator = ({
       let currentUser = user;
       let finalRestaurantId = createdRestaurantId;
 
-      // Step 1: Create user only if not already logged in and assisted setup
-      if (qrType === "assisted" && (!isAuthenticated || !user)) {
+      // Step 1: Create user only if not already logged in
+      if (!isAuthenticated || !user) {
         currentUser = await createUserMutation.mutateAsync({
           mobile_number: mobileNumber,
         });
@@ -115,9 +100,9 @@ const QRCodeGenerator = ({
         const restaurant = await createRestaurantMutation.mutateAsync({
           name: restaurantName,
           mobile: mobileNumber,
-          address: qrType === "assisted" ? formData.address || "Not specified" : "Not specified",
+          address: (!isAuthenticated && formData.address) ? formData.address : "Not specified",
           user_id: currentUser!.id,
-          theme_id: selectedTheme,
+          theme_id: "minimal", // Default theme for photomenu
           group_res_id: selectedChain ?? undefined,
         });
 
@@ -183,11 +168,7 @@ const QRCodeGenerator = ({
       // Step 4: Generate QR code
       const qrResult = await generateQrMutation.mutateAsync({
         restaurant_id: finalRestaurantId,
-        setup_type: qrType,
-        assisted_data: qrType === "assisted" ? {
-          phone_number: mobileNumber,
-          address: formData.address,
-        } : undefined,
+        setup_type: "self",
       });
 
       console.log('✅ Photomenu QR generated successfully:', qrResult);
@@ -228,43 +209,11 @@ const QRCodeGenerator = ({
     <div className="w-full">
       <h2 className="text-xl font-bold mb-4">Generate QR Code</h2>
       <p className="text-gray-600 mb-6">
-        Your menu is ready! Now choose how you'd like to generate your QR code.
+        Your photo menu is ready! {isAuthenticated ? 'Click the button below to generate your QR code.' : 'Please provide your phone number to continue.'}
       </p>
 
       {!qrGenerated ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div
-              className={`p-6 rounded-lg border-2 cursor-pointer transition-all ${
-                qrType === "self"
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => handleQrTypeSelect("self")}
-            >
-              <h3 className="text-lg font-medium mb-2">Self-Serve QR</h3>
-              <p className="text-sm text-gray-600">
-                Generate a QR code instantly that you can use right away. You'll
-                need to create an account within 7 days to keep it active.
-              </p>
-            </div>
-
-            <div
-              className={`p-6 rounded-lg border-2 cursor-pointer transition-all ${
-                qrType === "assisted"
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => handleQrTypeSelect("assisted")}
-            >
-              <h3 className="text-lg font-medium mb-2">Assisted Setup</h3>
-              <p className="text-sm text-gray-600">
-                We'll set up your QR code for you and send you login credentials
-                via SMS.
-              </p>
-            </div>
-          </div>
-
           {showForm && (
             <div className="mt-6 p-6 border rounded-lg">
               <h3 className="text-lg font-medium mb-4">Restaurant Details</h3>
@@ -340,6 +289,24 @@ const QRCodeGenerator = ({
             </div>
           )}
 
+          {!showForm && isAuthenticated && (
+            <div className="text-center">
+              <Button onClick={handleGenerateQR} className="w-full max-w-md" disabled={isGenerating}>
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Restaurant & Uploading Images...
+                  </>
+                ) : (
+                  <>
+                    <QrCode className="mr-2 h-4 w-4" />
+                    Generate QR Code
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
           {error && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-700 text-sm">{error}</p>
@@ -354,9 +321,7 @@ const QRCodeGenerator = ({
 
           <p className="text-lg font-medium mb-2">Your QR Code is Ready!</p>
           <p className="text-sm text-gray-600 text-center max-w-md mb-2">
-            {qrType === "self"
-              ? "Scan this QR code to view your menu. Remember to create an account within 7 days to keep it active."
-              : "Your QR code has been generated and your account details will be sent to your phone."}
+            Scan this QR code to view your photo menu. Customers can view your menu by scanning this code.
           </p>
           
           {qrData && (

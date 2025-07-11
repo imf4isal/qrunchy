@@ -11,8 +11,6 @@ interface SetupStepProps {
     onRestaurantNameChange: (name: string) => void;
     selectedChain: number | null;
     onChainChange: (chainId: number | null) => void;
-    selectedTheme: "minimal" | "modern";
-    onThemeChange: (theme: "minimal" | "modern") => void;
     chains?: Chain[];
 }
 
@@ -21,8 +19,6 @@ export default function SetupStep({
     onRestaurantNameChange,
     selectedChain,
     onChainChange,
-    selectedTheme,
-    onThemeChange,
     chains,
 }: SetupStepProps) {
     return (
@@ -100,65 +96,6 @@ export default function SetupStep({
                     </div>
                 )}
 
-                {/* Theme Selection */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Photo Menu Theme
-                    </label>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div 
-                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                                selectedTheme === "minimal" 
-                                    ? "border-blue-500 bg-blue-50" 
-                                    : "border-gray-200 hover:border-gray-300"
-                            }`}
-                            onClick={() => onThemeChange("minimal")}
-                        >
-                            <div className="flex items-center space-x-2 mb-2">
-                                <input
-                                    type="radio"
-                                    id="theme-minimal"
-                                    name="theme"
-                                    checked={selectedTheme === "minimal"}
-                                    onChange={() => onThemeChange("minimal")}
-                                    className="h-4 w-4 text-blue-600"
-                                />
-                                <label htmlFor="theme-minimal" className="font-medium text-gray-700">
-                                    Minimal
-                                </label>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                                Clean and simple layout focused on your menu photos
-                            </p>
-                        </div>
-
-                        <div 
-                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                                selectedTheme === "modern" 
-                                    ? "border-blue-500 bg-blue-50" 
-                                    : "border-gray-200 hover:border-gray-300"
-                            }`}
-                            onClick={() => onThemeChange("modern")}
-                        >
-                            <div className="flex items-center space-x-2 mb-2">
-                                <input
-                                    type="radio"
-                                    id="theme-modern"
-                                    name="theme"
-                                    checked={selectedTheme === "modern"}
-                                    onChange={() => onThemeChange("modern")}
-                                    className="h-4 w-4 text-blue-600"
-                                />
-                                <label htmlFor="theme-modern" className="font-medium text-gray-700">
-                                    Modern
-                                </label>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                                Contemporary design with enhanced visual effects
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );

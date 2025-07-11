@@ -24,7 +24,6 @@ export default function PhotoMenu() {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [restaurantName, setRestaurantName] = useState(currentRestaurant?.name || "");
   const [selectedChain, setSelectedChain] = useState<number | null>((currentRestaurant as any)?.group_res_id || null);
-  const [selectedTheme, setSelectedTheme] = useState<"minimal" | "modern">("minimal");
   const [createdRestaurantId, setCreatedRestaurantId] = useState<number | null>(currentRestaurant?.id || null);
   const [hasDraft, setHasDraft] = useState(false);
 
@@ -48,7 +47,6 @@ export default function PhotoMenu() {
         const draftData = {
           step,
           restaurantName,
-          selectedTheme,
           selectedChain,
           images: images.map(img => ({
             id: img.id,
@@ -61,7 +59,7 @@ export default function PhotoMenu() {
         localStorage.setItem('qrunchy_photomenu_draft', JSON.stringify(draftData));
       }
     }
-  }, [step, restaurantName, selectedTheme, selectedChain, images, currentRestaurant]);
+  }, [step, restaurantName, selectedChain, images, currentRestaurant]);
 
   // Load draft from localStorage on mount
   useEffect(() => {
@@ -87,7 +85,6 @@ export default function PhotoMenu() {
       try {
         const draft = JSON.parse(draftStr);
         setRestaurantName(draft.restaurantName || "");
-        setSelectedTheme(draft.selectedTheme || "minimal");
         setSelectedChain(draft.selectedChain || null);
         // Note: Cannot restore images as File objects are not serializable
         setHasDraft(false);
@@ -145,8 +142,6 @@ export default function PhotoMenu() {
                 onRestaurantNameChange={setRestaurantName}
                 selectedChain={selectedChain}
                 onChainChange={setSelectedChain}
-                selectedTheme={selectedTheme}
-                onThemeChange={setSelectedTheme}
                 chains={chains}
             />
         );
@@ -166,7 +161,6 @@ export default function PhotoMenu() {
             images={images} 
             restaurantId={createdRestaurantId || 0} // Will be created during QR generation if 0
             restaurantName={restaurantName}
-            selectedTheme={selectedTheme}
             selectedChain={selectedChain}
             onQrGenerated={(restaurantId: number) => {
               setCreatedRestaurantId(restaurantId);
