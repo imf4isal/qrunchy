@@ -48,7 +48,7 @@ export default function RestaurantPhotoMenuManager() {
   const createMultipleMutation = trpc.photoMenu.createMultiple.useMutation();
   const updateSortOrderMutation = trpc.photoMenu.updateSortOrder.useMutation();
   const deleteMutation = trpc.photoMenu.delete.useMutation();
-  const deleteAllMutation = trpc.photoMenu.deleteAll.useMutation();
+  const updateRestaurantMutation = trpc.restaurant.update.useMutation();
   const generateQrMutation = trpc.photoMenu.generateQr.useMutation();
 
   // Load existing photos
@@ -176,16 +176,22 @@ export default function RestaurantPhotoMenuManager() {
 
   const handleDeleteEntireMenu = async () => {
     if (!confirm(
-      `Are you sure you want to delete the entire photo menu for "${restaurant?.name}"? This action cannot be undone and will remove all photos.`
+      `Are you sure you want to delete the entire restaurant "${restaurant?.name}"? This action cannot be undone and will remove the restaurant from your dashboard along with all its photo menu data and QR codes.`
     )) return;
 
     try {
-      await deleteAllMutation.mutateAsync({ restaurant_id: restaurantId });
-      alert('Entire photo menu deleted successfully!');
-      refetchPhotoMenu();
+      await updateRestaurantMutation.mutateAsync({ 
+        id: restaurantId, 
+        is_active: false 
+      });
+      alert('Restaurant deleted successfully!');
+      
+      // Redirect to dashboard as restaurant no longer exists
+      setLocation('/dashboard');
+      
     } catch (error) {
-      console.error('Delete entire menu error:', error);
-      alert('Failed to delete entire menu');
+      console.error('Delete restaurant error:', error);
+      alert('Failed to delete restaurant');
     }
   };
 
@@ -286,7 +292,7 @@ export default function RestaurantPhotoMenuManager() {
             {images.length > 0 && (
               <Button onClick={handleDeleteEntireMenu} variant="destructive">
                 <Trash2 className="w-4 h-4 mr-2" />
-                Delete Entire Menu
+                Delete Restaurant
               </Button>
             )}
           </div>

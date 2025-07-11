@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { Link, useParams, useLocation } from "wouter";
-import { ArrowLeft, Eye, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Eye, Save, Loader2, CheckCircle, AlertCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MenuBuilder from "@/pages/digitalmenu/MenuBuilder";
@@ -55,6 +55,7 @@ export default function RestaurantMenuManager() {
   
   const bulkImportMutation = trpc.digitalMenu.menu.bulkImport.useMutation();
   const updateThemeMutation = trpc.restaurant.updateTheme.useMutation();
+  const updateRestaurantMutation = trpc.restaurant.update.useMutation();
 
   // Redirect if not authenticated or restaurant not found
   useEffect(() => {
@@ -182,6 +183,27 @@ export default function RestaurantMenuManager() {
       setTimeout(() => setSaveStatus('idle'), 5000);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteEntireMenu = async () => {
+    if (!confirm(
+      `Are you sure you want to delete the entire restaurant "${restaurant?.name}"? This action cannot be undone and will remove the restaurant from your dashboard along with all its digital menu data, photos, and QR codes.`
+    )) return;
+
+    try {
+      await updateRestaurantMutation.mutateAsync({ 
+        id: restaurantId, 
+        is_active: false 
+      });
+      alert('Restaurant deleted successfully!');
+      
+      // Redirect to dashboard as restaurant no longer exists
+      setLocation('/dashboard');
+      
+    } catch (error) {
+      console.error('Delete restaurant error:', error);
+      alert('Failed to delete restaurant');
     }
   };
 
@@ -327,6 +349,19 @@ export default function RestaurantMenuManager() {
                   </>
                 )}
               </Button>
+              
+              {(menu.categories.length > 0 || menu.items.length > 0) && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteEntireMenu}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Delete Restaurant</span>
+                  <span className="sm:hidden">Delete</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>

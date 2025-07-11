@@ -58,4 +58,52 @@ export const menuCoreProcedures = {
         throw new Error("Failed to export menu");
       }
     }),
+
+  // Delete entire digital menu
+  deleteEntire: publicProcedure
+    .input(restaurantIdSchema)
+    .mutation(async ({ input }) => {
+      try {
+        return await db.transaction().execute(async (trx) => {
+          // First get all categories for this restaurant
+          const categories = await trx
+            .selectFrom("category")
+            .select("id")
+            .where("restaurant_id", "=", input.restaurant_id)
+            .execute();
+
+          const categoryIds = categories.map(c => c.id);
+
+          if (categoryIds.length > 0) {
+            // Delete all menu items for these categories
+            await trx
+              .deleteFrom("item")
+              .where("category_id", "in", categoryIds)
+              .execute();
+
+            // Delete all categories for this restaurant
+            await trx
+              .deleteFrom("category")
+              .where("restaurant_id", "=", input.restaurant_id)
+              .execute();
+          }
+
+          // Delete QR codes for this restaurant (digital type)
+          await trx
+            .deleteFrom("qr_code")
+            .where("restaurant_id", "=", input.restaurant_id)
+            .where("type", "=", "digital")
+            .execute();
+
+          return { 
+            success: true, 
+            message: "Entire digital menu deleted successfully",
+            deletedCategories: categoryIds.length
+          };
+        });
+      } catch (error) {
+        console.error("Error deleting entire digital menu:", error);
+        throw new Error("Failed to delete entire digital menu");
+      }
+    }),
 };

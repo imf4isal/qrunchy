@@ -19,6 +19,7 @@ const restaurantUpdateSchema = z.object({
   address: z.string().optional(),
   group_res_id: z.number().int().positive().nullable().optional(),
   theme_id: z.enum(["minimal", "modern"]).optional(),
+  is_active: z.boolean().optional(),
 });
 
 const restaurantGetByUserSchema = z.object({
@@ -35,6 +36,7 @@ const restaurantUpdateThemeSchema = z.object({
 });
 
 export const restaurantProcedures = {
+  
   create: publicProcedure
     .input(restaurantCreateSchema)
     .mutation(async ({ input }) => {
