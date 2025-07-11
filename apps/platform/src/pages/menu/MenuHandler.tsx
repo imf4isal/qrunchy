@@ -17,15 +17,34 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
   // Check if this is a photo menu QR code (starts with "photo_")
   const isPhotoMenuQR = qrCode.startsWith("photo_");
   
+  // For photo menus, try server first, fallback to localStorage
+  const {
+    data: photoMenuData,
+    isLoading: photoMenuLoading,
+    error: photoMenuError,
+  } = trpc.photoMenu.getByQrCode.useQuery(
+    { qr_code: qrCode },
+    { enabled: isPhotoMenuQR }
+  );
+  
   if (isPhotoMenuQR) {
-    // Check if we have photo menu data for this QR code
+    if (photoMenuLoading) {
+      return <LoadingScreen />;
+    }
+
+    if (photoMenuData?.photos && photoMenuData.photos.length > 0) {
+      // Use server data
+      return <PhotoMenuViewer qrCode={qrCode} useServerData={true} />;
+    }
+
+    // Fallback to localStorage for development/legacy data
     const photoMenu = getPhotoMenu(qrCode);
     if (photoMenu) {
-      return <PhotoMenuViewer qrCode={qrCode} />;
-    } else {
-      // Photo menu QR not found in storage
-      return <ErrorScreen onRetry={() => window.location.reload()} />;
+      return <PhotoMenuViewer qrCode={qrCode} useServerData={false} />;
     }
+
+    // Photo menu not found anywhere
+    return <ErrorScreen onRetry={() => window.location.reload()} />;
   }
 
   // Use tRPC to fetch QR data from the real backend for digital menus
