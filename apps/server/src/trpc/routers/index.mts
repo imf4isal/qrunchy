@@ -4,10 +4,12 @@ import { digitalMenuRouter } from "./digitalMenu.mts";
 import { userRouter } from "./user.mts";
 import { restaurantRouter } from "./restaurant.mts";
 import { authRouter } from "./auth.mts";
+import { photoMenuRouter } from "./photoMenu.mjs";
 
 export const appRouter = router({
   hello: helloRouter,
   digitalMenu: digitalMenuRouter,
+  photoMenu: photoMenuRouter,
   user: userRouter,
   restaurant: restaurantRouter,
   auth: authRouter,
