@@ -59,6 +59,10 @@ const qrGeneratePhotoSchema = z.object({
   }).optional(),
 });
 
+const qrGetByRestaurantSchema = z.object({
+  restaurant_id: z.number().int().positive(),
+});
+
 // Helper function to generate unique photo QR code
 const generatePhotoQrCode = (): string => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -306,6 +310,30 @@ export const photoMenuProcedures = {
       } catch (error) {
         console.error("Error generating photo QR code:", error);
         throw new Error(error instanceof Error ? error.message : "Failed to generate QR code");
+      }
+    }),
+
+  // Get QR codes for a restaurant's photo menu
+  getQrByRestaurant: publicProcedure
+    .input(qrGetByRestaurantSchema)
+    .query(async ({ input }) => {
+      try {
+        const qrCodes = await db
+          .selectFrom("qr_code")
+          .select(["id", "code", "type", "status", "restaurant_id", "bound_at", "expires_at", "self_serve"])
+          .where("restaurant_id", "=", input.restaurant_id)
+          .where("type", "=", "photo")
+          .orderBy("bound_at", "desc")
+          .execute();
+
+        return qrCodes.map(qr => ({
+          ...qr,
+          menu_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/menu/${qr.code}`,
+          expires_at: qr.expires_at?.toISOString() || null,
+        }));
+      } catch (error) {
+        console.error("Error fetching photo menu QR codes:", error);
+        throw new Error("Failed to fetch QR codes");
       }
     }),
 };
