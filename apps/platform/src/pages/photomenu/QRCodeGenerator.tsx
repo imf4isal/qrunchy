@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { QrCode, Download, Copy, Check, Loader2 } from "lucide-react";
+import QRCodeDisplay from "@/components/QRCodeDisplay";
 import { trpc } from "@/utils/trpc";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -205,6 +206,27 @@ const QRCodeGenerator = ({
     }
   };
 
+  const handleDownloadQR = async () => {
+    if (qrData?.menu_url) {
+      try {
+        const canvas = document.createElement('canvas');
+        await import('qrcode').then(QRCode => {
+          QRCode.default.toCanvas(canvas, qrData.menu_url, {
+            width: 400,
+            margin: 2,
+          });
+        });
+        
+        const link = document.createElement('a');
+        link.download = `qr-code-${qrData.qr_code}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      } catch (error) {
+        console.error('Error downloading QR code:', error);
+      }
+    }
+  };
+
   return (
     <div className="w-full">
       <h2 className="text-xl font-bold mb-4">Generate QR Code</h2>
@@ -301,8 +323,12 @@ const QRCodeGenerator = ({
         </>
       ) : (
         <div className="flex flex-col items-center">
-          <div className="p-6 border rounded-xl bg-white shadow-sm mb-4 w-64 h-64 flex items-center justify-center">
-            <QrCode size={180} />
+          <div className="p-6 border rounded-xl bg-white shadow-sm mb-4">
+            <QRCodeDisplay 
+              value={qrData?.menu_url || ''} 
+              size={200}
+              className="rounded-lg"
+            />
           </div>
 
           <p className="text-lg font-medium mb-2">Your QR Code is Ready!</p>
@@ -322,7 +348,11 @@ const QRCodeGenerator = ({
           )}
 
           <div className="flex flex-wrap gap-3 justify-center">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={handleDownloadQR}
+            >
               <Download size={16} />
               Download QR
             </Button>
