@@ -62,7 +62,7 @@ export default function PhotoMenuViewer({ qrCode, useServerData = false }: Photo
       if (serverPhotoMenuData?.photos && serverPhotoMenuData.photos.length > 0) {
         // Convert server data to PhotoMenuData format
         const convertedData: PhotoMenuData = {
-          id: qrCode,
+          qrCode: qrCode,
           restaurant: {
             name: serverPhotoMenuData.photos[0].restaurant_name,
             address: serverPhotoMenuData.photos[0].restaurant_address || "",
@@ -74,6 +74,7 @@ export default function PhotoMenuViewer({ qrCode, useServerData = false }: Photo
             order: photo.sort_order || index,
           })),
           createdAt: serverPhotoMenuData.photos[0].created_at,
+          updatedAt: serverPhotoMenuData.photos[0].updated_at,
         };
         setPhotoMenu(convertedData);
         setError(null);

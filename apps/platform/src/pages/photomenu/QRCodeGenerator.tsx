@@ -145,7 +145,6 @@ const QRCodeGenerator = ({
           chain_type: null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          is_active: true,
         });
       }
 

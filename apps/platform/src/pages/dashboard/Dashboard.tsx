@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
 import ChainManagement from "@/components/chain/ChainManagement";
 import AddToChainButton from "@/components/restaurant/AddToChainButton";
-import { Plus, QrCode, Edit3, BarChart3, Building2, Store } from "lucide-react";
+import { Plus, QrCode, Edit3, BarChart3, Building2, Store, Image, Camera } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { useMemo } from "react";
 import type { Restaurant } from "@/contexts/AuthContext";
@@ -17,6 +17,14 @@ export default function Dashboard() {
   // Fetch QR codes for all restaurants
   const qrQueries = restaurants.map((restaurant) =>
     trpc.digitalMenu.qr.getByRestaurant.useQuery(
+      { restaurant_id: restaurant.id },
+      { enabled: !!restaurant.id }
+    )
+  );
+
+  // Fetch photo menu data for all restaurants
+  const photoMenuQueries = restaurants.map((restaurant) =>
+    trpc.photoMenu.getByRestaurant.useQuery(
       { restaurant_id: restaurant.id },
       { enabled: !!restaurant.id }
     )
@@ -41,6 +49,28 @@ export default function Dashboard() {
 
     return map;
   }, [restaurants, qrQueries]);
+
+  // Create a mapping of restaurant ID to photo menu data
+  const restaurantPhotoMenuMap = useMemo(() => {
+    const map: Record<string, { photos: any[]; hasPhotos: boolean } | null> = {};
+
+    restaurants.forEach((restaurant, index) => {
+      const photoData = photoMenuQueries[index]?.data;
+      if (photoData && photoData.photos && photoData.photos.length > 0) {
+        map[restaurant.id] = {
+          photos: photoData.photos,
+          hasPhotos: true,
+        };
+      } else {
+        map[restaurant.id] = {
+          photos: [],
+          hasPhotos: false,
+        };
+      }
+    });
+
+    return map;
+  }, [restaurants, photoMenuQueries]);
 
   // Group restaurants by chains
   const groupedRestaurants = useMemo(() => {
@@ -78,64 +108,113 @@ export default function Dashboard() {
     return grouped;
   }, [restaurants, chains]);
 
-  const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => (
-    <Card key={restaurant.id} className="hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              {restaurant.name}
-            </h3>
-            <p className="text-gray-600 text-sm mb-2">
-              {restaurant.mobile}
-            </p>
-            {restaurant.address && (
-              <p className="text-gray-500 text-sm">
-                {restaurant.address}
-              </p>
-            )}
-            {restaurant.chain_name && (
-              <div className="flex items-center mt-2">
-                <Building2 className="w-3 h-3 text-blue-600 mr-1" />
-                <span className="text-xs text-blue-600 font-medium">
-                  {restaurant.chain_name}
-                </span>
+  const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
+    const hasDigitalMenu = restaurantQrMap[restaurant.id] !== null;
+    const photoMenuData = restaurantPhotoMenuMap[restaurant.id];
+    const hasPhotoMenu = photoMenuData?.hasPhotos || false;
+
+    return (
+      <Card key={restaurant.id} className="hover:shadow-md transition-shadow">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {restaurant.name}
+                </h3>
+                {/* Status indicators */}
+                <div className="flex gap-1">
+                  {hasDigitalMenu && (
+                    <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                      <Edit3 className="w-3 h-3 mr-1" />
+                      Digital
+                    </div>
+                  )}
+                  {hasPhotoMenu && (
+                    <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                      <Camera className="w-3 h-3 mr-1" />
+                      Photo
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/restaurant/${restaurant.id}/menu`}>
-                <Edit3 className="w-4 h-4 mr-1" />
-                Edit Menu
-              </Link>
-            </Button>
-            {restaurantQrMap[restaurant.id] ? (
+              <p className="text-gray-600 text-sm mb-2">
+                {restaurant.mobile}
+              </p>
+              {restaurant.address && (
+                <p className="text-gray-500 text-sm">
+                  {restaurant.address}
+                </p>
+              )}
+              {restaurant.chain_name && (
+                <div className="flex items-center mt-2">
+                  <Building2 className="w-3 h-3 text-blue-600 mr-1" />
+                  <span className="text-xs text-blue-600 font-medium">
+                    {restaurant.chain_name}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {/* Digital Menu Management */}
               <Button variant="outline" size="sm" asChild>
-                <Link
-                  href={restaurantQrMap[restaurant.id]!.menu_url}
-                  target="_blank"
-                >
-                  <QrCode className="w-4 h-4 mr-1" />
-                  View Menu
+                <Link href={`/dashboard/restaurant/${restaurant.id}/menu`}>
+                  <Edit3 className="w-4 h-4 mr-1" />
+                  Edit Digital Menu
                 </Link>
               </Button>
-            ) : (
-              <Button variant="outline" size="sm" disabled>
-                <QrCode className="w-4 h-4 mr-1" />
-                No QR Code
-              </Button>
-            )}
-            <AddToChainButton
-              restaurantId={restaurant.id}
-              restaurantName={restaurant.name}
-              currentChainId={restaurant.group_res_id}
-            />
+
+              {/* Photo Menu Management */}
+              {hasPhotoMenu ? (
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/dashboard/restaurant/${restaurant.id}/photomenu`}>
+                    <Image className="w-4 h-4 mr-1" />
+                    Manage Photos
+                  </Link>
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/photo-menu">
+                    <Camera className="w-4 h-4 mr-1" />
+                    Create Photo Menu
+                  </Link>
+                </Button>
+              )}
+
+              {/* View Menu (Digital or Photo) */}
+              {hasDigitalMenu ? (
+                <Button variant="outline" size="sm" asChild>
+                  <Link
+                    href={restaurantQrMap[restaurant.id]!.menu_url}
+                    target="_blank"
+                  >
+                    <QrCode className="w-4 h-4 mr-1" />
+                    View Menu
+                  </Link>
+                </Button>
+              ) : hasPhotoMenu ? (
+                <Button variant="outline" size="sm" disabled>
+                  <QrCode className="w-4 h-4 mr-1" />
+                  View Photos
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" disabled>
+                  <QrCode className="w-4 h-4 mr-1" />
+                  No QR Code
+                </Button>
+              )}
+
+              <AddToChainButton
+                restaurantId={restaurant.id}
+                restaurantName={restaurant.name}
+                currentChainId={restaurant.group_res_id}
+              />
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <MainLayout>
