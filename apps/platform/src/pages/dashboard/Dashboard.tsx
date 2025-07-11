@@ -30,6 +30,14 @@ export default function Dashboard() {
     )
   );
 
+  // Fetch photo menu QR codes for all restaurants
+  const photoMenuQrQueries = restaurants.map((restaurant) =>
+    trpc.photoMenu.getQrByRestaurant.useQuery(
+      { restaurant_id: restaurant.id },
+      { enabled: !!restaurant.id }
+    )
+  );
+
   // Create a mapping of restaurant ID to QR code data
   const restaurantQrMap = useMemo(() => {
     const map: Record<string, { code: string; menu_url: string } | null> = {};
@@ -72,6 +80,26 @@ export default function Dashboard() {
     return map;
   }, [restaurants, photoMenuQueries]);
 
+  // Create a mapping of restaurant ID to photo menu QR code data  
+  const restaurantPhotoQrMap = useMemo(() => {
+    const map: Record<string, { code: string; menu_url: string } | null> = {};
+
+    restaurants.forEach((restaurant, index) => {
+      const qrData = photoMenuQrQueries[index]?.data;
+      if (qrData && qrData.length > 0) {
+        // Use the first (most recent) QR code for each restaurant
+        map[restaurant.id] = {
+          code: qrData[0].code,
+          menu_url: qrData[0].menu_url,
+        };
+      } else {
+        map[restaurant.id] = null;
+      }
+    });
+
+    return map;
+  }, [restaurants, photoMenuQrQueries]);
+
   // Group restaurants by chains
   const groupedRestaurants = useMemo(() => {
     const grouped: {
@@ -112,6 +140,7 @@ export default function Dashboard() {
     const hasDigitalMenu = restaurantQrMap[restaurant.id] !== null;
     const photoMenuData = restaurantPhotoMenuMap[restaurant.id];
     const hasPhotoMenu = photoMenuData?.hasPhotos || false;
+    const hasPhotoMenuQr = restaurantPhotoQrMap[restaurant.id] !== null;
 
     return (
       <Card key={restaurant.id} className="hover:shadow-md transition-shadow">
@@ -156,23 +185,25 @@ export default function Dashboard() {
               )}
             </div>
             <div className="flex gap-2 flex-wrap">
-              {/* Digital Menu Management */}
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/dashboard/restaurant/${restaurant.id}/menu`}>
-                  <Edit3 className="w-4 h-4 mr-1" />
-                  Edit Digital Menu
-                </Link>
-              </Button>
-
-              {/* Photo Menu Management */}
+              {/* Primary Menu Management - Show digital menu OR photo menu management */}
               {hasPhotoMenu ? (
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/dashboard/restaurant/${restaurant.id}/photomenu`}>
                     <Image className="w-4 h-4 mr-1" />
-                    Manage Photos
+                    Manage Photo Menu
                   </Link>
                 </Button>
               ) : (
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/dashboard/restaurant/${restaurant.id}/menu`}>
+                    <Edit3 className="w-4 h-4 mr-1" />
+                    Edit Digital Menu
+                  </Link>
+                </Button>
+              )}
+
+              {/* Secondary Actions */}
+              {!hasPhotoMenu && (
                 <Button variant="outline" size="sm" asChild>
                   <Link href="/photo-menu">
                     <Camera className="w-4 h-4 mr-1" />
@@ -189,13 +220,18 @@ export default function Dashboard() {
                     target="_blank"
                   >
                     <QrCode className="w-4 h-4 mr-1" />
-                    View Menu
+                    View Digital Menu
                   </Link>
                 </Button>
-              ) : hasPhotoMenu ? (
-                <Button variant="outline" size="sm" disabled>
-                  <QrCode className="w-4 h-4 mr-1" />
-                  View Photos
+              ) : hasPhotoMenu && hasPhotoMenuQr ? (
+                <Button variant="outline" size="sm" asChild>
+                  <Link
+                    href={restaurantPhotoQrMap[restaurant.id]!.menu_url}
+                    target="_blank"
+                  >
+                    <QrCode className="w-4 h-4 mr-1" />
+                    View Photo Menu
+                  </Link>
                 </Button>
               ) : (
                 <Button variant="outline" size="sm" disabled>

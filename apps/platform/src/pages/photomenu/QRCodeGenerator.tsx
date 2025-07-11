@@ -274,20 +274,6 @@ const QRCodeGenerator = ({
             </div>
           )}
 
-          {qrType === "self" && !showForm && (
-            <div className="mt-6 flex justify-center">
-              <Button onClick={() => handleGenerateQR()} disabled={isGenerating}>
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating Restaurant & Uploading Images...
-                  </>
-                ) : (
-                  'Generate QR Code'
-                )}
-              </Button>
-            </div>
-          )}
 
           {!showForm && isAuthenticated && (
             <div className="text-center">
