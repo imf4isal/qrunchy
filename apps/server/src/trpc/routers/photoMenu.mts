@@ -1,5 +1,5 @@
 import { router } from "../index.mjs";
-import { photoMenuProcedures } from "../procedures/photomenu.mjs";
+import { photoMenuProcedures } from "../procedures/photomenu.mts";
 
 export const photoMenuRouter = router({
   getByRestaurant: photoMenuProcedures.getByRestaurant,
@@ -12,4 +12,5 @@ export const photoMenuRouter = router({
   deleteAll: photoMenuProcedures.deleteAll,
   getCount: photoMenuProcedures.getCount,
   generateQr: photoMenuProcedures.generateQr,
+  getQrByRestaurant: photoMenuProcedures.getQrByRestaurant,
 });
