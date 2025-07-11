@@ -121,7 +121,7 @@ export default function PhotoMenu() {
   const getCanProceed = () => {
     switch (step) {
       case "setup":
-        return restaurantName.trim() !== "" && selectedTheme !== null;
+        return restaurantName.trim() !== "";
       case "upload":
         return images.length > 0;
       case "sort":
