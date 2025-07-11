@@ -12,7 +12,7 @@ interface QRCodeGeneratorProps {
   onQrGenerated?: (qrData: any) => void;
 }
 
-const QRCodeGenerator = ({ images, restaurantId, restaurantName, onQrGenerated }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({ restaurantId, restaurantName, onQrGenerated }: QRCodeGeneratorProps) => {
   const [qrType, setQrType] = useState<"self" | "assisted" | null>(null);
   const [qrGenerated, setQrGenerated] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -166,8 +166,8 @@ const QRCodeGenerator = ({ images, restaurantId, restaurantName, onQrGenerated }
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={generateQrMutation.isLoading}>
-                    {generateQrMutation.isLoading ? (
+                  <Button type="submit" className="w-full" disabled={generateQrMutation.isPending}>
+                    {generateQrMutation.isPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating QR Code...
@@ -183,8 +183,8 @@ const QRCodeGenerator = ({ images, restaurantId, restaurantName, onQrGenerated }
 
           {qrType === "self" && !showForm && (
             <div className="mt-6 flex justify-center">
-              <Button onClick={() => handleGenerateQR()} disabled={generateQrMutation.isLoading}>
-                {generateQrMutation.isLoading ? (
+              <Button onClick={() => handleGenerateQR()} disabled={generateQrMutation.isPending}>
+                {generateQrMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating QR Code...

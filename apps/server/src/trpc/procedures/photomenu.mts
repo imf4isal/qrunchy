@@ -10,7 +10,6 @@ import {
   updatePhotoMenuSortOrder,
   deletePhotoMenu,
   deleteAllPhotoMenusForRestaurant,
-  checkPhotoMenuOwnership,
   getPhotoMenuCount,
 } from "../../db/queries/photoMenu.mjs";
 

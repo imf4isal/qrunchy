@@ -21,7 +21,6 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
   const {
     data: photoMenuData,
     isLoading: photoMenuLoading,
-    error: photoMenuError,
   } = trpc.photoMenu.getByQrCode.useQuery(
     { qr_code: qrCode },
     { enabled: isPhotoMenuQR }

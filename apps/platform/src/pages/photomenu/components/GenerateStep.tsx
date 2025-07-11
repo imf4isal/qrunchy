@@ -8,13 +8,20 @@ interface UploadedImage {
 
 interface GenerateStepProps {
     images: UploadedImage[];
+    restaurantId: number;
+    restaurantName: string;
     onQrGenerated: () => void;
 }
 
-export default function GenerateStep({ images, onQrGenerated }: GenerateStepProps) {
+export default function GenerateStep({ images, restaurantId, restaurantName, onQrGenerated }: GenerateStepProps) {
     return (
         <div>
-            <QRCodeGenerator images={images} onQrGenerated={onQrGenerated} />
+            <QRCodeGenerator 
+                images={images} 
+                restaurantId={restaurantId}
+                restaurantName={restaurantName}
+                onQrGenerated={onQrGenerated} 
+            />
         </div>
     );
 }

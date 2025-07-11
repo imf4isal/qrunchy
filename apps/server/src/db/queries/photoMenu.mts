@@ -68,7 +68,7 @@ export async function getPhotoMenuByQrCode(qrCode: string): Promise<PhotoMenuWit
 /**
  * Create a new photo menu entry
  */
-export async function createPhotoMenu(data: CreatePhotoMenuData): Promise<PhotoMenuTable> {
+export async function createPhotoMenu(data: CreatePhotoMenuData) {
   // Get next sort order if not provided
   let sortOrder = data.sort_order;
   if (sortOrder === undefined) {
@@ -96,7 +96,7 @@ export async function createPhotoMenu(data: CreatePhotoMenuData): Promise<PhotoM
 /**
  * Create multiple photo menu entries
  */
-export async function createMultiplePhotoMenus(restaurantId: number, imageUrls: string[]): Promise<PhotoMenuTable[]> {
+export async function createMultiplePhotoMenus(restaurantId: number, imageUrls: string[]) {
   return await db.transaction().execute(async (trx) => {
     // Get the current max sort order
     const lastPhoto = await trx
@@ -107,7 +107,7 @@ export async function createMultiplePhotoMenus(restaurantId: number, imageUrls: 
       .executeTakeFirst();
     
     let currentSortOrder = (lastPhoto?.sort_order ?? -1) + 1;
-    const results: PhotoMenuTable[] = [];
+    const results = [];
 
     for (const imageUrl of imageUrls) {
       const result = await trx
@@ -131,7 +131,7 @@ export async function createMultiplePhotoMenus(restaurantId: number, imageUrls: 
 /**
  * Update photo menu entry
  */
-export async function updatePhotoMenu(id: number, data: UpdatePhotoMenuData): Promise<PhotoMenuTable> {
+export async function updatePhotoMenu(id: number, data: UpdatePhotoMenuData) {
   return await db
     .updateTable("photo_menu")
     .set({
@@ -164,7 +164,7 @@ export async function updatePhotoMenuSortOrder(updates: Array<{ id: number; sort
 /**
  * Delete photo menu entry
  */
-export async function deletePhotoMenu(id: number): Promise<PhotoMenuTable> {
+export async function deletePhotoMenu(id: number) {
   return await db
     .deleteFrom("photo_menu")
     .where("id", "=", id)

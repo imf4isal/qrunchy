@@ -73,7 +73,7 @@ export default function PhotoMenuViewer({ qrCode, useServerData = false }: Photo
             url: photo.image_url,
             order: photo.sort_order || index,
           })),
-          createdAt: new Date(serverPhotoMenuData.photos[0].created_at),
+          createdAt: serverPhotoMenuData.photos[0].created_at,
         };
         setPhotoMenu(convertedData);
         setError(null);
