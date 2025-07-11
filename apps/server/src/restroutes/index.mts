@@ -1,7 +1,11 @@
 import express from "express";
 import pool from "../config/database.mts";
+import fileRoutes from "./files.mjs";
 
 const router = express.Router();
+
+// File upload and serving routes
+router.use("/api", fileRoutes);
 
 // test server
 router.get("/", (req, res) => {
