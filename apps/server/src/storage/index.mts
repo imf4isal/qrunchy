@@ -1,4 +1,4 @@
-export { IStorageProvider, StorageOptions, StorageResult } from './interfaces.mjs';
-export { LocalStorageProvider } from './providers/LocalStorageProvider.mjs';
-export { R2StorageProvider } from './providers/R2StorageProvider.mjs';
-export { StorageFactory, StorageType } from './StorageFactory.mjs';
+export { IStorageProvider, StorageOptions, StorageResult } from './interfaces.mts';
+export { LocalStorageProvider } from './providers/LocalStorageProvider.mts';
+export { R2StorageProvider } from './providers/R2StorageProvider.mts';
+export { StorageFactory, StorageType } from './StorageFactory.mts';

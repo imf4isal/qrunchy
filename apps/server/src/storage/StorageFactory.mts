@@ -1,6 +1,6 @@
-import { IStorageProvider } from './interfaces.mjs';
-import { LocalStorageProvider } from './providers/LocalStorageProvider.mjs';
-import { R2StorageProvider } from './providers/R2StorageProvider.mjs';
+import { IStorageProvider } from './interfaces.mts';
+import { LocalStorageProvider } from './providers/LocalStorageProvider.mts';
+import { R2StorageProvider } from './providers/R2StorageProvider.mts';
 
 export type StorageType = 'local' | 'r2';
 

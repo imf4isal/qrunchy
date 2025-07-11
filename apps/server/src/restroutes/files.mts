@@ -1,7 +1,8 @@
 import express from 'express';
 import path from 'path';
-import { StorageFactory } from '../storage/index.mjs';
-import { uploadMultiple } from '../middleware/upload.mjs';
+import fs from 'fs/promises';
+import { randomUUID } from 'crypto';
+import { uploadMultiple } from '../middleware/upload.mts';
 
 const router = express.Router();
 
@@ -15,15 +16,32 @@ router.post('/upload/photomenu', uploadMultiple, async (req, res) => {
       return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    const storage = StorageFactory.getProvider();
     const uploadResults = [];
+    const baseDir = 'uploads';
+    const baseUrl = '/api/files';
 
     for (const file of req.files) {
-      const result = await storage.upload(file.buffer, file.originalname, {
-        folder: 'photomenu',
+      const folder = 'photomenu';
+      const ext = path.extname(file.originalname);
+      const filename = `${randomUUID()}${ext}`;
+      const key = `${folder}/${filename}`;
+      const fullPath = path.join(baseDir, key);
+
+      // Ensure directory exists
+      await fs.mkdir(path.dirname(fullPath), { recursive: true });
+
+      // Write file
+      await fs.writeFile(fullPath, file.buffer);
+
+      // Get file stats for size
+      const stats = await fs.stat(fullPath);
+
+      uploadResults.push({
+        url: `${baseUrl}/${key}`,
+        key,
+        size: stats.size,
         contentType: file.mimetype
       });
-      uploadResults.push(result);
     }
 
     res.json({ 
@@ -46,13 +64,30 @@ router.post('/upload/single', uploadMultiple, async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const storage = StorageFactory.getProvider();
     const file = req.files[0];
-    
-    const result = await storage.upload(file.buffer, file.originalname, {
-      folder: 'photomenu',
+    const baseDir = 'uploads';
+    const baseUrl = '/api/files';
+    const folder = 'photomenu';
+    const ext = path.extname(file.originalname);
+    const filename = `${randomUUID()}${ext}`;
+    const key = `${folder}/${filename}`;
+    const fullPath = path.join(baseDir, key);
+
+    // Ensure directory exists
+    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+
+    // Write file
+    await fs.writeFile(fullPath, file.buffer);
+
+    // Get file stats for size
+    const stats = await fs.stat(fullPath);
+
+    const result = {
+      url: `${baseUrl}/${key}`,
+      key,
+      size: stats.size,
       contentType: file.mimetype
-    });
+    };
 
     res.json({ 
       success: true, 

@@ -1,6 +1,6 @@
 import express from "express";
 import pool from "../config/database.mts";
-import fileRoutes from "./files.mjs";
+import fileRoutes from "./files.mts";
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-import { IStorageProvider, StorageOptions, StorageResult } from '../interfaces.mjs';
+import { IStorageProvider, StorageOptions, StorageResult } from '../interfaces.mts';
 
 export class R2StorageProvider implements IStorageProvider {
   private bucketName: string;

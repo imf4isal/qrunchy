@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
-import { IStorageProvider, StorageOptions, StorageResult } from '../interfaces.mjs';
+import { IStorageProvider, StorageOptions, StorageResult } from '../interfaces.mts';
 
 export class LocalStorageProvider implements IStorageProvider {
   private baseDir: string;

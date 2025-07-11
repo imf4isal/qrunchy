@@ -88,7 +88,7 @@ Learn more about the power of Turborepo:
 Our project is a turbo monorepo architecture codebase. where there are two apps inside apps folder. one is server which is basically the backend and another is platform, which is basically the frontend. so, the brief of the project is , it's qrunchy. where restaurant owner can create their menu instead of paper menu. now, we are keeping two flow.
 
 One is to build photomenu, where user just need to take photos of their menuq, upload, sort photo, generate qr, then boom. it will be
-ready. that flow is in the platform –> src –> pages –> photoMenu. it's just frontend ui. We have not implemented the backend for this part yet. It's just dummy. so, you don't need to deep dive into it right now.  we will come back to it, later.
+ready. that flow is in the platform –> src –> pages –> photoMenu. it's just frontend ui. We have not implemented the backend for this part yet. It's just dummy frontend.
 
 Then, there are also digitalmenu inside pages folder, which is basically manual menu creation flow for better UI for custoemr. User will put their menu information – category, item, variants, addons, etc .
 Then it will generate better ui than the photomenu.   –––– there are also other ui stuff in the platform.
@@ -96,6 +96,8 @@ Currently, at the first step, the user put the restaurant information, then cont
 
 And in our project, inside apps/server, there are server side code. inside src/db, you will find migrations file for our database. and one queries for digitalmenu.
 Inside src/trpc folder, there are procedures and router. we have implemented all necessary procedures and routes for the digital manual creation and viewing part.
+
+
 
  Oh, here is the initial data model of the project's database(dbdiagram format).
 
@@ -420,3 +422,84 @@ Feature Requirements Analysis
   │ - Minimal breaking changes │
   │ - Supports both use cases elegantly │
   │ - Maintains type safety throughout
+
+---
+
+---
+
+---
+
+upload plan
+
+Storage Abstraction Implementation Plan │ │
+│ │ │ │
+│ │ Phase 1: Core Storage Abstraction Layer │ │
+│ │ │ │
+│ │ 1. Create storage interface (IStorageProvider) with methods: │ │
+│ │ - upload(file: Buffer, filename: string, options?: StorageOptions): │ │
+│ │ Promise<StorageResult> │ │
+│ │ - delete(url: string): Promise<void> │ │
+│ │ - getUrl(key: string): string │ │
+│ │ - exists(key: string): Promise<boolean> │ │
+│ │ 2. Implement Local Filesystem Provider (LocalStorageProvider): │ │
+│ │ - Store files in uploads/ directory with organized structure │ │
+│ │ - Generate URLs pointing to static file server endpoint │ │
+│ │ - Implement file cleanup and validation │ │
+│ │ 3. Implement Cloudflare R2 Provider (R2StorageProvider): │ │
+│ │ - Use R2 SDK for file operations │ │
+│ │ - Handle public URL generation │ │
+│ │ - Implement proper error handling │ │
+│ │ 4. Create Storage Factory (StorageFactory): │ │
+│ │ - Environment-based provider selection │ │
+│ │ - Configuration management │ │
+│ │ - Provider switching capability │ │
+│ │ │ │
+│ │ Phase 2: Server Infrastructure │ │
+│ │ │ │
+│ │ 1. Add file upload dependencies: │ │
+│ │ - multer for multipart form handling │ │
+│ │ - @aws-sdk/client-s3 for R2 compatibility │ │
+│ │ - mime-types for file type validation │ │
+│ │ 2. Create upload endpoints: │ │
+│ │ - REST endpoint /api/upload for file uploads │ │
+│ │ - Static file serving for local storage │ │
+│ │ - File validation and security measures │ │
+│ │ 3. Add tRPC procedures: │ │
+│ │ - uploadPhotoMenuImage procedure │ │
+│ │ - deletePhotoMenuImage procedure │ │
+│ │ - Integration with existing photo menu workflows │ │
+│ │ │ │
+│ │ Phase 3: Database Schema Updates │ │
+│ │ │ │
+│ │ 1. Add image support to digital menu items: │ │
+│ │ - Migration to add image_url to item table │ │
+│ │ - Migration to add logo_url to restaurant table │ │
+│ │ 2. Update photo menu handling: │ │
+│ │ - Modify photo menu procedures to handle server-uploaded images │ │
+│ │ - Replace localStorage with database persistence │ │
+│ │ │ │
+│ │ Phase 4: Frontend Integration │ │
+│ │ │ │
+│ │ 1. Update ImageUploader component: │ │
+│ │ - Add server upload capability alongside local preview │ │
+│ │ - Progress tracking for uploads │ │
+│ │ - Error handling and retry logic │ │
+│ │ 2. Modify photo menu workflow: │ │
+│ │ - Upload images to server during generation step │ │
+│ │ - Store actual URLs instead of blob URLs │ │
+│ │ - Update storage manager to use server APIs │ │
+│ │ │ │
+│ │ Phase 5: Migration Strategy │ │
+│ │ │ │
+│ │ 1. Environment configuration: │ │
+│ │ - Start with local filesystem in development │ │
+│ │ - Easy switch to R2 in production via environment variables │ │
+│ │ - No code changes required for provider switching │ │
+│ │ 2. Backward compatibility: │ │
+│ │ - Maintain existing localStorage functionality as fallback │ │
+│ │ - Gradual migration of existing photo menus │ │
+│ │ - URL format consistency between providers │ │
+│ │ │ │
+│ │ This approach ensures a clean abstraction that can start with local │ │
+│ │ storage and seamlessly migrate to Cloudflare R2 without breaking │ │
+│ │ changes to the application code.
