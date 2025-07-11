@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import MainLayout from "@/components/layout/MainLayout";
-import PhotoMenuTester from "@/components/PhotoMenuTester";
 import { trpc } from "@/utils/trpc";
 
 export default function Home() {
@@ -214,10 +213,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Photo Menu Tester - Development Only */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <PhotoMenuTester />
-          </div>
         </div>
       </div>
     </MainLayout>

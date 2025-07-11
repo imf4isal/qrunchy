@@ -225,11 +225,18 @@ export const restaurantProcedures = {
           }
         }
 
-        const updatedRestaurant = await db
+        // Build the query - only filter by is_active if we're not updating it
+        let query = db
           .updateTable("restaurant")
           .set(updateData)
-          .where("id", "=", id)
-          .where("is_active", "=", true)
+          .where("id", "=", id);
+          
+        // Only filter by is_active = true if we're not trying to set is_active
+        if (!updateData.hasOwnProperty('is_active')) {
+          query = query.where("is_active", "=", true);
+        }
+        
+        const updatedRestaurant = await query
           .returningAll()
           .executeTakeFirstOrThrow();
 

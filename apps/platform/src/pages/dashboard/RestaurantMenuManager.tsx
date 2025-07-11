@@ -350,18 +350,16 @@ export default function RestaurantMenuManager() {
                 )}
               </Button>
               
-              {(menu.categories.length > 0 || menu.items.length > 0) && (
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteEntireMenu}
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Delete Restaurant</span>
-                  <span className="sm:hidden">Delete</span>
-                </Button>
-              )}
+              <Button
+                variant="destructive"
+                onClick={handleDeleteEntireMenu}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Delete Restaurant</span>
+                <span className="sm:hidden">Delete</span>
+              </Button>
             </div>
           </div>
         </div>

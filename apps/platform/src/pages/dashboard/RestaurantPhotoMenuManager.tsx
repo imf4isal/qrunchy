@@ -289,12 +289,10 @@ export default function RestaurantPhotoMenuManager() {
               <QrCode className="w-4 h-4 mr-2" />
               Generate QR
             </Button>
-            {images.length > 0 && (
-              <Button onClick={handleDeleteEntireMenu} variant="destructive">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Restaurant
-              </Button>
-            )}
+            <Button onClick={handleDeleteEntireMenu} variant="destructive">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Restaurant
+            </Button>
           </div>
         </div>
 
