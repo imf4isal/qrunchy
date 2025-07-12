@@ -1,4 +1,9 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file (for local dev) or use Docker env vars
+dotenv.config({ path: '../../.env' });
+
+
 import express from "express";
 import routes from "./restroutes/index.mts";
 import { trpcRouter } from "./trpc/trpc-server.mts";

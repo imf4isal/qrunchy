@@ -1,10 +1,10 @@
 # Cloudflare R2 Setup Guide (Updated 2025)
 
 ## ✅ Your Bucket Details
-- **Bucket Name**: `menu`
+- **Bucket Name**: `qrunchy`
 - **Account ID**: `ae689246e3715da2454b458efa2fc0f2`
 - **R2 Endpoint**: `https://ae689246e3715da2454b458efa2fc0f2.r2.cloudflarestorage.com`
-- **Public URL**: `https://pub-96c1fc9b883745fdb46e31e3f5c1fc61.r2.dev` ✅
+- **Public URL**: `https://pub-7bbb8f8509494271964ed1ac3af6ef64.r2.dev` ✅
 
 ## 🔑 Create R2 API Token (REQUIRED)
 
@@ -109,13 +109,13 @@ pnpm wrangler login
 
 # Test: List your buckets
 pnpm wrangler r2 bucket list
-# Should show: menu
+# Should show: qrunchy
 
 # Test: Upload a file
-pnpm wrangler r2 object put menu/test.jpg --file test.png
+pnpm wrangler r2 object put qrunchy/test.jpg --file test.png
 
 # Test: List files in bucket  
-pnpm wrangler r2 object list menu
+pnpm wrangler r2 object list qrunchy
 ```
 
 ### Method 2: Test Your Server
@@ -130,7 +130,7 @@ curl -X POST http://localhost:3000/api/upload/photomenu \
   -H "Content-Type: multipart/form-data"
 
 # Should return R2 URLs like:
-# {"success":true,"files":[{"url":"https://pub-96c1fc9b883745fdb46e31e3f5c1fc61.r2.dev/photomenu/..."}]}
+# {"success":true,"files":[{"url":"https://pub-7bbb8f8509494271964ed1ac3af6ef64.r2.dev/photomenu/..."}]}
 ```
 
 ### Method 3: Check Environment Variables
@@ -150,9 +150,9 @@ console.log('R2_SECRET_ACCESS_KEY:', process.env.R2_SECRET_ACCESS_KEY ? 'SET' : 
 
 | Variable | Your Value | Status |
 |----------|------------|--------|
-| `R2_BUCKET_NAME` | `menu` | ✅ Set |
+| `R2_BUCKET_NAME` | `qrunchy` | ✅ Set |
 | `R2_ENDPOINT` | `https://ae689246e3715da2454b458efa2fc0f2.r2.cloudflarestorage.com` | ✅ Set |
-| `R2_PUBLIC_URL` | `https://pub-96c1fc9b883745fdb46e31e3f5c1fc61.r2.dev` | ✅ Set |
+| `R2_PUBLIC_URL` | `https://pub-7bbb8f8509494271964ed1ac3af6ef64.r2.dev` | ✅ Set |
 | `R2_ACCESS_KEY_ID` | Your R2 API Token | ❌ **ADD THIS** |
 | `R2_SECRET_ACCESS_KEY` | Same as above | ❌ **ADD THIS** |
 
@@ -160,8 +160,8 @@ console.log('R2_SECRET_ACCESS_KEY:', process.env.R2_SECRET_ACCESS_KEY ? 'SET' : 
 
 ### Upload Flow (Photo Menu Creation)
 1. User uploads photos via photo menu interface in platform
-2. Server receives files and uploads to R2 `menu/photomenu/` folder  
-3. Returns public R2 URLs like: `https://pub-96c1fc9b883745fdb46e31e3f5c1fc61.r2.dev/photomenu/image-uuid.jpg`
+2. Server receives files and uploads to R2 `qrunchy/photomenu/` folder  
+3. Returns public R2 URLs like: `https://pub-7bbb8f8509494271964ed1ac3af6ef64.r2.dev/photomenu/image-uuid.jpg`
 4. Frontend stores these URLs for QR code generation
 
 ### Viewing Flow (Customer Experience)  
