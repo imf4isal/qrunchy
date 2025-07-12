@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from "express";
 import routes from "./restroutes/index.mts";
 import { trpcRouter } from "./trpc/trpc-server.mts";

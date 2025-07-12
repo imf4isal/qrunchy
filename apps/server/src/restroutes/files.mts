@@ -25,13 +25,13 @@ router.post('/upload/photomenu', uploadMultiple, async (req, res) => {
       uploadResults.push(result);
     }
 
-    res.json({ 
+    return res.json({ 
       success: true, 
       files: uploadResults 
     });
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Upload failed', 
       message: error instanceof Error ? error.message : 'Unknown error' 
     });
@@ -53,13 +53,13 @@ router.post('/upload/single', uploadMultiple, async (req, res) => {
       contentType: file.mimetype
     });
 
-    res.json({ 
+    return res.json({ 
       success: true, 
       file: result 
     });
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Upload failed', 
       message: error instanceof Error ? error.message : 'Unknown error' 
     });
