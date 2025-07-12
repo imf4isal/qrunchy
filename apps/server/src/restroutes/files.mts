@@ -1,15 +1,10 @@
 import express from 'express';
-import path from 'path';
-import fs from 'fs/promises';
-import { randomUUID } from 'crypto';
-import { uploadMultiple } from '../middleware/upload.mts';
+import { uploadMultiple } from '../middleware/upload.mjs';
+import { StorageFactory } from '../storage/StorageFactory.mjs';
 
 const router = express.Router();
 
-console.log('File routes module loaded');
-
-// Serve static files from uploads directory (for local storage)
-router.use('/files', express.static(path.join(process.cwd(), 'uploads')));
+console.log('File routes module loaded - R2 storage only');
 
 // Upload endpoint for photo menu images
 router.post('/upload/photomenu', uploadMultiple, async (req, res) => {
@@ -18,32 +13,16 @@ router.post('/upload/photomenu', uploadMultiple, async (req, res) => {
       return res.status(400).json({ error: 'No files uploaded' });
     }
 
+    const storage = StorageFactory.getProvider();
     const uploadResults = [];
-    const baseDir = 'uploads';
-    const baseUrl = 'http://localhost:3000/api/files';
 
     for (const file of req.files) {
-      const folder = 'photomenu';
-      const ext = path.extname(file.originalname);
-      const filename = `${randomUUID()}${ext}`;
-      const key = `${folder}/${filename}`;
-      const fullPath = path.join(baseDir, key);
-
-      // Ensure directory exists
-      await fs.mkdir(path.dirname(fullPath), { recursive: true });
-
-      // Write file
-      await fs.writeFile(fullPath, file.buffer);
-
-      // Get file stats for size
-      const stats = await fs.stat(fullPath);
-
-      uploadResults.push({
-        url: `${baseUrl}/${key}`,
-        key,
-        size: stats.size,
+      const result = await storage.upload(file.buffer, file.originalname, {
+        folder: 'photomenu',
         contentType: file.mimetype
       });
+
+      uploadResults.push(result);
     }
 
     res.json({ 
@@ -66,30 +45,13 @@ router.post('/upload/single', uploadMultiple, async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    const storage = StorageFactory.getProvider();
     const file = req.files[0];
-    const baseDir = 'uploads';
-    const baseUrl = 'http://localhost:3000/api/files';
-    const folder = 'photomenu';
-    const ext = path.extname(file.originalname);
-    const filename = `${randomUUID()}${ext}`;
-    const key = `${folder}/${filename}`;
-    const fullPath = path.join(baseDir, key);
-
-    // Ensure directory exists
-    await fs.mkdir(path.dirname(fullPath), { recursive: true });
-
-    // Write file
-    await fs.writeFile(fullPath, file.buffer);
-
-    // Get file stats for size
-    const stats = await fs.stat(fullPath);
-
-    const result = {
-      url: `${baseUrl}/${key}`,
-      key,
-      size: stats.size,
+    
+    const result = await storage.upload(file.buffer, file.originalname, {
+      folder: 'photomenu',
       contentType: file.mimetype
-    };
+    });
 
     res.json({ 
       success: true, 
