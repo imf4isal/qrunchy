@@ -142,7 +142,7 @@ const QRCodeGenerator = ({
           formData.append('images', image.file);
         });
 
-        const uploadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}/api/upload/photomenu`, {
+        const uploadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://13.250.49.6:3000'}/api/upload/photomenu`, {
           method: 'POST',
           body: formData,
         });

@@ -9,7 +9,7 @@ import { trpc } from "./utils/trpc";
 // import { devtoolsLink } from "trpc-client-devtools-link";
 
 const App = () => {
-  const localURL = `${window.location.protocol}//${window.location.hostname}:3000/trpc`;
+  const localURL = `${import.meta.env.VITE_BACKEND_URL || "http://13.250.49.6:3000"}/trpc`;
 
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
