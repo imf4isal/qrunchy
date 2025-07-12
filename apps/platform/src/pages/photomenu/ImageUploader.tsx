@@ -70,7 +70,7 @@ const ImageUploader = ({
         formData.append('images', image.file);
       });
 
-      const response = await fetch('http://localhost:3000/api/upload/photomenu', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}/api/upload/photomenu`, {
         method: 'POST',
         body: formData,
       });

@@ -75,7 +75,7 @@ export default function RestaurantPhotoMenuManager() {
         formData.append('images', file);
       });
 
-      const uploadResponse = await fetch('http://localhost:3000/api/upload/photomenu', {
+      const uploadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}/api/upload/photomenu`, {
         method: 'POST',
         body: formData,
       });

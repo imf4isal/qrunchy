@@ -11,7 +11,7 @@ export const trpcClientConfig = {
       enabled: import.meta.env.DEV,
     }),
     httpBatchLink({
-      url: "http://localhost:3000/trpc",
+      url: `${import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"}/trpc`,
     }),
   ],
 };
