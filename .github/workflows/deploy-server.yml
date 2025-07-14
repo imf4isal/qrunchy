@@ -1,0 +1,43 @@
+name: Deploy Server to AWS Lightsail
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/server/**'
+      - '.github/workflows/deploy-server.yml'
+
+jobs:
+  deploy:
+    name: Deploy to Lightsail
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/server
+          sparse-checkout-cone-mode: false
+
+      - name: Copy server files to Lightsail
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          source: "apps/server/*"
+          target: "/home/ubuntu/qrunchy-server/"
+          strip_components: 2
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/qrunchy-server
+            chmod +x deploy.sh
+            ./deploy.sh
