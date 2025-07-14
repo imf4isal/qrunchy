@@ -1,7 +1,7 @@
 # Server Automated Deployment Setup
 
 ## 🚀 What This Does
-- **Auto-deploys** when you push to `main` branch (server changes only)
+- **Auto-deploys** when you push to `production` branch (server changes only)
 - **Simplified Docker setup** (no nginx/SSL complexity)
 - **Uses Cloudflare Tunnel** for HTTPS (recommended)
 
@@ -66,11 +66,26 @@ cloudflared tunnel run qrunchy-server
 
 ## 🔄 How It Works
 
-1. **Push to main** → GitHub Action triggers
+1. **Push to production** → GitHub Action triggers
 2. **Sparse checkout** → Only downloads `apps/server/` 
 3. **SCP transfer** → Copies server files to Lightsail
 4. **Run deploy.sh** → Rebuild containers
 5. **Cloudflare Tunnel** → Serves HTTPS traffic
+
+## 🌟 Deployment Workflow
+
+```bash
+# Development workflow
+git checkout main
+# ... make changes ...
+git commit -m "Add new feature"
+git push origin main
+
+# When ready to deploy
+git checkout production
+git merge main
+git push origin production  # 🚀 This triggers deployment!
+```
 
 ## 🏃‍♂️ Manual Deployment
 ```bash

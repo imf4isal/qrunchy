@@ -2,7 +2,7 @@ name: Deploy Server to AWS Lightsail
 
 on:
   push:
-    branches: [main]
+    branches: [production]
     paths:
       - 'apps/server/**'
       - '.github/workflows/deploy-server.yml'
