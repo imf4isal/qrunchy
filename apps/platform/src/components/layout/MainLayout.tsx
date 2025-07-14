@@ -65,32 +65,32 @@ export default function MainLayout({ children }: MainLayoutProps) {
         </div>
       </header>
       <main className="flex-grow">{children}</main>
-      <footer className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-12">
+      <footer className="bg-gray-50 py-12 mt-20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
-              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent hover:from-blue-300 hover:to-purple-300 transition-all duration-300">
+              <Link href="/" className="text-2xl font-medium text-gray-900 hover:text-gray-700 transition-colors duration-200">
                 Qrunchy
               </Link>
-              <p className="text-gray-400 text-sm mt-2">Digital menus made simple</p>
+              <p className="text-gray-600 text-sm mt-2">Digital menus made simple</p>
             </div>
             <div className="flex gap-8">
-              <Link href="/about" className="text-gray-300 hover:text-white transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-400 after:transition-all after:duration-300 hover:after:w-full">
+              <Link href="/about" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm">
                 About
               </Link>
-              <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-400 after:transition-all after:duration-300 hover:after:w-full">
+              <Link href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm">
                 Contact
               </Link>
-              <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-400 after:transition-all after:duration-300 hover:after:w-full">
+              <Link href="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm">
                 Privacy
               </Link>
-              <Link href="/terms" className="text-gray-300 hover:text-white transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-400 after:transition-all after:duration-300 hover:after:w-full">
+              <Link href="/terms" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm">
                 Terms
               </Link>
             </div>
           </div>
-          <div className="text-center mt-12 pt-8 border-t border-gray-700 text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Qrunchy. All rights reserved.</p>
+          <div className="text-center mt-8 pt-8 border-t border-gray-200">
+            <p className="text-gray-500 text-sm">&copy; {new Date().getFullYear()} Qrunchy. All rights reserved.</p>
           </div>
         </div>
       </footer>
