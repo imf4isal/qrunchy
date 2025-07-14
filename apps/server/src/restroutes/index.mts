@@ -11,7 +11,7 @@ router.use("/api", fileRoutes);
 
 // test server
 router.get("/", (req, res) => {
-  res.json({ message: "Hello from Qrunchy API!" });
+  res.json({ message: "Hello from Qrunchy API - CI/CD Test Successful!" });
 });
 
 router.get("/db-test", async (req, res) => {
