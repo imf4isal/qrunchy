@@ -87,6 +87,7 @@ export interface ItemTable {
   description: string | null;
   category_id: number;
   sort_order: number;
+  image_url: string | null;
 }
 
 export interface VariantTable {
