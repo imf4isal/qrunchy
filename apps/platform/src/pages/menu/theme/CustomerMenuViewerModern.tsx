@@ -6,6 +6,7 @@ import {
   Phone,
   ChevronDown,
   ArrowUp,
+  Filter,
   Star,
   Clock,
   Heart,
@@ -352,32 +353,16 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
 
   return (
     <div className="bg-white/95 backdrop-blur-2xl rounded-3xl border border-white/10 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:scale-[1.02] hover:bg-white group">
-      <div className={`${item.image_url ? 'md:flex' : ''} relative`}>
-        {item.image_url && (
-          <div className="md:w-2/5 lg:w-1/3 h-48 md:h-auto relative overflow-hidden">
-            <img
-              src={item.image_url}
-              alt={item.name}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              loading="lazy"
-              onError={(e) => {
-                // Hide image if it fails to load
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/5"></div>
-          </div>
-        )}
-        <div className={`p-8 ${item.image_url ? 'md:w-3/5 lg:w-2/3' : 'w-full'} relative`}>
-          <button
-            onClick={() => setIsLiked(!isLiked)}
-            className="absolute top-6 right-6 p-2 rounded-full transition-all hover:bg-gray-100 group-hover:scale-110"
-          >
-            <Heart
-              size={20}
-              className={`transition-all ${isLiked ? "text-red-500 fill-current" : "text-gray-400 hover:text-red-400"}`}
-            />
-          </button>
+      <div className="p-8 relative">
+        <button
+          onClick={() => setIsLiked(!isLiked)}
+          className="absolute top-6 right-6 p-2 rounded-full transition-all hover:bg-gray-100 group-hover:scale-110"
+        >
+          <Heart
+            size={20}
+            className={`transition-all ${isLiked ? "text-red-500 fill-current" : "text-gray-400 hover:text-red-400"}`}
+          />
+        </button>
 
         <div className="flex justify-between items-start mb-6 pr-12">
           <div className="flex-1">
