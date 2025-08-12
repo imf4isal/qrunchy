@@ -6,7 +6,6 @@ import {
   Phone,
   ChevronDown,
   ArrowUp,
-  Filter,
   Star,
   Clock,
   Heart,
@@ -370,15 +369,15 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
           </div>
         )}
         <div className={`p-8 ${item.image_url ? 'md:w-3/5 lg:w-2/3' : 'w-full'} relative`}>
-        <button
-          onClick={() => setIsLiked(!isLiked)}
-          className="absolute top-6 right-6 p-2 rounded-full transition-all hover:bg-gray-100 group-hover:scale-110"
-        >
-          <Heart
-            size={20}
-            className={`transition-all ${isLiked ? "text-red-500 fill-current" : "text-gray-400 hover:text-red-400"}`}
-          />
-        </button>
+          <button
+            onClick={() => setIsLiked(!isLiked)}
+            className="absolute top-6 right-6 p-2 rounded-full transition-all hover:bg-gray-100 group-hover:scale-110"
+          >
+            <Heart
+              size={20}
+              className={`transition-all ${isLiked ? "text-red-500 fill-current" : "text-gray-400 hover:text-red-400"}`}
+            />
+          </button>
 
         <div className="flex justify-between items-start mb-6 pr-12">
           <div className="flex-1">
