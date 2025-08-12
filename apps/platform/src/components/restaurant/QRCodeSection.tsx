@@ -57,7 +57,7 @@ export default function QRCodeSection({ qrData, restaurantName, onDownloadQR }: 
               </Button>
             </div>
           </div>
-          <div className="flex justify-center">
+          <div className="flex justify-center items-center">
             <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
               <QRCodeDisplay 
                 value={qrCode.menu_url} 
