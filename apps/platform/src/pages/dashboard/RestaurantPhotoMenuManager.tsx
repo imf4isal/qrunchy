@@ -6,6 +6,7 @@ import { trpc } from "@/utils/trpc";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
 import QRCodeSection from "@/components/restaurant/QRCodeSection";
+import RestaurantSettings from "@/components/restaurant/RestaurantSettings";
 import { ArrowLeft, Upload, Trash2, GripVertical, Eye } from "lucide-react";
 import {
   DndContext,
@@ -307,6 +308,11 @@ export default function RestaurantPhotoMenuManager() {
             </Button>
           </div>
         </div>
+
+        {/* Restaurant Settings */}
+        {restaurant && (
+          <RestaurantSettings restaurant={restaurant} />
+        )}
 
         {/* QR Code Section */}
         <QRCodeSection 

@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { trpc } from "@/utils/trpc";
 import ThemeSelector from "@/components/ThemeSelector";
 import QRCodeSection from "@/components/restaurant/QRCodeSection";
+import RestaurantSettings from "@/components/restaurant/RestaurantSettings";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function RestaurantMenuManager() {
@@ -393,6 +394,11 @@ export default function RestaurantMenuManager() {
             </div>
           </div>
         </div>
+
+        {/* Restaurant Settings */}
+        {restaurant && (
+          <RestaurantSettings restaurant={restaurant} />
+        )}
 
         {/* QR Code Section */}
         <QRCodeSection 
