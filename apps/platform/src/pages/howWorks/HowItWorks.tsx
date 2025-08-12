@@ -131,7 +131,7 @@ export default function HowItWorks() {
                 </div>
 
                 <div className="mt-10">
-                  <Button asChild className="w-full border border-gray-300 bg-white text-gray-900 hover:bg-gray-50">
+                  <Button asChild className="w-full bg-gray-900 hover:bg-gray-800 text-white">
                     <Link href="/digital-menu">Create Digital Menu</Link>
                   </Button>
                 </div>
