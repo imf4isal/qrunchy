@@ -55,7 +55,7 @@ export default function ItemEditor({
     setUploadingImage(true);
     try {
       const formData = new FormData();
-      formData.append('files', file);
+      formData.append('images', file);
 
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://13.250.49.6:3000'}/api/upload/menuitem/single`, {
         method: 'POST',
