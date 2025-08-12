@@ -352,7 +352,19 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
 
   return (
     <div className="bg-white/95 backdrop-blur-2xl rounded-3xl border border-white/10 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:scale-[1.02] hover:bg-white group">
-      <div className="p-8 relative">
+      <div className={`${item.image_url ? 'md:flex' : ''} relative`}>
+        {item.image_url && (
+          <div className="md:w-2/5 lg:w-1/3 h-48 md:h-auto relative overflow-hidden">
+            <img
+              src={item.image_url}
+              alt={item.name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none"
+              loading="lazy"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          </div>
+        )}
+        <div className={`p-8 ${item.image_url ? 'md:w-3/5 lg:w-2/3' : 'w-full'} relative`}>
         <button
           onClick={() => setIsLiked(!isLiked)}
           className="absolute top-6 right-6 p-2 rounded-full transition-all hover:bg-gray-100 group-hover:scale-110"
