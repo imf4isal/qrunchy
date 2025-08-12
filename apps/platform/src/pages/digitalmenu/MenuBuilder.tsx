@@ -157,6 +157,14 @@ export default function MenuBuilder({
     },
   });
 
+  const updateItemImageMutation = trpc.digitalMenu.items.updateImage.useMutation({
+    onSuccess: () => {
+      setTimeout(() => {
+        utils.digitalMenu.items.getByRestaurant.invalidate();
+      }, 100);
+    },
+  });
+
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -326,6 +334,22 @@ export default function MenuBuilder({
   };
 
   const handleSaveItem = async (item: MenuItem) => {
+    // If in batch mode but the item has an image_url, save the image immediately
+    if (batchSaveMode && restaurantId && item.image_url) {
+      const existingItem = menu.items?.find((existingItem) => existingItem.id === item.id);
+      if (existingItem && existingItem.image_url !== item.image_url) {
+        try {
+          await updateItemImageMutation.mutateAsync({
+            id: parseInt(item.id, 10),
+            image_url: item.image_url,
+          });
+        } catch (error) {
+          console.error('Failed to save image:', error);
+          alert('Failed to save image. Please try again.');
+        }
+      }
+    }
+    
     if (batchSaveMode || !restaurantId) {
       // In batch save mode or for new restaurants, just update local state
       const existingItemIndex = menu.items?.findIndex(existingItem => existingItem.id === item.id) ?? -1;
