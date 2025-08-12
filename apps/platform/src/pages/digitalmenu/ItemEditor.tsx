@@ -57,7 +57,7 @@ export default function ItemEditor({
       const formData = new FormData();
       formData.append('files', file);
 
-      const response = await fetch('/api/files/upload/menuitem/single', {
+      const response = await fetch('/api/upload/menuitem/single', {
         method: 'POST',
         body: formData,
       });
