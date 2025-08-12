@@ -24,6 +24,7 @@ export interface MenuItem {
   variants: Variant[];
   addons: Addon[];
   description?: string;
+  image_url?: string;
 }
 
 export interface Category {

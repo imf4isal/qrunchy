@@ -312,7 +312,25 @@ function MenuItemCard({ item }: MenuItemCardProps) {
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-xl hover:shadow-slate-900/10 transition-all duration-300 hover:-translate-y-1">
-      <div className="p-8">
+      <div className={`${item.image_url ? 'md:flex' : ''}`}>
+        {item.image_url && (
+          <div className="md:w-2/5 lg:w-1/3 h-48 md:h-auto relative overflow-hidden">
+            <img
+              src={item.image_url}
+              alt={item.name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              loading="lazy"
+              onError={(e) => {
+                // Hide image container if it fails to load
+                const parent = e.currentTarget.closest('.md\\:w-2\\/5, .lg\\:w-1\\/3');
+                if (parent) {
+                  parent.style.display = 'none';
+                }
+              }}
+            />
+          </div>
+        )}
+        <div className={`p-8 ${item.image_url ? 'md:w-3/5 lg:w-2/3' : 'w-full'}`}>
         <div className="flex justify-between items-start mb-6">
           <div className="flex-1 pr-6">
             <h3 className="text-lg font-semibold text-slate-900 mb-2 leading-tight">
@@ -413,6 +431,7 @@ function MenuItemCard({ item }: MenuItemCardProps) {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
