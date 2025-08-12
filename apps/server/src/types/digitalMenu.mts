@@ -86,6 +86,7 @@ export interface BulkImportItem {
   price: number;
   description?: string;
   categoryName: string;
+  image_url?: string;
   variants?: BulkImportVariant[];
   addons?: BulkImportAddon[];
 }

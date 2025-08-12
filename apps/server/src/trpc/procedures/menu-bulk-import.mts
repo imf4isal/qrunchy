@@ -2,6 +2,7 @@ import { z } from "zod";
 import { publicProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 import type { ItemTable } from "../../types/database.mts";
+import { StorageFactory } from "../../storage/StorageFactory.mjs";
 import {
   variantSchema,
   addonSchema,
@@ -18,12 +19,62 @@ const bulkImportSchema = z.object({
       price: z.number().min(0, "Price must be non-negative"),
       description: z.string().optional(),
       categoryName: z.string().min(1, "Category name is required"),
+      image_url: z.string().url("Invalid image URL").optional(),
       variants: z.array(variantSchema).optional(),
       addons: z.array(addonSchema).optional(),
     })),
   }),
   replace_existing: z.boolean().default(false),
 });
+
+// Helper function to download image from URL and upload to R2
+const downloadAndUploadImage = async (imageUrl: string): Promise<string | null> => {
+  try {
+    // Validate URL
+    const url = new URL(imageUrl);
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      throw new Error('Invalid URL protocol');
+    }
+
+    // Download the image
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
+    }
+
+    // Get content type and validate it's an image
+    const contentType = response.headers.get('content-type') || '';
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.some(type => contentType.includes(type))) {
+      throw new Error(`Invalid image type: ${contentType}`);
+    }
+
+    // Get the image buffer
+    const buffer = Buffer.from(await response.arrayBuffer());
+    
+    // Check file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (buffer.length > maxSize) {
+      throw new Error('Image file too large (max 5MB)');
+    }
+
+    // Generate filename from URL
+    const urlPath = url.pathname;
+    const filename = urlPath.split('/').pop() || 'image';
+    
+    // Upload to R2
+    const storage = StorageFactory.getProvider();
+    const result = await storage.upload(buffer, filename, {
+      folder: 'menuitem',
+      contentType: contentType,
+    });
+
+    return result.url;
+  } catch (error) {
+    console.error('Error downloading and uploading image:', error);
+    return null; // Return null to skip the image rather than failing the entire import
+  }
+};
 
 // Helper function to clear existing menu data
 const clearExistingMenuData = async (trx: any, restaurantId: number) => {
@@ -159,6 +210,12 @@ const createItems = async (trx: any, input: any, categoryMap: Map<string, number
       throw new Error(`Category "${itemData.categoryName}" not found`);
     }
 
+    // Handle image URL - download and upload if provided
+    let finalImageUrl: string | null = null;
+    if (itemData.image_url) {
+      finalImageUrl = await downloadAndUploadImage(itemData.image_url);
+    }
+
     // Create item
     const item = await trx
       .insertInto("item")
@@ -168,6 +225,7 @@ const createItems = async (trx: any, input: any, categoryMap: Map<string, number
         description: itemData.description || null,
         category_id: categoryId,
         sort_order: createdItems.length,
+        image_url: finalImageUrl,
       })
       .returningAll()
       .executeTakeFirstOrThrow() as ItemTable & { id: number };
