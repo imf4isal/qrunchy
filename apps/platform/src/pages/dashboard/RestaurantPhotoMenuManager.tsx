@@ -309,17 +309,21 @@ export default function RestaurantPhotoMenuManager() {
           </div>
         </div>
 
-        {/* Restaurant Settings */}
-        {restaurant && (
-          <RestaurantSettings restaurant={restaurant} />
-        )}
-
-        {/* QR Code Section */}
-        <QRCodeSection 
-          qrData={qrData} 
-          restaurantName={restaurant?.name}
-          onDownloadQR={handleDownloadQR}
-        />
+        {/* Restaurant Settings and QR Code Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8 items-stretch">
+          <div className="flex">
+            {restaurant && (
+              <RestaurantSettings restaurant={restaurant} />
+            )}
+          </div>
+          <div className="flex">
+            <QRCodeSection 
+              qrData={qrData} 
+              restaurantName={restaurant?.name}
+              onDownloadQR={handleDownloadQR}
+            />
+          </div>
+        </div>
 
         {/* Upload Section */}
         <Card className="mb-8">
