@@ -304,7 +304,7 @@ export default function RestaurantPhotoMenuManager() {
             )}
             <Button onClick={handleDeleteEntireMenu} variant="destructive">
               <Trash2 className="w-4 h-4 mr-2" />
-              Delete Restaurant
+              Delete Menu
             </Button>
           </div>
         </div>

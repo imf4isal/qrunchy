@@ -388,7 +388,7 @@ export default function RestaurantMenuManager() {
                 className="flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Delete Restaurant</span>
+                <span className="hidden sm:inline">Delete Menu</span>
                 <span className="sm:hidden">Delete</span>
               </Button>
             </div>
