@@ -6,7 +6,6 @@ import {
   Phone,
   ChevronDown,
   ArrowUp,
-  Filter,
   Star,
   Clock,
   Heart,
@@ -483,6 +482,7 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
               </div>
             )}
           </div>
+        )}
         </div>
       </div>
   );
