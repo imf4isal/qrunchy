@@ -485,7 +485,6 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
