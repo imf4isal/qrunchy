@@ -75,9 +75,7 @@ export const qrProcedures = {
               status: input.setup_type === "self" ? "available" : "used",
               restaurant_id: input.restaurant_id,
               bound_at: new Date(),
-              expires_at: input.setup_type === "self" 
-                ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-                : null,
+              expires_at: null, // QR codes don't expire
               self_serve: input.setup_type === "self",
             })
             .returningAll()

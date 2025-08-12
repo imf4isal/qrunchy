@@ -351,11 +351,6 @@ const QRCodeGenerator = ({
           {qrData && (
             <div className="text-center mb-6">
               <p className="text-xs text-gray-500 mb-1">QR Code: {qrData.qr_code}</p>
-              {qrData.expires_at && (
-                <p className="text-xs text-gray-500">
-                  Expires: {new Date(qrData.expires_at).toLocaleDateString()}
-                </p>
-              )}
             </div>
           )}
 

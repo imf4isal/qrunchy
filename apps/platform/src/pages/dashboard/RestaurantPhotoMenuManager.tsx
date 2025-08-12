@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
-import QRCodeDisplay from "@/components/QRCodeDisplay";
-import { ArrowLeft, Upload, Trash2, GripVertical, Eye, QrCode, Download, ExternalLink } from "lucide-react";
+import QRCodeSection from "@/components/restaurant/QRCodeSection";
+import { ArrowLeft, Upload, Trash2, GripVertical, Eye } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -308,6 +308,13 @@ export default function RestaurantPhotoMenuManager() {
           </div>
         </div>
 
+        {/* QR Code Section */}
+        <QRCodeSection 
+          qrData={qrData} 
+          restaurantName={restaurant?.name}
+          onDownloadQR={handleDownloadQR}
+        />
+
         {/* Upload Section */}
         <Card className="mb-8">
           <CardHeader>
@@ -339,58 +346,6 @@ export default function RestaurantPhotoMenuManager() {
             </div>
           </CardContent>
         </Card>
-
-        {/* QR Code Section */}
-        {qrData && qrData.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <QrCode className="w-5 h-5" />
-                Your Menu QR Code
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">QR Code Details</p>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <p><span className="font-medium">Code:</span> {qrData[0].code}</p>
-                      <p><span className="font-medium">Status:</span> Active</p>
-                      <p><span className="font-medium">Menu URL:</span></p>
-                      <div className="bg-gray-50 p-2 rounded text-xs font-mono break-all">
-                        {qrData[0].menu_url}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={handleDownloadQR} variant="outline" size="sm">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download QR
-                    </Button>
-                    <Button
-                      onClick={() => window.open(`/menu/${qrData[0].code}`, '_blank')}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      View Menu
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex justify-center">
-                  <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-                    <QRCodeDisplay 
-                      value={qrData[0].menu_url} 
-                      size={192}
-                      className="rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Photo Management */}
         <Card>

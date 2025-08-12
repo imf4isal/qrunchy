@@ -9,6 +9,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { trpc } from "@/utils/trpc";
 import ThemeSelector from "@/components/ThemeSelector";
+import QRCodeSection from "@/components/restaurant/QRCodeSection";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function RestaurantMenuManager() {
@@ -77,6 +78,12 @@ export default function RestaurantMenuManager() {
   } = trpc.digitalMenu.menu.getComplete.useQuery(
     { restaurant_id: restaurantId },
     { enabled: !!restaurantId && !!restaurant }
+  );
+
+  // Fetch QR code data for this restaurant
+  const { data: qrData } = trpc.digitalMenu.qr.getByRestaurant.useQuery(
+    { restaurant_id: restaurantId },
+    { enabled: !!restaurantId }
   );
 
   // Update local menu state when backend data loads
@@ -183,6 +190,29 @@ export default function RestaurantMenuManager() {
       setTimeout(() => setSaveStatus('idle'), 5000);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDownloadQR = async () => {
+    const qrCode = qrData?.[0];
+    if (qrCode?.menu_url) {
+      try {
+        const canvas = document.createElement('canvas');
+        await import('qrcode').then(QRCode => {
+          QRCode.default.toCanvas(canvas, qrCode.menu_url, {
+            width: 400,
+            margin: 2,
+          });
+        });
+        
+        const link = document.createElement('a');
+        link.download = `${restaurant?.name}-qr-code.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      } catch (error) {
+        console.error('Error downloading QR code:', error);
+        alert('Failed to download QR code');
+      }
     }
   };
 
@@ -363,6 +393,13 @@ export default function RestaurantMenuManager() {
             </div>
           </div>
         </div>
+
+        {/* QR Code Section */}
+        <QRCodeSection 
+          qrData={qrData} 
+          restaurantName={restaurant?.name}
+          onDownloadQR={handleDownloadQR}
+        />
 
         {/* Theme Settings */}
         <div className="mb-8">
