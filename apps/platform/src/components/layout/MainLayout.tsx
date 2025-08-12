@@ -133,12 +133,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
               <Link href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm">
                 Contact
               </Link>
-              <Link href="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm">
-                Privacy
-              </Link>
-              <Link href="/terms" className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm">
-                Terms
-              </Link>
             </div>
           </div>
           <div className="text-center mt-8 pt-8 border-t border-gray-200">
