@@ -82,5 +82,3 @@ yarn-error.log*
 .DS_Store
 *.pem
 
-
-curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb

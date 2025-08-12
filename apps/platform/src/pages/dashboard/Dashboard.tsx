@@ -167,10 +167,7 @@ export default function Dashboard() {
                   )}
                 </div>
               </div>
-              <p className="text-gray-600 text-sm mb-2">
-                {restaurant.mobile}
-              </p>
-              {restaurant.address && (
+              {restaurant.address && restaurant.address !== "Not specified" && (
                 <p className="text-gray-500 text-sm">
                   {restaurant.address}
                 </p>
@@ -190,24 +187,14 @@ export default function Dashboard() {
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/dashboard/restaurant/${restaurant.id}/photomenu`}>
                     <Image className="w-4 h-4 mr-1" />
-                    Manage Photo Menu
+                    Manage
                   </Link>
                 </Button>
               ) : (
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/dashboard/restaurant/${restaurant.id}/menu`}>
                     <Edit3 className="w-4 h-4 mr-1" />
-                    Edit Digital Menu
-                  </Link>
-                </Button>
-              )}
-
-              {/* Secondary Actions */}
-              {!hasPhotoMenu && (
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/photo-menu">
-                    <Camera className="w-4 h-4 mr-1" />
-                    Create Photo Menu
+                    Manage
                   </Link>
                 </Button>
               )}
@@ -216,21 +203,21 @@ export default function Dashboard() {
               {hasDigitalMenu ? (
                 <Button variant="outline" size="sm" asChild>
                   <Link
-                    href={restaurantQrMap[restaurant.id]!.menu_url}
+                    href={`/menu/${restaurantQrMap[restaurant.id]!.code}`}
                     target="_blank"
                   >
                     <QrCode className="w-4 h-4 mr-1" />
-                    View Digital Menu
+                    View
                   </Link>
                 </Button>
               ) : hasPhotoMenu && hasPhotoMenuQr ? (
                 <Button variant="outline" size="sm" asChild>
                   <Link
-                    href={restaurantPhotoQrMap[restaurant.id]!.menu_url}
+                    href={`/menu/${restaurantPhotoQrMap[restaurant.id]!.code}`}
                     target="_blank"
                   >
                     <QrCode className="w-4 h-4 mr-1" />
-                    View Photo Menu
+                    View
                   </Link>
                 </Button>
               ) : (

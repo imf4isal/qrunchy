@@ -87,8 +87,8 @@ Learn more about the power of Turborepo:
 ```
 Our project is a turbo monorepo architecture codebase. where there are two apps inside apps folder. one is server which is basically the backend and another is platform, which is basically the frontend. so, the brief of the project is , it's qrunchy. where restaurant owner can create their menu instead of paper menu. now, we are keeping two flow.
 
-One is to build photomenu, where user just need to take photos of their menuq, upload, sort photo, generate qr, then boom. it will be
-ready. that flow is in the platform –> src –> pages –> photoMenu. it's just frontend ui. We have not implemented the backend for this part yet. It's just dummy frontend.
+One is to build photomenu, where user just need to take photos of their menu, upload, sort photo, generate qr, then boom. it will be
+ready. that flow is in the platform –> src –> pages –> photoMenu.
 
 Then, there are also digitalmenu inside pages folder, which is basically manual menu creation flow for better UI for custoemr. User will put their menu information – category, item, variants, addons, etc .
 Then it will generate better ui than the photomenu.   –––– there are also other ui stuff in the platform.
@@ -97,9 +97,11 @@ Currently, at the first step, the user put the restaurant information, then cont
 And in our project, inside apps/server, there are server side code. inside src/db, you will find migrations file for our database. and one queries for digitalmenu.
 Inside src/trpc folder, there are procedures and router. we have implemented all necessary procedures and routes for the digital manual creation and viewing part.
 
+There are theme functionality to viewing the menu. also, there are group functionality too. I mean, one user can create group with his multiple menus.
 
 
- Oh, here is the initial data model of the project's database(dbdiagram format).
+
+ Oh, here is the initial data model of the project's database(dbdiagram format). There are some additional changes in the DB model.
 
 ```
 
@@ -197,8 +199,10 @@ price decimal(10,2)
 
 ```
 
-Analyze the whole project very briefly, so that you understand well what's going on, and we can proceed further.
-```
+
+
+
+-- Some Information about theme.
 
 ## Theme
 
@@ -333,10 +337,8 @@ Qrunchy Turbo Monorepo - Project Structure and Theme Implementation │ │
 
 ---
 
-Analysis of Current Architecture
+also, here are some Analysis of Current Architecture, which might help you.
 
-Based on your existing schema, you already have the foundation for both
-features:
 
 Current Structure:
 
@@ -356,7 +358,7 @@ Feature Requirements Analysis
 - Current Support: ✅ Already supported with existing group_res table
   and group_res_id
 
-2. Food Courts (Customer Experience)
+2. Food Courts (Customer Experience) - not yet implemented(maybe)
 
 - Purpose: Single QR code showing multiple restaurants to customers
 - User Experience: Scan QR → See restaurant grid/list → Select
@@ -423,83 +425,12 @@ Feature Requirements Analysis
   │ - Supports both use cases elegantly │
   │ - Maintains type safety throughout
 
----
 
----
+----
 
----
 
-upload plan
 
-Storage Abstraction Implementation Plan │ │
-│ │ │ │
-│ │ Phase 1: Core Storage Abstraction Layer │ │
-│ │ │ │
-│ │ 1. Create storage interface (IStorageProvider) with methods: │ │
-│ │ - upload(file: Buffer, filename: string, options?: StorageOptions): │ │
-│ │ Promise<StorageResult> │ │
-│ │ - delete(url: string): Promise<void> │ │
-│ │ - getUrl(key: string): string │ │
-│ │ - exists(key: string): Promise<boolean> │ │
-│ │ 2. Implement Local Filesystem Provider (LocalStorageProvider): │ │
-│ │ - Store files in uploads/ directory with organized structure │ │
-│ │ - Generate URLs pointing to static file server endpoint │ │
-│ │ - Implement file cleanup and validation │ │
-│ │ 3. Implement Cloudflare R2 Provider (R2StorageProvider): │ │
-│ │ - Use R2 SDK for file operations │ │
-│ │ - Handle public URL generation │ │
-│ │ - Implement proper error handling │ │
-│ │ 4. Create Storage Factory (StorageFactory): │ │
-│ │ - Environment-based provider selection │ │
-│ │ - Configuration management │ │
-│ │ - Provider switching capability │ │
-│ │ │ │
-│ │ Phase 2: Server Infrastructure │ │
-│ │ │ │
-│ │ 1. Add file upload dependencies: │ │
-│ │ - multer for multipart form handling │ │
-│ │ - @aws-sdk/client-s3 for R2 compatibility │ │
-│ │ - mime-types for file type validation │ │
-│ │ 2. Create upload endpoints: │ │
-│ │ - REST endpoint /api/upload for file uploads │ │
-│ │ - Static file serving for local storage │ │
-│ │ - File validation and security measures │ │
-│ │ 3. Add tRPC procedures: │ │
-│ │ - uploadPhotoMenuImage procedure │ │
-│ │ - deletePhotoMenuImage procedure │ │
-│ │ - Integration with existing photo menu workflows │ │
-│ │ │ │
-│ │ Phase 3: Database Schema Updates │ │
-│ │ │ │
-│ │ 1. Add image support to digital menu items: │ │
-│ │ - Migration to add image_url to item table │ │
-│ │ - Migration to add logo_url to restaurant table │ │
-│ │ 2. Update photo menu handling: │ │
-│ │ - Modify photo menu procedures to handle server-uploaded images │ │
-│ │ - Replace localStorage with database persistence │ │
-│ │ │ │
-│ │ Phase 4: Frontend Integration │ │
-│ │ │ │
-│ │ 1. Update ImageUploader component: │ │
-│ │ - Add server upload capability alongside local preview │ │
-│ │ - Progress tracking for uploads │ │
-│ │ - Error handling and retry logic │ │
-│ │ 2. Modify photo menu workflow: │ │
-│ │ - Upload images to server during generation step │ │
-│ │ - Store actual URLs instead of blob URLs │ │
-│ │ - Update storage manager to use server APIs │ │
-│ │ │ │
-│ │ Phase 5: Migration Strategy │ │
-│ │ │ │
-│ │ 1. Environment configuration: │ │
-│ │ - Start with local filesystem in development │ │
-│ │ - Easy switch to R2 in production via environment variables │ │
-│ │ - No code changes required for provider switching │ │
-│ │ 2. Backward compatibility: │ │
-│ │ - Maintain existing localStorage functionality as fallback │ │
-│ │ - Gradual migration of existing photo menus │ │
-│ │ - URL format consistency between providers │ │
-│ │ │ │
-│ │ This approach ensures a clean abstraction that can start with local │ │
-│ │ storage and seamlessly migrate to Cloudflare R2 without breaking │ │
-│ │ changes to the application code.
+Analyze the whole project very briefly, so that you understand well what's going on, and we can proceed further. Understands everything very in depth. No rush. Run a thorough analysis. I want you to analyze every file, each line of code, every connection, how all the components and files have been connected together, how data is flowing, what actions are available right now, etc etc.
+
+After run a thorough Analysis and investigation, I want you to write a proper documentation about the project, so that - from next time, after reading the documentation - anyone can understands what's going on, which file is doing what, updated whole data model, all the procedures brief, everything, whether it's human or llm. You can create Documentation.md file for that. Okay, start. Again, reminder, nothing should be missed.
+```

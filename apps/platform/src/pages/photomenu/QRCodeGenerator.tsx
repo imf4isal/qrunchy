@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { QrCode, Download, Copy, Check, Loader2 } from "lucide-react";
+import { QrCode, Download, Copy, Check, Loader2, ArrowRight } from "lucide-react";
 import QRCodeDisplay from "@/components/QRCodeDisplay";
 import { trpc } from "@/utils/trpc";
 import { useRestaurant } from "@/contexts/RestaurantContext";
@@ -186,10 +186,7 @@ const QRCodeGenerator = ({
       // Reset generating state
       setIsGenerating(false);
 
-      // Redirect to dashboard after a short delay
-      setTimeout(() => {
-        setLocation("/dashboard");
-      }, 3000);
+      // No auto-redirection - let user decide when to leave
 
     } catch (error) {
       console.error('❌ Photomenu QR generation error:', error);
@@ -389,6 +386,17 @@ const QRCodeGenerator = ({
             >
               <QrCode size={16} />
               View Menu
+            </Button>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <Button 
+              onClick={() => setLocation("/dashboard")}
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+            >
+              Go to Dashboard
+              <ArrowRight size={16} />
             </Button>
           </div>
         </div>

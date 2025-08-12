@@ -64,8 +64,8 @@ export default function AddToChainButton({
     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Building2 className="w-4 h-4 mr-2" />
-          {currentChain ? `Chain: ${currentChain.name}` : 'Add to Chain'}
+          <Building2 className="w-4 h-4 mr-1" />
+          {currentChain ? 'Chain' : 'Chain'}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">

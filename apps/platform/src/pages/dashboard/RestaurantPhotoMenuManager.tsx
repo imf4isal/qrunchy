@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
-import { ArrowLeft, Upload, Trash2, GripVertical, Eye, QrCode } from "lucide-react";
+import QRCodeDisplay from "@/components/QRCodeDisplay";
+import { ArrowLeft, Upload, Trash2, GripVertical, Eye, QrCode, Download, ExternalLink } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -44,12 +45,17 @@ export default function RestaurantPhotoMenuManager() {
     { enabled: !!restaurantId }
   );
 
+  // Fetch QR code data for this restaurant
+  const { data: qrData } = trpc.photoMenu.getQrByRestaurant.useQuery(
+    { restaurant_id: restaurantId },
+    { enabled: !!restaurantId }
+  );
+
   // Mutations
   const createMultipleMutation = trpc.photoMenu.createMultiple.useMutation();
   const updateSortOrderMutation = trpc.photoMenu.updateSortOrder.useMutation();
   const deleteMutation = trpc.photoMenu.delete.useMutation();
   const updateRestaurantMutation = trpc.restaurant.update.useMutation();
-  const generateQrMutation = trpc.photoMenu.generateQr.useMutation();
 
   // Load existing photos
   useEffect(() => {
@@ -160,17 +166,27 @@ export default function RestaurantPhotoMenuManager() {
     }
   };
 
-  const handleGenerateQr = async () => {
-    try {
-      const result = await generateQrMutation.mutateAsync({
-        restaurant_id: restaurantId,
-        setup_type: "self",
-      });
-      
-      alert(`QR Code generated successfully! Code: ${result.qr_code}`);
-    } catch (error) {
-      console.error('QR generation error:', error);
-      alert('Failed to generate QR code');
+
+  const handleDownloadQR = async () => {
+    const qrCode = qrData?.[0];
+    if (qrCode?.menu_url) {
+      try {
+        const canvas = document.createElement('canvas');
+        await import('qrcode').then(QRCode => {
+          QRCode.default.toCanvas(canvas, qrCode.menu_url, {
+            width: 400,
+            margin: 2,
+          });
+        });
+        
+        const link = document.createElement('a');
+        link.download = `${restaurant?.name}-qr-code.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      } catch (error) {
+        console.error('Error downloading QR code:', error);
+        alert('Failed to download QR code');
+      }
     }
   };
 
@@ -285,10 +301,6 @@ export default function RestaurantPhotoMenuManager() {
                 Save Order
               </Button>
             )}
-            <Button onClick={handleGenerateQr} variant="outline">
-              <QrCode className="w-4 h-4 mr-2" />
-              Generate QR
-            </Button>
             <Button onClick={handleDeleteEntireMenu} variant="destructive">
               <Trash2 className="w-4 h-4 mr-2" />
               Delete Restaurant
@@ -328,6 +340,57 @@ export default function RestaurantPhotoMenuManager() {
           </CardContent>
         </Card>
 
+        {/* QR Code Section */}
+        {qrData && qrData.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <QrCode className="w-5 h-5" />
+                Your Menu QR Code
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">QR Code Details</p>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <p><span className="font-medium">Code:</span> {qrData[0].code}</p>
+                      <p><span className="font-medium">Status:</span> Active</p>
+                      <p><span className="font-medium">Menu URL:</span></p>
+                      <div className="bg-gray-50 p-2 rounded text-xs font-mono break-all">
+                        {qrData[0].menu_url}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={handleDownloadQR} variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download QR
+                    </Button>
+                    <Button
+                      onClick={() => window.open(`/menu/${qrData[0].code}`, '_blank')}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      View Menu
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex justify-center">
+                  <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
+                    <QRCodeDisplay 
+                      value={qrData[0].menu_url} 
+                      size={192}
+                      className="rounded"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Photo Management */}
         <Card>

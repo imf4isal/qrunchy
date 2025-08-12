@@ -26,9 +26,9 @@ export default function PhotoMenuLayout({ children, sidePanel }: PhotoMenuLayout
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className={`grid gap-8 ${sidePanel ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
                         {/* main content */}
-                        <div className="lg:col-span-2">
+                        <div className={sidePanel ? 'lg:col-span-2' : 'lg:col-span-1'}>
                             <div className="bg-white rounded-xl shadow-sm border p-8">
                                 {children}
                             </div>
