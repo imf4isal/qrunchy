@@ -356,6 +356,7 @@ export default function MenuBuilder({
             price: item.price,
             description: item.description,
             category_id: parseInt(item.categoryId, 10),
+            image_url: item.image_url,
             variants: item.variants.map((variant) => ({
               id: variant.id, // Include ID for existing variants
               title: variant.title,
@@ -378,6 +379,7 @@ export default function MenuBuilder({
             price: item.price,
             description: item.description,
             category_id: parseInt(item.categoryId, 10),
+            image_url: item.image_url,
             variants: item.variants.map((variant) => ({
               title: variant.title,
               options: variant.options.map((option) => ({

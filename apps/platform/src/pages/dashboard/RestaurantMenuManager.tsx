@@ -396,19 +396,15 @@ export default function RestaurantMenuManager() {
         </div>
 
         {/* Restaurant Settings and QR Code Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8 items-stretch">
-          <div className="flex">
-            {restaurant && (
-              <RestaurantSettings restaurant={restaurant} />
-            )}
-          </div>
-          <div className="flex">
-            <QRCodeSection 
-              qrData={qrData} 
-              restaurantName={restaurant?.name}
-              onDownloadQR={handleDownloadQR}
-            />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {restaurant && (
+            <RestaurantSettings restaurant={restaurant} />
+          )}
+          <QRCodeSection 
+            qrData={qrData} 
+            restaurantName={restaurant?.name}
+            onDownloadQR={handleDownloadQR}
+          />
         </div>
 
         {/* Theme Settings */}
