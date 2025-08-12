@@ -574,6 +574,7 @@ export default function MenuBuilder({
           price: 12.99,
           description: "Crispy chicken wings with your choice of sauce",
           categoryName: "Appetizers",
+          image_url: "https://example.com/images/chicken-wings.jpg",
           variants: [
             {
               title: "Size",
@@ -601,6 +602,7 @@ export default function MenuBuilder({
           price: 24.99,
           description: "Fresh Atlantic salmon with seasonal vegetables",
           categoryName: "Main Course",
+          image_url: "https://example.com/images/grilled-salmon.jpg",
           variants: [
             {
               title: "Cooking Style",
@@ -628,6 +630,7 @@ export default function MenuBuilder({
           price: 4.99,
           description: "Freshly squeezed fruit juice",
           categoryName: "Beverages",
+          image_url: "https://example.com/images/fresh-juice.jpg",
           variants: [
             {
               title: "Flavor",
