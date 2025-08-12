@@ -23,6 +23,7 @@ const menuItemCreateSchema = z.object({
   description: z.string().optional(),
   category_id: z.number().int().positive(),
   sort_order: z.number().int().min(0).optional(),
+  image_url: z.string().url("Invalid image URL").optional(),
   variants: z.array(variantSchema).optional(),
   addons: z.array(addonSchema).optional(),
 });
@@ -34,6 +35,7 @@ const menuItemUpdateSchema = z.object({
   description: z.string().optional(),
   category_id: z.number().int().positive().optional(),
   sort_order: z.number().int().min(0).optional(),
+  image_url: z.string().url("Invalid image URL").optional(),
   variants: z.array(variantUpdateSchema).optional(),
   addons: z.array(addonUpdateSchema).optional(),
 });
@@ -44,6 +46,7 @@ const transformItemToFrontend = (item: any) => ({
   price: parseFloat(item.price),
   description: item.description || undefined,
   categoryId: item.category_id.toString(),
+  image_url: item.image_url || undefined,
   variants: (item.variants || []).map((variant: any) => ({
     id: variant.id.toString(),
     title: variant.name, // Note: database 'name' maps to frontend 'title'
@@ -134,6 +137,7 @@ export const itemsProcedures = {
           description: input.description,
           category_id: input.category_id,
           sort_order: input.sort_order,
+          image_url: input.image_url,
           variants: input.variants,
           addons: input.addons,
         });
@@ -384,6 +388,49 @@ export const itemsProcedures = {
       } catch (error) {
         console.error("Error reordering items:", error);
         throw new Error("Failed to reorder items");
+      }
+    }),
+
+  // Update item image
+  updateImage: publicProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      image_url: z.string().url("Invalid image URL").nullable(),
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        const updatedItem = await db
+          .updateTable("item")
+          .set({ image_url: input.image_url })
+          .where("id", "=", input.id)
+          .returningAll()
+          .executeTakeFirstOrThrow();
+
+        const fullItem = await getItemWithDetailsById(updatedItem.id);
+        return transformItemToFrontend(fullItem);
+      } catch (error) {
+        console.error("Error updating item image:", error);
+        throw new Error("Failed to update item image");
+      }
+    }),
+
+  // Delete item image
+  deleteImage: publicProcedure
+    .input(idSchema)
+    .mutation(async ({ input }) => {
+      try {
+        const updatedItem = await db
+          .updateTable("item")
+          .set({ image_url: null })
+          .where("id", "=", input.id)
+          .returningAll()
+          .executeTakeFirstOrThrow();
+
+        const fullItem = await getItemWithDetailsById(updatedItem.id);
+        return transformItemToFrontend(fullItem);
+      } catch (error) {
+        console.error("Error deleting item image:", error);
+        throw new Error("Failed to delete item image");
       }
     }),
 };

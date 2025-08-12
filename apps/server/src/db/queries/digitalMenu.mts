@@ -230,6 +230,7 @@ export async function createItemWithDetails(data: {
   description?: string;
   category_id: number;
   sort_order?: number;
+  image_url?: string;
   variants?: Array<{
     title: string;
     options: Array<{ name: string; price: number }>;
@@ -259,6 +260,7 @@ export async function createItemWithDetails(data: {
         description: data.description || null,
         category_id: data.category_id,
         sort_order: sortOrder,
+        image_url: data.image_url || null,
       })
       .returningAll()
       .executeTakeFirstOrThrow();
