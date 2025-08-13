@@ -141,6 +141,8 @@ export default function RestaurantMenuManager() {
     setSaveStatus('saving');
     
     try {
+      console.log('🔍 Top-level Save Changes - preparing menu data with image URLs');
+      
       // Prepare menu data for bulk import
       const menuData = {
         categories: menu.categories.map(cat => ({ name: cat.name })),
@@ -148,6 +150,7 @@ export default function RestaurantMenuManager() {
           name: item.name,
           price: item.price,
           description: item.description,
+          image_url: item.image_url, // CRITICAL: Include image_url in bulk save
           categoryName: menu.categories.find(cat => cat.id === item.categoryId)?.name || '',
           variants: item.variants.map(variant => ({
             title: variant.title,
@@ -162,6 +165,10 @@ export default function RestaurantMenuManager() {
           })),
         })),
       };
+      
+      console.log('🔍 Menu data prepared, items with images:', 
+        menuData.items.filter(item => item.image_url).map(item => ({ name: item.name, image_url: item.image_url }))
+      );
       
       // Save menu data with bulk import (replaces existing)
       await bulkImportMutation.mutateAsync({

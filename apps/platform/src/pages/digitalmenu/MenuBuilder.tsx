@@ -334,24 +334,11 @@ export default function MenuBuilder({
   };
 
   const handleSaveItem = async (item: MenuItem) => {
-    // If in batch mode but the item has an image_url, save the image immediately
-    if (batchSaveMode && restaurantId && item.image_url) {
-      const existingItem = menu.items?.find((existingItem) => existingItem.id === item.id);
-      if (existingItem && existingItem.image_url !== item.image_url) {
-        try {
-          await updateItemImageMutation.mutateAsync({
-            id: parseInt(item.id, 10),
-            image_url: item.image_url,
-          });
-        } catch (error) {
-          console.error('Failed to save image:', error);
-          alert('Failed to save image. Please try again.');
-        }
-      }
-    }
+    console.log('🔍 MenuBuilder handleSaveItem called with item.image_url:', item.image_url);
     
     if (batchSaveMode || !restaurantId) {
       // In batch save mode or for new restaurants, just update local state
+      // Images are handled separately via atomic upload endpoint
       const existingItemIndex = menu.items?.findIndex(existingItem => existingItem.id === item.id) ?? -1;
       
       let updatedItems;
@@ -374,6 +361,7 @@ export default function MenuBuilder({
         
         if (existingItem) {
           // Update existing item
+          console.log('🔍 About to call updateItemMutation with image_url:', item.image_url);
           await updateItemMutation.mutateAsync({
             id: parseInt(item.id, 10),
             name: item.name,
@@ -1286,6 +1274,19 @@ export default function MenuBuilder({
           categories={menu.categories || []}
           onSave={handleSaveItem}
           onClose={handleCloseItemEditor}
+          onImagePersisted={(updatedItem) => {
+            // Update local state when image is persisted for existing items
+            console.log('🔄 Image persisted, updating local state');
+            const existingItemIndex = menu.items?.findIndex(item => item.id === updatedItem.id.toString()) ?? -1;
+            if (existingItemIndex >= 0 && menu.items) {
+              const updatedItems = [...menu.items];
+              updatedItems[existingItemIndex] = {
+                ...updatedItems[existingItemIndex], 
+                image_url: updatedItem.image_url
+              };
+              onItemsChange(updatedItems);
+            }
+          }}
         />
       )}
     </div>

@@ -116,6 +116,7 @@ The database has evolved through 12 migrations, resulting in the following schem
 - description (text, nullable)
 - category_id (integer, references category.id, not null)
 - sort_order (integer, not null)
+- image_url (varchar(500), nullable) -- Added in migration 013
 ```
 
 **variant**
@@ -623,6 +624,162 @@ const { data } = trpc.menu.getByQr.useQuery(
 
 ---
 
+## Menu Item Image System
+
+### Overview
+
+The menu item image system provides comprehensive support for uploading, storing, and displaying images for individual menu items across both dashboard management and customer-facing menus. The implementation follows the same reliable patterns as the photomenu system while handling the additional complexity of digital menu features.
+
+### Architecture
+
+#### Database Schema
+- **Migration 013**: Added `image_url` column to `item` table
+- **Field Type**: `varchar(500)` nullable
+- **Storage Location**: Cloudflare R2 storage in `menuitem/` folder
+
+#### Backend Implementation
+
+**File Upload Endpoint** (`apps/server/src/restroutes/files.mts`)
+- **Endpoint**: `/api/upload/menuitem/single`
+- **Method**: POST with multipart form data
+- **Validation**: File type (JPEG, PNG, WebP) and size (5MB max)
+- **Storage**: Cloudflare R2 with unique filename generation
+- **Response**: File URL and metadata
+
+**tRPC Procedures** (`apps/server/src/trpc/procedures/items.mts`)
+- `updateImage`: Dedicated procedure for immediate image persistence
+- `update`: General item update including image_url field
+- Integration with bulk import operations
+
+**Bulk Import Support** (`apps/server/src/trpc/procedures/menu-bulk-import.mts`)
+- Full support for `image_url` field in bulk operations
+- Automatic image downloading and re-uploading when needed
+- Preserves existing images during menu replacements
+
+#### Frontend Implementation
+
+**ItemEditor Component** (`apps/platform/src/pages/digitalmenu/ItemEditor.tsx`)
+- **Upload Interface**: Drag-and-drop with file validation
+- **Smart Persistence**: 
+  - Existing items: Immediate database persistence via tRPC
+  - New items: Local storage until item creation
+- **State Synchronization**: Local state updated after successful persistence
+- **Error Handling**: Clear feedback and retry mechanisms
+
+**MenuBuilder Integration** (`apps/platform/src/pages/digitalmenu/MenuBuilder.tsx`)
+- **Individual Save**: Preserves image URLs in item update operations
+- **Batch Operations**: Simplified logic with separate image handling
+- **UI Refresh**: Real-time updates when images are persisted
+
+**Restaurant Menu Manager** (`apps/platform/src/pages/dashboard/RestaurantMenuManager.tsx`)
+- **Top-level Save**: Includes image URLs in bulk save operations
+- **Menu Persistence**: Preserves images across all save scenarios
+- **Debug Logging**: Comprehensive logging for troubleshooting
+
+#### Customer Display
+
+**Theme Integration**
+- **Minimal Theme** (`CustomerMenuViewer.tsx`): Clean layout with responsive image display
+- **Modern Theme** (`CustomerMenuViewerModern.tsx`): Rich visual design with image support
+- **Responsive Design**: Mobile-optimized layouts with proper image scaling
+- **Error Handling**: Graceful fallback when images fail to load
+
+### Data Flow
+
+#### Upload and Persistence Flow
+1. **File Upload**: User selects image → Validation → R2 storage
+2. **Immediate Persistence**: For existing items, tRPC `updateImage` called immediately
+3. **State Sync**: Local component state updated with persisted image URL
+4. **Save Operations**: Both individual and bulk saves preserve image URLs
+5. **Customer Display**: Images rendered in responsive layouts
+
+#### Error Recovery
+- **Upload Failures**: Clear error messages with retry options
+- **Database Failures**: Automatic rollback of uploaded files
+- **Display Failures**: Graceful image hiding with preserved layout
+
+### Key Features
+
+#### Upload Experience
+- **Drag-and-Drop Interface**: Intuitive file selection
+- **Real-time Validation**: Immediate feedback on file type and size
+- **Progress Indicators**: Visual feedback during upload operations
+- **Preview Support**: Immediate preview of uploaded images
+
+#### Persistence Reliability
+- **Atomic Operations**: Images are either fully saved or not saved at all
+- **State Synchronization**: Local state always matches database state
+- **Multiple Save Paths**: Support for both individual and bulk save operations
+- **Rollback Mechanisms**: Automatic cleanup of failed operations
+
+#### Display Optimization
+- **Responsive Layouts**: Optimized for mobile and desktop viewing
+- **Lazy Loading**: Performance optimization for large menus
+- **Error Handling**: Graceful degradation when images are unavailable
+- **SEO Support**: Proper alt text and image optimization
+
+### Implementation Patterns
+
+#### Atomic Upload Pattern
+```typescript
+// Step 1: Upload to storage
+const response = await fetch('/api/upload/menuitem/single', {...});
+const imageUrl = result.file.url;
+
+// Step 2: Update local state
+handleBasicInfoChange('image_url', imageUrl);
+
+// Step 3: For existing items, persist immediately
+if (isExistingItem) {
+  await updateItemImageMutation.mutateAsync({
+    id: parseInt(item.id, 10),
+    image_url: imageUrl,
+  });
+}
+```
+
+#### State Synchronization Pattern
+```typescript
+const updateItemImageMutation = trpc.digitalMenu.items.updateImage.useMutation({
+  onSuccess: (updatedItem) => {
+    // Critical: Update local state to match database
+    setFormData(prev => ({
+      ...prev,
+      image_url: updatedItem.image_url
+    }));
+  }
+});
+```
+
+#### Bulk Save Integration
+```typescript
+const menuData = {
+  items: menu.items.map(item => ({
+    name: item.name,
+    price: item.price,
+    description: item.description,
+    image_url: item.image_url, // Critical: Include in bulk operations
+    // ... other fields
+  }))
+};
+```
+
+### Performance Considerations
+
+- **Storage Optimization**: Efficient file naming and organization in R2
+- **Upload Optimization**: Direct browser-to-R2 uploads (planned)
+- **Display Optimization**: Lazy loading and responsive images
+- **Cache Strategy**: Proper cache invalidation after updates
+
+### Security Features
+
+- **File Validation**: Strict file type and size restrictions
+- **Upload Limits**: Configurable size limits (5MB default)
+- **Access Control**: Authenticated uploads only
+- **Malware Protection**: File type validation and content scanning
+
+---
+
 ## Current Limitations and Technical Debt
 
 1. **Authentication:** Simple mobile-based auth without proper session tokens
@@ -650,7 +807,7 @@ const { data } = trpc.menu.getByQr.useQuery(
    - Role-based access control
 
 3. **Advanced Menu Features:**
-   - Image support for menu items
+   - ✅ Image support for menu items (IMPLEMENTED)
    - Nutritional information
    - Dietary restriction filters
    - Multi-language support

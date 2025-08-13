@@ -3,6 +3,7 @@ import { X, Plus, Trash2, Upload, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { trpc } from "@/utils/trpc";
 import type {
   MenuItem,
   Category,
@@ -16,6 +17,7 @@ interface ItemEditorProps {
   categories: Category[];
   onSave: (item: MenuItem) => void;
   onClose: () => void;
+  onImagePersisted?: (item: any) => void;
 }
 
 export default function ItemEditor({
@@ -23,9 +25,31 @@ export default function ItemEditor({
   categories,
   onSave,
   onClose,
+  onImagePersisted,
 }: ItemEditorProps) {
   const [formData, setFormData] = useState<MenuItem>(item);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // tRPC mutation for updating item image immediately for existing items
+  const updateItemImageMutation = trpc.digitalMenu.items.updateImage.useMutation({
+    onSuccess: (updatedItem) => {
+      console.log('✅ Image persisted to database via tRPC:', updatedItem.image_url);
+      
+      // CRITICAL: Update local formData to match the database state
+      setFormData(prev => ({
+        ...prev,
+        image_url: updatedItem.image_url
+      }));
+      
+      if (onImagePersisted) {
+        onImagePersisted(updatedItem);
+      }
+    },
+    onError: (error) => {
+      console.error('❌ Failed to persist image to database:', error);
+      alert('Failed to save image to database. Please try again.');
+    }
+  });
 
   useEffect(() => {
     setFormData(item);
@@ -57,6 +81,7 @@ export default function ItemEditor({
       const formData = new FormData();
       formData.append('images', file);
 
+      // Step 1: Upload image to storage
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://13.250.49.6:3000'}/api/upload/menuitem/single`, {
         method: 'POST',
         body: formData,
@@ -68,7 +93,23 @@ export default function ItemEditor({
       }
 
       const result = await response.json();
-      handleBasicInfoChange('image_url', result.file.url);
+      const imageUrl = result.file.url;
+      
+      // Step 2: Update local state immediately
+      handleBasicInfoChange('image_url', imageUrl);
+      
+      // Step 3: For existing items, immediately persist to database via tRPC
+      const isExistingItem = item.id && !isNaN(parseInt(item.id, 10));
+      if (isExistingItem) {
+        console.log('📤 Persisting image to database for existing item:', parseInt(item.id, 10));
+        await updateItemImageMutation.mutateAsync({
+          id: parseInt(item.id, 10),
+          image_url: imageUrl,
+        });
+      } else {
+        console.log('📎 Image uploaded for new item, will persist when item is created');
+      }
+      
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Failed to upload image. Please try again.');
@@ -202,6 +243,8 @@ export default function ItemEditor({
   };
 
   const handleSave = () => {
+    console.log('🔍 ItemEditor handleSave called with formData.image_url:', formData.image_url);
+    
     // Validate required fields
     if (!formData.name.trim() || formData.price <= 0) {
       alert("Please fill in item name and price");

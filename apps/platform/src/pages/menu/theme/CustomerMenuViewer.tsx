@@ -320,13 +320,7 @@ function MenuItemCard({ item }: MenuItemCardProps) {
               alt={item.name}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
               loading="lazy"
-              onError={(e) => {
-                // Hide image container if it fails to load
-                const parent = e.currentTarget.closest('.md\\:w-2\\/5, .lg\\:w-1\\/3');
-                if (parent) {
-                  parent.style.display = 'none';
-                }
-              }}
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
           </div>
         )}
