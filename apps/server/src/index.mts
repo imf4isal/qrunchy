@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 
 // Load environment variables from .env file (for local dev) or use Docker env vars
+// First try local .env, then fallback to root .env
+dotenv.config({ path: ".env" });
 dotenv.config({ path: "../../.env" });
 
 import express from "express";
