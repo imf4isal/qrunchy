@@ -2,7 +2,7 @@ import type { Generated, ColumnType } from "kysely";
 
 type Point = ColumnType<string, string, string>;
 
-type QrType = "photo" | "digital";
+type QrType = "photo" | "digital" | "foodcourt";
 type QrStatus = "available" | "used" | "expired";
 type GroupResType = "chain" | "foodcourt";
 
@@ -58,6 +58,7 @@ export interface QrCodeTable {
   type: QrType;
   status: QrStatus;
   restaurant_id: number | null;
+  group_res_id: number | null;
   created_at: Generated<Date>;
   bound_at: Date | null;
   expires_at: Date | null;
