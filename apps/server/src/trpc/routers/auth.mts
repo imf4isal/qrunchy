@@ -11,4 +11,12 @@ export const authRouter = router({
   login: authProcedures.login,
   me: authProcedures.me,
   logout: authProcedures.logout,
+  
+  // OTP Authentication
+  sendOTP: authProcedures.sendOTP,
+  verifyOTP: authProcedures.verifyOTP,
+  
+  // Password Authentication
+  setPassword: authProcedures.setPassword,
+  loginWithPassword: authProcedures.loginWithPassword,
 });
