@@ -12,6 +12,7 @@ import Login from "@/pages/auth/Login";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import RestaurantMenuManager from "@/pages/dashboard/RestaurantMenuManager";
 import RestaurantPhotoMenuManager from "@/pages/dashboard/RestaurantPhotoMenuManager";
+import FoodCourtManager from "@/pages/dashboard/FoodCourtManager";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function Router() {
@@ -42,6 +43,12 @@ export default function Router() {
       <Route path="/dashboard/restaurant/:id/photomenu">
         <ProtectedRoute>
           <RestaurantPhotoMenuManager />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/dashboard/foodcourt/:id">
+        <ProtectedRoute>
+          <FoodCourtManager />
         </ProtectedRoute>
       </Route>
       

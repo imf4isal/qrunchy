@@ -91,8 +91,8 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
 
   const handleItemClick = (result: SearchResult) => {
     // Navigate to restaurant menu with item highlighted
-    const restaurantQrCode = `QR_${result.restaurant_id}`; // This would need to be the actual restaurant QR code
-    window.location.href = `/menu/${restaurantQrCode}?highlight=${result.item_id}`;
+    // For now, we'll use a simple redirect to the restaurant - QR codes would need to be fetched separately
+    window.location.href = `/dashboard/restaurant/${result.restaurant_id}/menu`;
   };
 
   const formatPrice = (price: string) => {
@@ -224,40 +224,43 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
                     key={restaurant.id}
                     className="hover:shadow-lg transition-shadow cursor-pointer group"
                   >
-                    <Link href={`/menu/QR_${restaurant.id}`}>
-                      <CardContent className="p-6">
-                        <div className="flex items-start space-x-4">
-                          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <ChefHat className="w-6 h-6 text-orange-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                              {restaurant.name}
-                            </h3>
-                            {restaurant.address && (
-                              <p className="text-sm text-gray-600 mt-1 truncate">
-                                {restaurant.address}
-                              </p>
-                            )}
-                            <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
-                              <span>{restaurant.category_count} categories</span>
-                              <span>•</span>
-                              <span>{restaurant.item_count} items</span>
-                            </div>
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4">
+                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <ChefHat className="w-6 h-6 text-orange-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            {restaurant.name}
+                          </h3>
+                          {restaurant.address && (
+                            <p className="text-sm text-gray-600 mt-1 truncate">
+                              {restaurant.address}
+                            </p>
+                          )}
+                          <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
+                            <span>{restaurant.category_count} categories</span>
+                            <span>•</span>
+                            <span>{restaurant.item_count} items</span>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full group-hover:bg-blue-50 group-hover:border-blue-200"
-                          >
-                            View Menu
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Link>
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full group-hover:bg-blue-50 group-hover:border-blue-200"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // For now, redirect to dashboard view - would need actual restaurant QR codes
+                            window.location.href = `/dashboard/restaurant/${restaurant.id}/menu`;
+                          }}
+                        >
+                          View Menu
+                        </Button>
+                      </div>
+                    </CardContent>
                   </Card>
                 ))}
               </div>
