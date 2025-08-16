@@ -5,13 +5,23 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
+import OTPVerification from "@/components/OTPVerification";
+import { trpc } from "@/utils/trpc";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const [mobileNumber, setMobileNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loginMethod, setLoginMethod] = useState<"otp" | "password">("password");
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
   const { login } = useAuth();
+
+  // tRPC mutations
+  const loginWithPasswordMutation = trpc.auth.loginWithPassword.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,17 +31,44 @@ export default function Login() {
       return;
     }
 
+    if (loginMethod === "password" && !password.trim()) {
+      setError("Please enter your password");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
-      await login(mobileNumber.trim());
-      // Redirect to dashboard on success
-      setLocation("/dashboard");
+      if (loginMethod === "password") {
+        // Login with password
+        const result = await loginWithPasswordMutation.mutateAsync({
+          mobile_number: mobileNumber.trim(),
+          password: password.trim(),
+        });
+        
+        // Manually update auth context (since we're using a different login method)
+        await login(mobileNumber.trim());
+        
+        setLocation("/dashboard");
+      } else {
+        // OTP login - show OTP verification modal
+        setShowOTPVerification(true);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOTPVerificationSuccess = async () => {
+    setShowOTPVerification(false);
+    try {
+      await login(mobileNumber.trim());
+      setLocation("/dashboard");
+    } catch (err) {
+      setError("Login failed after OTP verification");
     }
   };
 
@@ -58,6 +95,34 @@ export default function Login() {
               <CardTitle>Login to Your Account</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Login Method Selector */}
+              <div className="mb-6">
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  <button
+                    type="button"
+                    onClick={() => setLoginMethod("password")}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      loginMethod === "password"
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    Password Login
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLoginMethod("otp")}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      loginMethod === "otp"
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    OTP Login
+                  </button>
+                </div>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">
@@ -73,6 +138,32 @@ export default function Login() {
                     disabled={isLoading}
                   />
                 </div>
+
+                {loginMethod === "password" && (
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="w-full pr-12"
+                        disabled={isLoading}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {error && (
                   <div className={`p-4 rounded-lg ${
@@ -121,10 +212,10 @@ export default function Login() {
                   {isLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Logging in...
+                      {loginMethod === "password" ? "Logging in..." : "Sending OTP..."}
                     </>
                   ) : (
-                    "Log In"
+                    loginMethod === "password" ? "Log In with Password" : "Send OTP"
                   )}
                 </Button>
               </form>
@@ -149,6 +240,14 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      {/* OTP Verification Modal */}
+      <OTPVerification
+        mobileNumber={mobileNumber}
+        onVerificationSuccess={handleOTPVerificationSuccess}
+        onCancel={() => setShowOTPVerification(false)}
+        isOpen={showOTPVerification}
+      />
     </MainLayout>
   );
 }
