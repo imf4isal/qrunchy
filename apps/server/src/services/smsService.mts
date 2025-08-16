@@ -87,7 +87,7 @@ export class SMSService {
 
   // Check if it's the master password
   isMasterPassword(input: string): boolean {
-    return input === 'AUTHQRUNCHYBRO';
+    return input === '123456'; // 6-digit master password for testing
   }
 }
 
