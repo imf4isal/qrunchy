@@ -26,17 +26,40 @@ export default function PasswordSetup({
 
   const setPasswordMutation = trpc.auth.setPassword.useMutation();
 
+  // Password validation functions
+  const hasMinLength = password.length >= 6;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const passwordsMatch = password === confirmPassword && password.length > 0;
+  const isValidPassword = hasMinLength && hasUppercase && hasLowercase && hasNumber && passwordsMatch;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     // Validation
-    if (password.length < 6) {
+    if (!hasMinLength) {
       setError("Password must be at least 6 characters long");
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (!hasUppercase) {
+      setError("Password must contain at least one uppercase letter");
+      return;
+    }
+
+    if (!hasLowercase) {
+      setError("Password must contain at least one lowercase letter");
+      return;
+    }
+
+    if (!hasNumber) {
+      setError("Password must contain at least one number");
+      return;
+    }
+
+    if (!passwordsMatch) {
       setError("Passwords do not match");
       return;
     }
@@ -134,14 +157,28 @@ export default function PasswordSetup({
             </div>
           </div>
 
-          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-            <p className="font-medium mb-1">Password requirements:</p>
+          <div className="text-xs bg-gray-50 p-3 rounded-lg">
+            <p className="font-medium mb-2 text-gray-700">Password requirements:</p>
             <ul className="space-y-1">
-              <li className={password.length >= 6 ? "text-green-600" : ""}>
-                • At least 6 characters
+              <li className={`flex items-center gap-2 ${hasMinLength ? "text-green-600" : "text-gray-500"}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${hasMinLength ? "bg-green-500" : "bg-gray-300"}`}></span>
+                At least 6 characters
               </li>
-              <li className={password === confirmPassword && password.length > 0 ? "text-green-600" : ""}>
-                • Passwords must match
+              <li className={`flex items-center gap-2 ${hasUppercase ? "text-green-600" : "text-gray-500"}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${hasUppercase ? "bg-green-500" : "bg-gray-300"}`}></span>
+                One uppercase letter (A-Z)
+              </li>
+              <li className={`flex items-center gap-2 ${hasLowercase ? "text-green-600" : "text-gray-500"}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${hasLowercase ? "bg-green-500" : "bg-gray-300"}`}></span>
+                One lowercase letter (a-z)
+              </li>
+              <li className={`flex items-center gap-2 ${hasNumber ? "text-green-600" : "text-gray-500"}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${hasNumber ? "bg-green-500" : "bg-gray-300"}`}></span>
+                One number (0-9)
+              </li>
+              <li className={`flex items-center gap-2 ${passwordsMatch ? "text-green-600" : "text-gray-500"}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${passwordsMatch ? "bg-green-500" : "bg-gray-300"}`}></span>
+                Passwords must match
               </li>
             </ul>
           </div>
@@ -155,7 +192,7 @@ export default function PasswordSetup({
           <div className="flex flex-col gap-3 pt-2">
             <Button
               type="submit"
-              disabled={isSubmitting || password.length < 6 || password !== confirmPassword}
+              disabled={isSubmitting || !isValidPassword}
               className="w-full"
             >
               {isSubmitting ? (
