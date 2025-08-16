@@ -44,6 +44,7 @@ interface AuthContextType {
   refreshSession: () => Promise<void>;
   updateRestaurant: (restaurantId: number, updates: Partial<Restaurant>) => void;
   addRestaurant: (restaurant: Restaurant) => void;
+  deleteRestaurant: (restaurantId: number) => void;
   addChain: (chain: Chain) => void;
   updateChain: (chainId: number, updates: Partial<Chain>) => void;
   deleteChain: (chainId: number) => void;
@@ -228,6 +229,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const deleteRestaurant = (restaurantId: number) => {
+    console.log('🗑️ Deleting restaurant from context:', restaurantId);
+    
+    setRestaurants(prev => {
+      const updated = prev.filter(restaurant => restaurant.id !== restaurantId);
+      
+      // Update localStorage
+      localStorage.setItem('qrunchy_restaurants', JSON.stringify(updated));
+      
+      return updated;
+    });
+  };
+
   const deleteChain = (chainId: number) => {
     console.log('🗑️ Deleting chain from context:', chainId);
     
@@ -252,6 +266,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshSession,
     updateRestaurant,
     addRestaurant,
+    deleteRestaurant,
     addChain,
     updateChain,
     deleteChain,

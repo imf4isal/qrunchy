@@ -30,7 +30,7 @@ import { CSS } from "@dnd-kit/utilities";
 export default function RestaurantPhotoMenuManager() {
   const params = useParams();
   const [, setLocation] = useLocation();
-  const { restaurants } = useAuth();
+  const { restaurants, deleteRestaurant } = useAuth();
   const restaurantId = parseInt(params.id as string);
   
   const [images, setImages] = useState<any[]>([]);
@@ -201,9 +201,13 @@ export default function RestaurantPhotoMenuManager() {
         id: restaurantId, 
         is_active: false 
       });
+      
+      // Remove restaurant from context and localStorage
+      deleteRestaurant(restaurantId);
+      
       alert('Restaurant deleted successfully!');
       
-      // Redirect to dashboard as restaurant no longer exists
+      // Redirect to dashboard
       setLocation('/dashboard');
       
     } catch (error) {

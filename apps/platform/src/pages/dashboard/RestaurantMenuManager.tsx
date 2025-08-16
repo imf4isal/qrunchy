@@ -16,7 +16,7 @@ import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 export default function RestaurantMenuManager() {
   const { id: restaurantIdParam } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const { restaurants, isAuthenticated } = useAuth();
+  const { restaurants, isAuthenticated, deleteRestaurant } = useAuth();
   
   const restaurantId = parseInt(restaurantIdParam || "0", 10);
   const restaurant = restaurants.find(r => r.id === restaurantId);
@@ -241,9 +241,13 @@ export default function RestaurantMenuManager() {
         id: restaurantId, 
         is_active: false 
       });
+      
+      // Remove restaurant from context and localStorage
+      deleteRestaurant(restaurantId);
+      
       alert('Restaurant deleted successfully!');
       
-      // Redirect to dashboard as restaurant no longer exists
+      // Redirect to dashboard
       setLocation('/dashboard');
       
     } catch (error) {
