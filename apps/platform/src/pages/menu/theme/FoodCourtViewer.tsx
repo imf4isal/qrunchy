@@ -50,6 +50,15 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
     }
   );
 
+  // Get QR codes for all restaurants in the food court
+  const restaurantIds = foodCourtData?.foodCourt?.restaurants?.map(r => r.id) || [];
+  const restaurantQrQueries = restaurantIds.map(id => 
+    trpc.digitalMenu.qr.getByRestaurant.useQuery(
+      { restaurant_id: id },
+      { enabled: !!id }
+    )
+  );
+
   // Pre-compute values that will be used in render
   const foodCourt = foodCourtData?.foodCourt;
   const hasSearchResults = searchQuery.length > 2 && searchResults?.results;
@@ -90,10 +99,24 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
     setIsSearching(value.length > 2);
   };
 
+  // Helper function to get restaurant menu URL
+  const getRestaurantMenuUrl = (restaurantId: number) => {
+    const qrQuery = restaurantQrQueries.find((_, index) => restaurantIds[index] === restaurantId);
+    const qrData = qrQuery?.data;
+    
+    if (qrData && qrData.length > 0) {
+      // Use the QR code to navigate to the restaurant menu
+      return `/menu/${qrData[0].code}`;
+    }
+    
+    // Fallback: if no QR code is found, redirect to dashboard
+    return `/dashboard/restaurant/${restaurantId}/menu`;
+  };
+
   const handleItemClick = (result: SearchResult) => {
     // Navigate to restaurant menu with item highlighted
-    // For now, we'll use a simple redirect to the restaurant - QR codes would need to be fetched separately
-    window.location.href = `/dashboard/restaurant/${result.restaurant_id}/menu`;
+    const menuUrl = getRestaurantMenuUrl(result.restaurant_id);
+    window.location.href = menuUrl;
   };
 
   const formatPrice = (price: string) => {
@@ -254,8 +277,8 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
                           className="w-full group-hover:bg-blue-50 group-hover:border-blue-200"
                           onClick={(e) => {
                             e.preventDefault();
-                            // For now, redirect to dashboard view - would need actual restaurant QR codes
-                            window.location.href = `/dashboard/restaurant/${restaurant.id}/menu`;
+                            const menuUrl = getRestaurantMenuUrl(restaurant.id);
+                            window.location.href = menuUrl;
                           }}
                         >
                           View Menu

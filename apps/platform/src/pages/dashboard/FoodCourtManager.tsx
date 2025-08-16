@@ -430,13 +430,31 @@ export default function FoodCourtManager() {
                       {generateQrMutation.isLoading ? "Generating..." : "Generate QR Code"}
                     </Button>
                   ) : (
-                    <div className="space-y-3">
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                        <div className="flex items-start space-x-2">
-                          <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                          <div className="text-sm text-green-800">
-                            <p className="font-medium">QR Code Available!</p>
-                            <p>Code: {currentQrData.qr_code}</p>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Code</div>
+                          <div className="text-sm font-mono text-gray-900">{currentQrData.qr_code}</div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Status</div>
+                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                            foodCourt.is_active 
+                              ? "bg-green-100 text-green-800" 
+                              : "bg-orange-100 text-orange-800"
+                          }`}>
+                            <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                              foodCourt.is_active ? "bg-green-400" : "bg-orange-400"
+                            }`}></div>
+                            {foodCourt.is_active ? "Active" : "Pending"}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">URL</div>
+                          <div className="bg-gray-50 p-2 rounded text-xs font-mono break-all text-gray-600">
+                            {`/menu/${currentQrData.qr_code}`}
                           </div>
                         </div>
                       </div>
@@ -452,7 +470,7 @@ export default function FoodCourtManager() {
                         <Button 
                           variant="outline" 
                           className="w-full"
-                          onClick={() => navigator.clipboard.writeText(currentQrData.menu_url)}
+                          onClick={() => navigator.clipboard.writeText(`${window.location.origin}/menu/${currentQrData.qr_code}`)}
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Copy URL
