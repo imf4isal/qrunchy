@@ -261,6 +261,7 @@ export const qrProcedures = {
         const qrRecord = await db
           .selectFrom("qr_code")
           .leftJoin("restaurant", "qr_code.restaurant_id", "restaurant.id")
+          .leftJoin("group_res", "qr_code.group_res_id", "group_res.id")
           .select([
             "qr_code.id",
             "qr_code.code",
@@ -273,6 +274,9 @@ export const qrProcedures = {
             "restaurant.address as restaurant_address",
             "restaurant.mobile as restaurant_phone",
             "restaurant.theme_id as restaurant_theme",
+            "group_res.id as food_court_id",
+            "group_res.name as food_court_name",
+            "group_res.is_active as food_court_is_active",
           ])
           .where("qr_code.code", "=", input.qr_code)
           .executeTakeFirst();
@@ -281,6 +285,30 @@ export const qrProcedures = {
           throw new Error("QR code not found");
         }
 
+        // Handle food court QR codes
+        if (qrRecord.type === "foodcourt") {
+          if (!qrRecord.food_court_id) {
+            throw new Error("Food court not found");
+          }
+
+          return {
+            id: qrRecord.id.toString(),
+            code: qrRecord.code,
+            type: qrRecord.type,
+            status: qrRecord.status,
+            isActive: qrRecord.food_court_is_active || false,
+            needsActivation: false,
+            expiresAt: qrRecord.expires_at?.toISOString() || null,
+            foodCourt: {
+              id: qrRecord.food_court_id.toString(),
+              name: qrRecord.food_court_name || "",
+              is_active: qrRecord.food_court_is_active || false,
+            },
+            restaurant: null,
+          };
+        }
+
+        // Handle restaurant QR codes (existing logic)
         return {
           id: qrRecord.id.toString(),
           code: qrRecord.code,
@@ -296,6 +324,7 @@ export const qrProcedures = {
             phone: qrRecord.restaurant_phone || "",
             theme_id: qrRecord.restaurant_theme || "minimal",
           } : null,
+          foodCourt: null,
         };
       } catch (error) {
         console.error("Error fetching QR data:", error);

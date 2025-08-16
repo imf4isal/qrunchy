@@ -5,6 +5,7 @@ import { userRouter } from "./user.mts";
 import { restaurantRouter } from "./restaurant.mts";
 import { authRouter } from "./auth.mts";
 import { photoMenuRouter } from "./photoMenu.mts";
+import { foodCourtRouter } from "./foodCourt.mts";
 
 export const appRouter = router({
   hello: helloRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   user: userRouter,
   restaurant: restaurantRouter,
   auth: authRouter,
+  foodCourt: foodCourtRouter,
 });
 
 export type AppRouter = typeof appRouter;
