@@ -121,6 +121,48 @@ export const foodCourtProcedures = {
       }
     }),
 
+  // Get QR codes for all restaurants in a food court
+  getRestaurantQrCodes: publicProcedure
+    .input(foodCourtGetByIdSchema)
+    .query(async ({ input }) => {
+      try {
+        // Get all restaurants in the food court
+        const restaurants = await db
+          .selectFrom("restaurant")
+          .select("id")
+          .where("group_res_id", "=", input.id)
+          .where("is_active", "=", true)
+          .execute();
+
+        if (restaurants.length === 0) {
+          return { restaurant_qr_codes: {} };
+        }
+
+        const restaurantIds = restaurants.map(r => r.id);
+
+        // Get QR codes for all these restaurants
+        const qrCodes = await db
+          .selectFrom("qr_code")
+          .select(["restaurant_id", "code", "status", "type"])
+          .where("restaurant_id", "in", restaurantIds)
+          .where("type", "=", "digital")
+          .execute();
+
+        // Create a map of restaurant_id -> qr_code
+        const qrCodeMap: Record<number, string> = {};
+        qrCodes.forEach(qr => {
+          if (qr.restaurant_id) {
+            qrCodeMap[qr.restaurant_id] = qr.code;
+          }
+        });
+
+        return { restaurant_qr_codes: qrCodeMap };
+      } catch (error) {
+        console.error("Error fetching restaurant QR codes:", error);
+        return { restaurant_qr_codes: {} };
+      }
+    }),
+
   // Get user's food courts
   getByUser: publicProcedure
     .query(async ({ ctx }) => {

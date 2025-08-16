@@ -51,12 +51,11 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
   );
 
   // Get QR codes for all restaurants in the food court
-  const restaurantIds = foodCourtData?.foodCourt?.restaurants?.map(r => r.id) || [];
-  const restaurantQrQueries = restaurantIds.map(id => 
-    trpc.digitalMenu.qr.getByRestaurant.useQuery(
-      { restaurant_id: id },
-      { enabled: !!id }
-    )
+  const {
+    data: restaurantQrData,
+  } = trpc.foodCourt.getRestaurantQrCodes.useQuery(
+    { id: foodCourtData?.foodCourt?.id || 0 },
+    { enabled: !!foodCourtData?.foodCourt?.id }
   );
 
   // Pre-compute values that will be used in render
@@ -101,12 +100,11 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
 
   // Helper function to get restaurant menu URL
   const getRestaurantMenuUrl = (restaurantId: number) => {
-    const qrQuery = restaurantQrQueries.find((_, index) => restaurantIds[index] === restaurantId);
-    const qrData = qrQuery?.data;
+    const qrCode = restaurantQrData?.restaurant_qr_codes?.[restaurantId];
     
-    if (qrData && qrData.length > 0) {
+    if (qrCode) {
       // Use the QR code to navigate to the restaurant menu
-      return `/menu/${qrData[0].code}`;
+      return `/menu/${qrCode}`;
     }
     
     // Fallback: if no QR code is found, redirect to dashboard

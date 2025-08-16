@@ -74,6 +74,11 @@ export default function FoodCourtManager() {
     refetch: refetchQrCode,
   } = trpc.foodCourt.getQrCode.useQuery({ id: foodCourtId });
 
+  // Get restaurant QR codes for dashboard view buttons
+  const {
+    data: restaurantQrData,
+  } = trpc.foodCourt.getRestaurantQrCodes.useQuery({ id: foodCourtId });
+
   // Search restaurants
   const {
     data: searchResults,
@@ -127,6 +132,18 @@ export default function FoodCourtManager() {
   
   // Use existing QR code data if available, otherwise use generated data
   const currentQrData = qrCodeData || (qrCodeResult?.qr_code ? qrCodeResult : null);
+
+  // Helper function to get restaurant menu URL
+  const getRestaurantMenuUrl = (restaurantId: number) => {
+    const qrCode = restaurantQrData?.restaurant_qr_codes?.[restaurantId];
+    
+    if (qrCode) {
+      return `/menu/${qrCode}`;
+    }
+    
+    // Fallback to dashboard if no QR code found
+    return `/dashboard/restaurant/${restaurantId}/menu`;
+  };
 
   if (isLoading) {
     return (
@@ -386,7 +403,7 @@ export default function FoodCourtManager() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Button size="sm" variant="outline" asChild>
-                            <Link href={`/menu/QR_${restaurant.id}`} target="_blank">
+                            <Link href={getRestaurantMenuUrl(restaurant.id)} target="_blank">
                               <Eye className="w-4 h-4 mr-1" />
                               View
                             </Link>

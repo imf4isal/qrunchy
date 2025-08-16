@@ -7,6 +7,7 @@ export const foodCourtRouter = router({
   getById: foodCourtProcedures.getById,
   getByQrCode: foodCourtProcedures.getByQrCode,
   getQrCode: foodCourtProcedures.getQrCode,
+  getRestaurantQrCodes: foodCourtProcedures.getRestaurantQrCodes,
   updateRestaurants: foodCourtProcedures.updateRestaurants,
   searchItems: foodCourtProcedures.searchItems,
   update: foodCourtProcedures.update,
