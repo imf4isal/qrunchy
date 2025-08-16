@@ -1,3 +1,4 @@
+import React from "react";
 import { trpc } from "@/utils/trpc";
 import CustomerMenuViewer from "./theme/CustomerMenuViewer";
 import CustomerMenuViewerModern from "./theme/CustomerMenuViewerModern";
@@ -14,8 +15,9 @@ interface MenuHandlerProps {
 }
 
 export default function MenuHandler({ qrCode }: MenuHandlerProps) {
-  // Check if this is a photo menu QR code (starts with "photo_")
+  // Check QR code types
   const isPhotoMenuQR = qrCode.startsWith("photo_");
+  const isFoodCourtQR = qrCode.startsWith("foodcourt_");
   
   // For photo menus, try server first, fallback to localStorage
   const {
@@ -44,6 +46,17 @@ export default function MenuHandler({ qrCode }: MenuHandlerProps) {
 
     // Photo menu not found anywhere
     return <ErrorScreen onRetry={() => window.location.reload()} />;
+  }
+
+  // Handle food court QR codes
+  if (isFoodCourtQR) {
+    // Dynamic import to avoid circular dependencies
+    const FoodCourtViewer = React.lazy(() => import("./theme/FoodCourtViewer"));
+    return (
+      <React.Suspense fallback={<LoadingScreen />}>
+        <FoodCourtViewer qrCode={qrCode} />
+      </React.Suspense>
+    );
   }
 
   // Use tRPC to fetch QR data from the real backend for digital menus

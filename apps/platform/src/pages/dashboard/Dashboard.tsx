@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
 import ChainManagement from "@/components/chain/ChainManagement";
+import FoodCourtManagement from "@/components/foodcourt/FoodCourtManagement";
 import AddToChainButton from "@/components/restaurant/AddToChainButton";
 import { Plus, QrCode, Edit3, BarChart3, Building2, Store, Image, Camera, Edit } from "lucide-react";
 import { trpc } from "@/utils/trpc";
@@ -320,7 +321,7 @@ export default function Dashboard() {
           {/* Main Content Area */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="restaurants" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="restaurants" className="flex items-center gap-2">
                   <Store className="w-4 h-4" />
                   Restaurants
@@ -328,6 +329,10 @@ export default function Dashboard() {
                 <TabsTrigger value="chains" className="flex items-center gap-2">
                   <Building2 className="w-4 h-4" />
                   Chains
+                </TabsTrigger>
+                <TabsTrigger value="foodcourts" className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  Food Courts
                 </TabsTrigger>
               </TabsList>
 
@@ -403,6 +408,10 @@ export default function Dashboard() {
 
               <TabsContent value="chains">
                 <ChainManagement />
+              </TabsContent>
+
+              <TabsContent value="foodcourts">
+                <FoodCourtManagement />
               </TabsContent>
             </Tabs>
           </div>
