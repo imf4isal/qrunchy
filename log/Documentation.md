@@ -43,6 +43,8 @@ The database has evolved through 12 migrations, resulting in the following schem
 ```sql
 - id (serial, primary key)
 - mobile_number (varchar, unique, not null)
+- is_verified (boolean, default false) [NEW - Added in v1.2]
+- password (varchar, optional) [NEW - Added in v1.2]
 - created_at (timestamp, default now())
 - updated_at (timestamp, default now())
 ```
@@ -142,6 +144,18 @@ The database has evolved through 12 migrations, resulting in the following schem
 - price (decimal(10,2), not null)
 ```
 
+**otp_verification** [NEW - Added in v1.2]
+```sql
+- id (serial, primary key)
+- mobile_number (varchar, not null)
+- otp_code (varchar(6), not null)
+- expires_at (timestamp, not null)
+- attempts (integer, default 0, not null)
+- verified_at (timestamp, nullable)
+- created_at (timestamp, default now(), not null)
+- INDEX: idx_otp_mobile_number on mobile_number
+```
+
 ### Database Relationships
 
 ```
@@ -196,6 +210,32 @@ export const appRouter = router({
 - Input: `{ user_id: number }`
 - Purpose: Get current user session info
 - Returns: User data + restaurants
+
+**sendOTP** [NEW - Added in v1.2]
+- Input: `{ mobile_number: string }`
+- Purpose: Send 6-digit OTP via SMS for new user verification
+- Features: Rate limiting (max 3 requests per hour), master password support
+- Returns: Success message
+- SMS Provider: SMS Orbis API integration
+
+**verifyOTP** [NEW - Added in v1.2]
+- Input: `{ mobile_number: string, otp_code: string }`
+- Purpose: Verify OTP code and mark user as verified
+- Features: Master password bypass ("654321"), attempt tracking
+- Returns: User verification status
+- Side Effects: Creates new user if mobile number doesn't exist
+
+**setPassword** [NEW - Added in v1.2]
+- Input: `{ user_id: number, password: string }`
+- Purpose: Set password for verified users (dashboard functionality)
+- Returns: Success confirmation
+- Validation: User must be verified to set password
+
+**loginWithPassword** [NEW - Added in v1.2]
+- Input: `{ mobile_number: string, password: string }`
+- Purpose: Authenticate users using password instead of OTP
+- Returns: User data + associated restaurants
+- Fallback: Supports dual authentication flow
 
 #### User Management (`user.mts`)
 
@@ -881,5 +921,150 @@ VITE_BACKEND_URL=http://localhost:3000
 **Backend specific:**
 - `pnpm migrate` - Run database migrations
 - `pnpm migrate:down` - Rollback migrations
+
+---
+
+## Changelog
+
+### Version 1.2 - OTP Authentication System (August 2025)
+
+#### Major Features Added
+
+**1. OTP Verification System**
+- **Database Schema Updates:**
+  - Added `otp_verification` table with rate limiting support
+  - Updated `user` table with `is_verified` and `password` fields
+  - Implemented database migrations 014 and 015
+
+**2. SMS Integration**
+- **SMS Orbis API Integration:**
+  - Complete SMS service implementation (`smsService.mts`)
+  - Environment variables for API key and sender ID
+  - Rate limiting: Maximum 3 OTP requests per hour per mobile number
+  - Master password support for testing: "654321"
+
+**3. Frontend Components**
+- **OTPVerification Component:**
+  - 6-digit OTP input with auto-focus and paste handling
+  - 5-minute countdown timer with resend functionality
+  - Master password hint display
+  - Error handling and loading states
+
+**4. Authentication Flow Enhancements**
+- **Dual Authentication Support:**
+  - OTP-based registration for new users
+  - Password-based login for existing users
+  - Seamless integration into existing registration workflow
+  - Dashboard password setup functionality
+
+**5. Backend API Extensions**
+- **New tRPC Procedures:**
+  - `auth.sendOTP` - Send OTP via SMS
+  - `auth.verifyOTP` - Verify OTP and create user
+  - `auth.setPassword` - Dashboard password setup
+  - `auth.loginWithPassword` - Password-based authentication
+
+#### Technical Implementation Details
+
+**Database Migrations:**
+```sql
+-- Migration 014: OTP Verification Table
+CREATE TABLE otp_verification (
+  id SERIAL PRIMARY KEY,
+  mobile_number VARCHAR NOT NULL,
+  otp_code VARCHAR(6) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  attempts INTEGER DEFAULT 0 NOT NULL,
+  verified_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+CREATE INDEX idx_otp_mobile_number ON otp_verification(mobile_number);
+
+-- Migration 015: User Table Updates
+ALTER TABLE user 
+ADD COLUMN is_verified BOOLEAN DEFAULT FALSE NOT NULL,
+ADD COLUMN password VARCHAR;
+```
+
+**Security Features:**
+- Rate limiting prevents OTP spam
+- OTP codes expire after 5 minutes
+- Maximum 3 verification attempts per OTP
+- Master password bypass for development/testing
+- Secure password hashing for stored passwords
+
+**Integration Points:**
+- QR Generator: OTP verification before menu creation
+- Dashboard: Password setup modal for verified users
+- Login: Toggle between OTP and password authentication
+- Registration Flow: Automatic OTP sending for new mobile numbers
+
+#### Files Modified/Added
+
+**Backend Files:**
+- `apps/server/src/db/migrations/014_add_otp_verification_table.mts` (NEW)
+- `apps/server/src/db/migrations/015_update_user_table_for_auth.mts` (NEW)
+- `apps/server/src/services/smsService.mts` (NEW)
+- `apps/server/src/trpc/procedures/auth.mts` (ENHANCED)
+- `apps/server/src/trpc/routers/auth.mts` (ENHANCED)
+
+**Frontend Files:**
+- `apps/platform/src/components/OTPVerification.tsx` (NEW)
+- `apps/platform/src/components/PasswordSetup.tsx` (NEW)
+- `apps/platform/src/pages/digitalmenu/QRGenerator.tsx` (ENHANCED)
+- `apps/platform/src/pages/auth/Login.tsx` (ENHANCED)
+
+**Configuration:**
+- Environment variables for SMS Orbis API integration
+- Docker configuration updates for new environment variables
+
+#### Migration and Deployment Notes
+
+**Database Migration:**
+```bash
+# Run inside Docker container
+docker exec -it qrunchy sh
+cd apps/server
+pnpm migrate
+```
+
+**Environment Variables Required:**
+```bash
+SMS_ORBIS_API_KEY=ZVNkR0hIdmZxeGVSTDlmVXRvTU9ZalZXYURsQ1MyWkZOMmd5U1VkRlVVVmpiMlkwTDBFOVBRPT0=
+SMS_ORBIS_SENDER_ID=YourSenderID
+```
+
+#### User Experience Improvements
+
+**Registration Flow:**
+1. User enters mobile number in QR Generator
+2. System automatically sends OTP via SMS
+3. User verifies with 6-digit code (or master password)
+4. User is marked as verified and can proceed
+5. Menu creation continues as normal
+
+**Dashboard Enhancement:**
+- New password setup modal for verified users
+- Secure password management
+- Option to switch to password-based authentication
+
+**Login Options:**
+- Toggle between OTP and password authentication
+- Seamless transition for existing users
+- Backward compatibility maintained
+
+#### Development and Testing
+
+**Master Password:**
+- Test OTP: "654321" (bypasses SMS sending)
+- Allows development and testing without SMS costs
+- Clearly indicated in UI for transparency
+
+**Rate Limiting:**
+- Prevents abuse with 3 OTP requests per hour limit
+- Graceful error handling when limit exceeded
+- Clear user feedback on remaining time
+
+---
 
 This documentation provides a comprehensive overview of the Qrunchy digital menu platform. The system is well-architected with clear separation of concerns, type safety throughout the stack, and support for both simple photo menus and advanced digital menus with theming capabilities.

@@ -6,7 +6,6 @@ import { RestaurantProvider } from "./contexts/RestaurantContext";
 import { AuthProvider } from "./contexts/AuthContext";
 
 import { trpc } from "./utils/trpc";
-// import { devtoolsLink } from "trpc-client-devtools-link";
 
 const App = () => {
   const localURL = `${import.meta.env.VITE_BACKEND_URL || "https://api.qrunchy.menu"}/trpc`;
