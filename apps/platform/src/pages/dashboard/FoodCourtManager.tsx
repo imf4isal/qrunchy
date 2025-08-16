@@ -320,7 +320,7 @@ export default function FoodCourtManager() {
                     <AlertCircle className="w-4 h-4 mr-2" />
                     Request Activation
                   </Button>
-                )}
+                ) : null}
                 <Button 
                   variant="outline" 
                   onClick={() => setShowDeleteDialog(true)}
