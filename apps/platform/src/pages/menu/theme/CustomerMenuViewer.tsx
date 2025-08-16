@@ -24,6 +24,25 @@ export default function CustomerMenuViewer({
     { enabled: !!qrCode }
   );
 
+  // Debug logging to check if image URLs are coming from backend
+  React.useEffect(() => {
+    if (menuData) {
+      console.log('🔍 CustomerMenuViewer - Full menuData:', menuData);
+      console.log('🔍 CustomerMenuViewer - Menu items with image URLs:', 
+        menuData.items?.map((item: any) => ({ 
+          id: item.id, 
+          name: item.name, 
+          image_url: item.image_url 
+        }))
+      );
+      const itemsWithImages = menuData.items?.filter((item: any) => item.image_url);
+      console.log('🔍 CustomerMenuViewer - Items that have images:', itemsWithImages?.length || 0);
+      if (itemsWithImages && itemsWithImages.length > 0) {
+        console.log('🔍 CustomerMenuViewer - First item with image:', itemsWithImages[0]);
+      }
+    }
+  }, [menuData]);
+
   // Handle scroll for back to top button
   useEffect(() => {
     const handleScroll = () => {

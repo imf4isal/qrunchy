@@ -15,6 +15,7 @@ export const transformMenuToFrontend = (menuData: any) => ({
       name: item.name,
       price: parseFloat(item.price),
       description: item.description || undefined,
+      image_url: item.image_url || undefined, // CRITICAL: Include image_url field
       categoryId: item.category_id.toString(),
       variants: (item.variants || []).map((variant: any) => ({
         id: variant.id.toString(),
@@ -44,6 +45,7 @@ export const transformMenuForExport = (menuData: any) => ({
       name: item.name,
       price: parseFloat(item.price),
       description: item.description || undefined,
+      image_url: item.image_url || undefined, // CRITICAL: Include image_url field for export
       categoryName: category.name,
       variants: item.variants.map((variant: any) => ({
         title: variant.name,
