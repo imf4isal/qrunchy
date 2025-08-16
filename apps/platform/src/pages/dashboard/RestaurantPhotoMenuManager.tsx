@@ -56,6 +56,7 @@ export default function RestaurantPhotoMenuManager() {
   const createMultipleMutation = trpc.photoMenu.createMultiple.useMutation();
   const updateSortOrderMutation = trpc.photoMenu.updateSortOrder.useMutation();
   const deleteMutation = trpc.photoMenu.delete.useMutation();
+  const deleteAllMutation = trpc.photoMenu.deleteAll.useMutation();
   const updateRestaurantMutation = trpc.restaurant.update.useMutation();
 
   // Load existing photos
@@ -197,6 +198,12 @@ export default function RestaurantPhotoMenuManager() {
     )) return;
 
     try {
+      // First delete all photo menu entries for this restaurant
+      await deleteAllMutation.mutateAsync({ 
+        restaurant_id: restaurantId 
+      });
+      
+      // Mark restaurant as inactive
       await updateRestaurantMutation.mutateAsync({ 
         id: restaurantId, 
         is_active: false 

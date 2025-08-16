@@ -96,7 +96,8 @@ export const photoMenuProcedures = {
         return { photos };
       } catch (error) {
         console.error("Error fetching photo menu by QR:", error);
-        throw new Error("Photo menu not found for this QR code");
+        // Re-throw the original error to preserve custom messages
+        throw error;
       }
     }),
 
@@ -204,8 +205,22 @@ export const photoMenuProcedures = {
     .input(photoMenuGetByRestaurantSchema)
     .mutation(async ({ input }) => {
       try {
-        await deleteAllPhotoMenusForRestaurant(input.restaurant_id);
-        return { success: true };
+        return await db.transaction().execute(async (trx) => {
+          // Delete all photo menu entries
+          await trx
+            .deleteFrom("photo_menu")
+            .where("restaurant_id", "=", input.restaurant_id)
+            .execute();
+
+          // Delete all QR codes for this restaurant's photo menus
+          await trx
+            .deleteFrom("qr_code")
+            .where("restaurant_id", "=", input.restaurant_id)
+            .where("type", "=", "photo")
+            .execute();
+
+          return { success: true };
+        });
       } catch (error) {
         console.error("Error deleting all photo menus:", error);
         throw new Error("Failed to delete photo menus");

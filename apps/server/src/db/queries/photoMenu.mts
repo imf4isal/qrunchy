@@ -53,13 +53,19 @@ export async function getPhotoMenuByRestaurant(restaurantId: number): Promise<Ph
 export async function getPhotoMenuByQrCode(qrCode: string): Promise<PhotoMenuWithRestaurant[]> {
   const qrRecord = await db
     .selectFrom("qr_code")
-    .select("restaurant_id")
-    .where("code", "=", qrCode)
-    .where("type", "=", "photo")
+    .innerJoin("restaurant", "qr_code.restaurant_id", "restaurant.id")
+    .select(["qr_code.restaurant_id", "restaurant.is_active"])
+    .where("qr_code.code", "=", qrCode)
+    .where("qr_code.type", "=", "photo")
     .executeTakeFirst();
 
   if (!qrRecord || !qrRecord.restaurant_id) {
     throw new Error("Photo menu not found for this QR code");
+  }
+
+  // Check if restaurant is active
+  if (!qrRecord.is_active) {
+    throw new Error("This menu is no longer available");
   }
 
   return await getPhotoMenuByRestaurant(qrRecord.restaurant_id);
