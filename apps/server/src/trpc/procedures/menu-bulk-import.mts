@@ -213,7 +213,15 @@ const createItems = async (trx: any, input: any, categoryMap: Map<string, number
     // Handle image URL - download and upload if provided
     let finalImageUrl: string | null = null;
     if (itemData.image_url) {
-      finalImageUrl = await downloadAndUploadImage(itemData.image_url);
+      // If it's already an R2 URL, keep it as-is (don't re-download)
+      if (itemData.image_url.includes('r2.dev') || itemData.image_url.includes('cloudflarestorage.com')) {
+        console.log('🔄 Preserving existing R2 image URL:', itemData.image_url);
+        finalImageUrl = itemData.image_url;
+      } else {
+        // External URL - download and re-upload to our R2
+        console.log('📥 Downloading external image URL:', itemData.image_url);
+        finalImageUrl = await downloadAndUploadImage(itemData.image_url);
+      }
     }
 
     // Create item

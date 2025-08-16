@@ -106,6 +106,7 @@ export default function RestaurantMenuManager() {
             categoryId: item.categoryId,
             variants: item.variants,
             addons: item.addons,
+            image_url: item.image_url, // CRITICAL: Include image_url field
           }))
         ),
       };
@@ -142,6 +143,11 @@ export default function RestaurantMenuManager() {
     
     try {
       console.log('🔍 Top-level Save Changes - preparing menu data with image URLs');
+      console.log('🔍 Current menu.items before mapping:', menu.items.map(item => ({
+        id: item.id,
+        name: item.name,
+        image_url: item.image_url
+      })));
       
       // Prepare menu data for bulk import
       const menuData = {
@@ -166,9 +172,10 @@ export default function RestaurantMenuManager() {
         })),
       };
       
-      console.log('🔍 Menu data prepared, items with images:', 
-        menuData.items.filter(item => item.image_url).map(item => ({ name: item.name, image_url: item.image_url }))
+      console.log('🔍 Menu data prepared, ALL items with their image URLs:', 
+        menuData.items.map(item => ({ name: item.name, image_url: item.image_url }))
       );
+      console.log('🔍 Full menuData object:', menuData);
       
       // Save menu data with bulk import (replaces existing)
       await bulkImportMutation.mutateAsync({
@@ -408,7 +415,7 @@ export default function RestaurantMenuManager() {
             <RestaurantSettings restaurant={restaurant} />
           )}
           <QRCodeSection 
-            qrData={qrData} 
+            qrData={qrData || []} 
             restaurantName={restaurant?.name}
             onDownloadQR={handleDownloadQR}
           />
@@ -419,7 +426,7 @@ export default function RestaurantMenuManager() {
           {restaurant && (
             <ThemeSelector
               restaurantId={restaurantId}
-              currentTheme={restaurant?.theme_id || "minimal"}
+              currentTheme={(restaurant?.theme_id as "minimal" | "modern") || "minimal"}
               onThemeChange={handleThemeChange}
             />
           )}
@@ -459,8 +466,8 @@ export default function RestaurantMenuManager() {
                       theme={restaurant?.theme_id as "minimal" | "modern" || "minimal"}
                       restaurant={{
                         name: restaurant?.name || menu.restaurantName,
-                        address: restaurant?.address,
-                        mobile: restaurant?.mobile,
+                        address: restaurant?.address || undefined,
+                        mobile: restaurant?.mobile || undefined,
                       }}
                     />
                   </CardContent>
