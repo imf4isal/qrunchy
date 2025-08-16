@@ -97,7 +97,21 @@ export class SMSService {
 
   // Check if it's the master password
   isMasterPassword(input: string): boolean {
-    return input === "654321"; // 6-digit master password for testing
+    const masterPassword = process.env.OTP_MASTER_PASSWORD;
+    
+    // Only allow master password if it's configured
+    if (!masterPassword) {
+      return false;
+    }
+    
+    const isMatch = input === masterPassword;
+    
+    if (isMatch) {
+      console.log("⚠️  WARNING: Master password used for OTP verification");
+      console.log("   Consider disabling OTP_MASTER_PASSWORD in production");
+    }
+    
+    return isMatch;
   }
 }
 

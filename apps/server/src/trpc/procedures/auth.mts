@@ -1,34 +1,68 @@
 import { z } from "zod";
-import { publicProcedure } from "../index.mts";
+import { publicProcedure, withRateLimit } from "../index.mts";
 import { db } from "../../db/index.mts";
 import { smsService } from "../../services/smsService.mts";
+import { hashPassword, safeComparePassword } from "../../utils/password.mts";
 
-// Auth-related schemas
+// Enhanced validation schemas with better security
 const loginSchema = z.object({
-  mobile_number: z.string().min(1, "Mobile number is required"),
+  mobile_number: z
+    .string()
+    .min(1, "Mobile number is required")
+    .max(25, "Mobile number too long")
+    .regex(/^[\+]?[0-9][\d\s\-]{0,20}$/, "Invalid mobile number format")
+    .transform((val) => val.trim()),
 });
 
 const userSessionSchema = z.object({
-  user_id: z.number().int().positive(),
+  user_id: z.number().int().positive().max(2147483647), // Max int32
 });
 
 const sendOTPSchema = z.object({
-  mobile_number: z.string().min(1, "Mobile number is required"),
+  mobile_number: z
+    .string()
+    .min(1, "Mobile number is required")
+    .max(25, "Mobile number too long")
+    .regex(/^[\+]?[0-9][\d\s\-]{0,20}$/, "Invalid mobile number format")
+    .transform((val) => val.trim()),
 });
 
 const verifyOTPSchema = z.object({
-  mobile_number: z.string().min(1, "Mobile number is required"),
-  otp_code: z.string().min(1, "OTP code is required"),
+  mobile_number: z
+    .string()
+    .min(1, "Mobile number is required")
+    .max(25, "Mobile number too long")
+    .regex(/^[\+]?[0-9][\d\s\-]{0,20}$/, "Invalid mobile number format")
+    .transform((val) => val.trim()),
+  otp_code: z
+    .string()
+    .length(6, "OTP code must be exactly 6 digits")
+    .regex(/^\d{6}$/, "OTP code must contain only digits")
+    .transform((val) => val.trim()),
 });
 
 const setPasswordSchema = z.object({
-  user_id: z.number().int().positive(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  user_id: z.number().int().positive().max(2147483647),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(100, "Password too long")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number")
+    .transform((val) => val.trim()),
 });
 
 const loginWithPasswordSchema = z.object({
-  mobile_number: z.string().min(1, "Mobile number is required"),
-  password: z.string().min(1, "Password is required"),
+  mobile_number: z
+    .string()
+    .min(1, "Mobile number is required")
+    .max(25, "Mobile number too long")
+    .regex(/^[\+]?[0-9][\d\s\-]{0,20}$/, "Invalid mobile number format")
+    .transform((val) => val.trim()),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .max(100, "Password too long")
+    .transform((val) => val.trim()),
 });
 
 export const authProcedures = {
@@ -143,7 +177,10 @@ export const authProcedures = {
   }),
 
   // Send OTP to mobile number
-  sendOTP: publicProcedure.input(sendOTPSchema).mutation(async ({ input }) => {
+  sendOTP: publicProcedure
+    .use(withRateLimit('otp'))
+    .input(sendOTPSchema)
+    .mutation(async ({ input }) => {
     try {
       const { mobile_number } = input;
 
@@ -277,19 +314,23 @@ export const authProcedures = {
 
   // Set password for existing user
   setPassword: publicProcedure
+    .use(withRateLimit('password'))
     .input(setPasswordSchema)
     .mutation(async ({ input }) => {
       try {
         const { user_id, password } = input;
 
-        // Update user with password
+        // Hash the password before storing
+        const hashedPassword = await hashPassword(password);
+
+        // Update user with hashed password
         await db
           .updateTable("user")
-          .set({ password })
+          .set({ password: hashedPassword })
           .where("id", "=", user_id)
           .execute();
 
-        console.log(`🔐 Password set for user ${user_id}`);
+        console.log(`🔐 Password set and hashed for user ${user_id}`);
 
         return {
           success: true,
@@ -303,20 +344,27 @@ export const authProcedures = {
 
   // Login with mobile number and password
   loginWithPassword: publicProcedure
+    .use(withRateLimit('login'))
     .input(loginWithPasswordSchema)
     .mutation(async ({ input }) => {
       try {
         const { mobile_number, password } = input;
 
-        // Find user with mobile number and password
+        // Find user by mobile number first
         const user = await db
           .selectFrom("user")
           .selectAll()
           .where("mobile_number", "=", mobile_number)
-          .where("password", "=", password)
           .executeTakeFirst();
 
-        if (!user) {
+        if (!user || !user.password) {
+          throw new Error("Invalid mobile number or password");
+        }
+
+        // Verify password using safe comparison (supports both plain text and hashed)
+        const isPasswordValid = await safeComparePassword(password, user.password);
+
+        if (!isPasswordValid) {
           throw new Error("Invalid mobile number or password");
         }
 

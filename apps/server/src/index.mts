@@ -9,9 +9,38 @@ import express from "express";
 import routes from "./restroutes/index.mts";
 import { trpcRouter } from "./trpc/trpc-server.mts";
 import cors from "cors";
+import helmet from "helmet";
+import { generalRateLimiter } from "./middleware/rateLimiter.mts";
 
 const app = express();
 
+// Security headers with Helmet
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Disable for compatibility
+  })
+);
+
+// Trust proxy for rate limiting (when behind reverse proxy)
+app.set('trust proxy', 1);
+
+// General rate limiting for all endpoints
+app.use(generalRateLimiter);
+
+// CORS configuration
 app.use(
   cors({
     origin: [
@@ -21,10 +50,13 @@ app.use(
       process.env.FRONTEND_URL,
     ].filter((url): url is string => Boolean(url)),
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
 
-app.use(express.json());
+// JSON parsing with size limit
+app.use(express.json({ limit: '10mb' }));
 
 app.use(routes);
 
