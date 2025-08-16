@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "wouter";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,11 @@ export default function FoodCourtManager() {
   const [showAddRestaurantDialog, setShowAddRestaurantDialog] = useState(false);
   const [restaurantSearch, setRestaurantSearch] = useState("");
   const [selectedRestaurants, setSelectedRestaurants] = useState<number[]>([]);
+  const [qrCodeData, setQrCodeData] = useState<{
+    qr_code: string;
+    menu_url: string;
+    status: string;
+  } | null>(null);
 
   // Fetch food court data
   const {
@@ -78,7 +83,8 @@ export default function FoodCourtManager() {
 
   // Generate QR code mutation
   const generateQrMutation = trpc.foodCourt.generateQr.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setQrCodeData(data);
       refetchFoodCourt();
     },
   });
@@ -102,6 +108,14 @@ export default function FoodCourtManager() {
   });
 
   const foodCourt = foodCourtData?.foodCourt;
+
+  // Check for existing QR code when food court data loads
+  useEffect(() => {
+    if (foodCourt && !qrCodeData) {
+      // Try to get existing QR code by calling generateQr (it returns existing ones)
+      generateQrMutation.mutate({ food_court_id: foodCourtId });
+    }
+  }, [foodCourt?.id]);
 
   if (isLoading) {
     return (
@@ -378,14 +392,54 @@ export default function FoodCourtManager() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Button 
-                    onClick={handleGenerateQr} 
-                    className="w-full"
-                    disabled={generateQrMutation.isLoading}
-                  >
-                    <QrCode className="w-4 h-4 mr-2" />
-                    {generateQrMutation.isLoading ? "Generating..." : "Generate QR Code"}
-                  </Button>
+                  {!qrCodeData ? (
+                    <Button 
+                      onClick={handleGenerateQr} 
+                      className="w-full"
+                      disabled={generateQrMutation.isLoading}
+                    >
+                      <QrCode className="w-4 h-4 mr-2" />
+                      {generateQrMutation.isLoading ? "Generating..." : "Generate QR Code"}
+                    </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div className="flex items-start space-x-2">
+                          <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          <div className="text-sm text-green-800">
+                            <p className="font-medium">QR Code Generated Successfully!</p>
+                            <p>Code: {qrCodeData.qr_code}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Button asChild className="w-full">
+                          <Link href={qrCodeData.menu_url} target="_blank">
+                            <Eye className="w-4 h-4 mr-2" />
+                            View Food Court
+                          </Link>
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => navigator.clipboard.writeText(qrCodeData.menu_url)}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Copy URL
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => setQrCodeData(null)}
+                        >
+                          Generate New QR
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   
                   {!foodCourt.is_active && (
                     <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
