@@ -5,17 +5,16 @@ export interface SMSResponse {
 }
 
 export class SMSService {
-  private apiKey: string;
-  private senderId: string;
   private baseUrl = "https://portal.smsorbis.com/api/sendSMS";
 
-  constructor() {
-    this.apiKey = process.env.SMS_ORBIS_API_KEY || "";
-    this.senderId = process.env.SMS_ORBIS_SENDER_ID || "Qrunchy";
+  // Get API key dynamically to ensure it's loaded after dotenv
+  private getApiKey(): string {
+    return process.env.SMS_ORBIS_API_KEY || "";
+  }
 
-    if (!this.apiKey) {
-      console.warn("SMS_ORBIS_API_KEY not found in environment variables");
-    }
+  // Get sender ID dynamically
+  private getSenderId(): string {
+    return process.env.SMS_ORBIS_SENDER_ID || "Qrunchy";
   }
 
   async sendOTP(mobileNumber: string, otpCode: string): Promise<SMSResponse> {
@@ -36,9 +35,20 @@ export class SMSService {
 
       const message = `Your Qrunchy verification code is: ${otpCode}. Valid for 5 minutes. Do not share this code.`;
 
+      const apiKey = this.getApiKey();
+      const senderId = this.getSenderId();
+
+      if (!apiKey) {
+        console.warn("SMS_ORBIS_API_KEY not found in environment variables");
+        return {
+          success: false,
+          error: "SMS API key not configured",
+        };
+      }
+
       const url = new URL(this.baseUrl);
-      url.searchParams.append("ApiKey", this.apiKey);
-      url.searchParams.append("SenderID", this.senderId);
+      url.searchParams.append("ApiKey", apiKey);
+      url.searchParams.append("SenderID", senderId);
       url.searchParams.append("number", formattedNumber);
       url.searchParams.append("sms", message);
 
