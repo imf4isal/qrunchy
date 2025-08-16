@@ -6,13 +6,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
 import ChainManagement from "@/components/chain/ChainManagement";
 import AddToChainButton from "@/components/restaurant/AddToChainButton";
-import { Plus, QrCode, Edit3, BarChart3, Building2, Store, Image, Camera } from "lucide-react";
+import { Plus, QrCode, Edit3, BarChart3, Building2, Store, Image, Camera, Edit } from "lucide-react";
 import { trpc } from "@/utils/trpc";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import PasswordSetup from "@/components/PasswordSetup";
 import type { Restaurant } from "@/contexts/AuthContext";
 
 export default function Dashboard() {
   const { user, restaurants, chains } = useAuth();
+  const [showPasswordSetup, setShowPasswordSetup] = useState(false);
 
   // Fetch QR codes for all restaurants
   const qrQueries = restaurants.map((restaurant) =>
@@ -285,13 +287,30 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Account</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowPasswordSetup(true)}
+                  className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+                  title="Set password for login"
+                >
+                  <Edit className="h-4 w-4 text-muted-foreground hover:text-gray-700" />
+                </button>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-lg font-medium">{user?.mobile_number}</div>
               <p className="text-xs text-muted-foreground">
                 Your mobile number
               </p>
+              <div className="mt-2 text-xs text-blue-600">
+                <button
+                  onClick={() => setShowPasswordSetup(true)}
+                  className="hover:underline"
+                >
+                  Set password for easier login
+                </button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -445,6 +464,19 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Password Setup Modal */}
+      {user && (
+        <PasswordSetup
+          userId={user.id}
+          onSuccess={() => {
+            setShowPasswordSetup(false);
+            alert("Password set successfully! You can now login using your mobile number and password.");
+          }}
+          onCancel={() => setShowPasswordSetup(false)}
+          isOpen={showPasswordSetup}
+        />
+      )}
     </MainLayout>
   );
 }
