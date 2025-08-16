@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { publicProcedure } from "../index.mjs";
-import { db } from "../../db/index.mjs";
+import { publicProcedure } from "../index.mts";
+import { db } from "../../db/index.mts";
 import {
   createFoodCourt,
   getFoodCourtById,
@@ -12,7 +12,7 @@ import {
   updateFoodCourt,
   deleteFoodCourt,
   checkFoodCourtOwnership,
-} from "../../db/queries/foodCourt.mjs";
+} from "../../db/queries/foodCourt.mts";
 
 // Validation schemas
 const foodCourtCreateSchema = z.object({
@@ -90,6 +90,34 @@ export const foodCourtProcedures = {
       } catch (error) {
         console.error("Error creating food court:", error);
         throw new Error("Failed to create food court");
+      }
+    }),
+
+  // Get QR code for food court (if exists)
+  getQrCode: publicProcedure
+    .input(foodCourtGetByIdSchema)
+    .query(async ({ input }) => {
+      try {
+        const qrCode = await db
+          .selectFrom("qr_code")
+          .select(["code", "status", "type"])
+          .where("group_res_id", "=", input.id)
+          .where("type", "=", "foodcourt")
+          .executeTakeFirst();
+
+        if (!qrCode) {
+          return { qr_code: null };
+        }
+
+        return {
+          qr_code: qrCode.code,
+          status: qrCode.status,
+          type: qrCode.type,
+          menu_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/menu/${qrCode.code}`,
+        };
+      } catch (error) {
+        console.error("Error fetching food court QR code:", error);
+        return { qr_code: null };
       }
     }),
 

@@ -1,6 +1,6 @@
 import { sql } from "kysely";
-import { db } from "../index.mjs";
-import type { GroupResTable, RestaurantTable } from "../../types/database.mjs";
+import { db } from "../index.mts";
+import type { GroupResTable, RestaurantTable } from "../../types/database.mts";
 
 export interface FoodCourtWithRestaurants {
   id: number;

@@ -54,6 +54,7 @@ export default function FoodCourtManager() {
   const [showAddRestaurantDialog, setShowAddRestaurantDialog] = useState(false);
   const [restaurantSearch, setRestaurantSearch] = useState("");
   const [selectedRestaurants, setSelectedRestaurants] = useState<number[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<{
     qr_code: string;
     menu_url: string;
@@ -66,6 +67,12 @@ export default function FoodCourtManager() {
     isLoading,
     refetch: refetchFoodCourt,
   } = trpc.foodCourt.getById.useQuery({ id: foodCourtId });
+
+  // Get existing QR code data
+  const {
+    data: qrCodeResult,
+    refetch: refetchQrCode,
+  } = trpc.foodCourt.getQrCode.useQuery({ id: foodCourtId });
 
   // Search restaurants
   const {
@@ -85,6 +92,7 @@ export default function FoodCourtManager() {
   const generateQrMutation = trpc.foodCourt.generateQr.useMutation({
     onSuccess: (data) => {
       setQrCodeData(data);
+      refetchQrCode();
       refetchFoodCourt();
     },
   });
@@ -107,15 +115,18 @@ export default function FoodCourtManager() {
     },
   });
 
-  const foodCourt = foodCourtData?.foodCourt;
+  // Delete food court mutation
+  const deleteFoodCourtMutation = trpc.foodCourt.delete.useMutation({
+    onSuccess: () => {
+      // Redirect to dashboard after successful deletion
+      window.location.href = "/dashboard";
+    },
+  });
 
-  // Check for existing QR code when food court data loads
-  useEffect(() => {
-    if (foodCourt && !qrCodeData) {
-      // Try to get existing QR code by calling generateQr (it returns existing ones)
-      generateQrMutation.mutate({ food_court_id: foodCourtId });
-    }
-  }, [foodCourt?.id]);
+  const foodCourt = foodCourtData?.foodCourt;
+  
+  // Use existing QR code data if available, otherwise use generated data
+  const currentQrData = qrCodeData || (qrCodeResult?.qr_code ? qrCodeResult : null);
 
   if (isLoading) {
     return (
@@ -203,6 +214,14 @@ export default function FoodCourtManager() {
       });
     } catch (error: any) {
       alert(`Error removing restaurant: ${error.message}`);
+    }
+  };
+
+  const handleDeleteFoodCourt = async () => {
+    try {
+      await deleteFoodCourtMutation.mutateAsync({ id: foodCourtId });
+    } catch (error: any) {
+      alert(`Error deleting food court: ${error.message}`);
     }
   };
 
@@ -301,6 +320,14 @@ export default function FoodCourtManager() {
                     Request Activation
                   </Button>
                 )}
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
               </div>
             )}
           </div>
@@ -392,7 +419,7 @@ export default function FoodCourtManager() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {!qrCodeData ? (
+                  {!currentQrData ? (
                     <Button 
                       onClick={handleGenerateQr} 
                       className="w-full"
@@ -407,15 +434,15 @@ export default function FoodCourtManager() {
                         <div className="flex items-start space-x-2">
                           <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                           <div className="text-sm text-green-800">
-                            <p className="font-medium">QR Code Generated Successfully!</p>
-                            <p>Code: {qrCodeData.qr_code}</p>
+                            <p className="font-medium">QR Code Available!</p>
+                            <p>Code: {currentQrData.qr_code}</p>
                           </div>
                         </div>
                       </div>
                       
                       <div className="space-y-2">
                         <Button asChild className="w-full">
-                          <Link href={qrCodeData.menu_url} target="_blank">
+                          <Link href={currentQrData.menu_url} target="_blank">
                             <Eye className="w-4 h-4 mr-2" />
                             View Food Court
                           </Link>
@@ -424,18 +451,10 @@ export default function FoodCourtManager() {
                         <Button 
                           variant="outline" 
                           className="w-full"
-                          onClick={() => navigator.clipboard.writeText(qrCodeData.menu_url)}
+                          onClick={() => navigator.clipboard.writeText(currentQrData.menu_url)}
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Copy URL
-                        </Button>
-                        
-                        <Button 
-                          variant="outline" 
-                          className="w-full"
-                          onClick={() => setQrCodeData(null)}
-                        >
-                          Generate New QR
                         </Button>
                       </div>
                     </div>
@@ -517,6 +536,44 @@ export default function FoodCourtManager() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowActivationDialog(false)}>
                 Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Food Court Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Food Court</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{foodCourt.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h4 className="font-medium text-red-900 mb-2">This will permanently:</h4>
+                <ul className="text-red-800 text-sm space-y-1">
+                  <li>• Delete the food court and all its settings</li>
+                  <li>• Remove the QR code and make it inaccessible</li>
+                  <li>• Unlink all {foodCourt.restaurants.length} associated restaurants</li>
+                  <li>• Remove all food court data from the system</li>
+                </ul>
+                <p className="text-red-800 text-sm mt-3 font-medium">
+                  The restaurants themselves will not be deleted and can be reassigned to other food courts.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleDeleteFoodCourt}
+                disabled={deleteFoodCourtMutation.isLoading}
+              >
+                {deleteFoodCourtMutation.isLoading ? "Deleting..." : "Delete Food Court"}
               </Button>
             </DialogFooter>
           </DialogContent>

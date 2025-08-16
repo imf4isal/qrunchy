@@ -50,7 +50,25 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
     }
   );
 
-  // Handle loading states
+  // Pre-compute values that will be used in render
+  const foodCourt = foodCourtData?.foodCourt;
+  const hasSearchResults = searchQuery.length > 2 && searchResults?.results;
+
+  // Filter restaurants based on search or show all - must be called before any early returns
+  const displayedContent = useMemo(() => {
+    if (hasSearchResults) {
+      return {
+        type: "search" as const,
+        results: searchResults.results,
+      };
+    }
+    return {
+      type: "restaurants" as const,
+      restaurants: foodCourt?.restaurants || [],
+    };
+  }, [hasSearchResults, searchResults, foodCourt?.restaurants]);
+
+  // Handle loading states - AFTER all hooks are called
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -63,26 +81,9 @@ export default function FoodCourtViewer({ qrCode }: FoodCourtViewerProps) {
     return <ErrorScreen onRetry={() => window.location.reload()} />;
   }
 
-  if (!foodCourtData?.foodCourt) {
+  if (!foodCourt) {
     return <ErrorScreen onRetry={() => window.location.reload()} />;
   }
-
-  const { foodCourt } = foodCourtData;
-  const hasSearchResults = searchQuery.length > 2 && searchResults?.results;
-
-  // Filter restaurants based on search or show all
-  const displayedContent = useMemo(() => {
-    if (hasSearchResults) {
-      return {
-        type: "search" as const,
-        results: searchResults.results,
-      };
-    }
-    return {
-      type: "restaurants" as const,
-      restaurants: foodCourt.restaurants,
-    };
-  }, [hasSearchResults, searchResults, foodCourt.restaurants]);
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
