@@ -26,21 +26,27 @@
 
 ### Food Court Owner Experience
 
-**Food Court Registration (Simple Approach):**
-1. "Register Food Court" button in dashboard
-2. Master password validation + OTP to admin phone (one-time setup per food court)
-3. Food court setup form: name, location, description
-4. Search & select existing restaurants to include (search by restaurant name)
-5. Generate food court QR code
-6. Food court appears in new "Food Courts" tab in dashboard
+**Food Court Registration (Simplified Approach):**
+1. "Create Food Court" button in dashboard
+2. Food court setup form: name, location, description
+3. Search & select existing restaurants to include (search by restaurant name)
+4. Generate food court QR code (marked as inactive by default)
+5. Food court appears in new "Food Courts" tab in dashboard with "Inactive" status
 
 **Food Court Management:**
 - View/edit food court details
 - Add/remove restaurants (search by restaurant name)
-- Toggle food court active/inactive status
-- View food court QR code & analytics
+- "Activate" button that shows popup: "Contact admin to activate your food court"
+- View food court QR code & status (Active/Inactive)
 - Restaurants can belong to multiple food courts (keep flexible for future changes)
 - Restaurant menus remain independent - food court QR is totally separate functionality
+
+**Food Court Activation:**
+- QR codes are generated but inactive by default
+- Inactive QR scan shows: "This food court is pending activation" 
+- User requests activation via popup contact admin message
+- Admin manually activates from admin panel
+- Once activated, full food court experience becomes available
 
 **Alternative Approach (Future Consideration):**
 - Restaurant approval system: when adding restaurants not owned by food court admin, send notification to restaurant owner for approval
@@ -53,7 +59,7 @@
 - New food court QR type: `foodcourt_XXXXXXXX`
 - Food court to restaurant relationship tables
 - Basic food court CRUD operations
-- Master password authentication system
+- Simple activation status system (no complex authentication)
 - Leverage existing `group_res` table with `foodcourt` type
 
 ### Phase 2: Customer-Facing Food Court Viewer
@@ -64,11 +70,11 @@
 - Search results showing item + restaurant + price + images + categories
 
 ### Phase 3: Admin Dashboard Integration
-- Food court registration flow with master password + OTP
+- Food court creation flow (no authentication barriers)
 - Food court management tab in dashboard
 - Restaurant search & selection interface
 - QR code generation for food courts
-- Active/inactive toggle functionality
+- Activation request system with contact admin popup
 
 ### Phase 4: Search & Performance Optimization
 - Cross-restaurant search indexing for food court items
