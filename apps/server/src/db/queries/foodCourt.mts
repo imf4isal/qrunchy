@@ -1,3 +1,4 @@
+import { sql } from "kysely";
 import { db } from "../index.mjs";
 import type { GroupResTable, RestaurantTable } from "../../types/database.mjs";
 
@@ -52,7 +53,7 @@ export async function createFoodCourt(data: CreateFoodCourtData) {
       description: data.description || null,
       user_id: data.user_id,
       type: "foodcourt",
-      geolocation: "POINT(0 0)", // Default location
+      geolocation: sql`POINT(0, 0)`, // Default location using Kysely sql helper
       is_active: false, // Inactive by default
     })
     .returningAll()
