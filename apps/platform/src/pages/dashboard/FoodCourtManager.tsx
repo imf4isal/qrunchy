@@ -307,14 +307,15 @@ export default function FoodCourtManager() {
                   <Settings className="w-4 h-4 mr-2" />
                   Edit Details
                 </Button>
-                {foodCourt.is_active ? (
+                {currentQrData ? (
                   <Button asChild>
-                    <Link href={`/menu/foodcourt_${foodCourtId}`} target="_blank">
+                    <Link href={`/menu/${currentQrData.qr_code}`} target="_blank">
                       <Eye className="w-4 h-4 mr-2" />
                       Preview
                     </Link>
                   </Button>
-                ) : (
+                ) : null}
+                {!foodCourt.is_active ? (
                   <Button onClick={() => setShowActivationDialog(true)}>
                     <AlertCircle className="w-4 h-4 mr-2" />
                     Request Activation
@@ -442,7 +443,7 @@ export default function FoodCourtManager() {
                       
                       <div className="space-y-2">
                         <Button asChild className="w-full">
-                          <Link href={currentQrData.menu_url} target="_blank">
+                          <Link href={`/menu/${currentQrData.qr_code}`} target="_blank">
                             <Eye className="w-4 h-4 mr-2" />
                             View Food Court
                           </Link>
@@ -460,13 +461,13 @@ export default function FoodCourtManager() {
                     </div>
                   )}
                   
-                  {!foodCourt.is_active && (
+                  {!foodCourt.is_active && currentQrData && (
                     <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
                       <div className="flex items-start space-x-2">
                         <AlertCircle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
                         <div className="text-sm text-orange-800">
-                          <p className="font-medium">Activation Required</p>
-                          <p>QR codes will work once the food court is activated by admin.</p>
+                          <p className="font-medium">Pending Activation</p>
+                          <p>QR code works, but visitors will see "Food court not active" until admin approval.</p>
                         </div>
                       </div>
                     </div>
