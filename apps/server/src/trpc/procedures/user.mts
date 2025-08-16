@@ -4,6 +4,7 @@ import { db } from "../../db/index.mts";
 
 const userCreateSchema = z.object({
   mobile_number: z.string().min(1, "Mobile number is required"),
+  is_verified: z.boolean().optional().default(false),
 });
 
 const userGetByMobileSchema = z.object({
@@ -42,6 +43,7 @@ export const userProcedures = {
           .insertInto("user")
           .values({
             mobile_number: input.mobile_number,
+            is_verified: input.is_verified ?? false,
           })
           .returningAll()
           .executeTakeFirstOrThrow();

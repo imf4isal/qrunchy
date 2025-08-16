@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { trpc } from "@/utils/trpc";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import { useAuth } from "@/contexts/AuthContext";
+import OTPVerification from "@/components/OTPVerification";
 import type { DigitalMenu } from "@/types/digitalMenu";
 
 interface QRGeneratorProps {
@@ -23,6 +24,8 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
   const [mobileNumber, setMobileNumber] = useState(user?.mobile_number || "");
   const [isGenerating, setIsGenerating] = useState(false);
   const [createdRestaurantId, setCreatedRestaurantId] = useState<number | null>(null);
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   // Update mobile number when user data changes
   useEffect(() => {
@@ -36,6 +39,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
   const createRestaurantMutation = trpc.restaurant.create.useMutation();
   const bulkImportMutation = trpc.digitalMenu.menu.bulkImport.useMutation();
   const generateQRMutation = trpc.digitalMenu.qr.generate.useMutation();
+  const checkUserExistsMutation = trpc.auth.login.useMutation();
 
   const handleGenerateQR = async () => {
     if (!mobileNumber.trim()) {
@@ -43,6 +47,27 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
       return;
     }
 
+    // Check if user already exists or is logged in
+    if (!isAuthenticated || !user) {
+      try {
+        // Check if user already exists
+        await checkUserExistsMutation.mutateAsync({ mobile_number: mobileNumber.trim() });
+        // If we get here, user exists - they should login instead
+        alert("This mobile number is already registered. Please login instead.");
+        return;
+      } catch (error) {
+        // User doesn't exist, need OTP verification for new registration
+        setNeedsVerification(true);
+        setShowOTPVerification(true);
+        return;
+      }
+    }
+
+    // Continue with restaurant creation if already authenticated
+    await proceedWithRestaurantCreation();
+  };
+
+  const proceedWithRestaurantCreation = async () => {
     setIsGenerating(true);
     
     try {
@@ -60,6 +85,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
       if (!isAuthenticated || !user) {
         currentUser = await createUserMutation.mutateAsync({
           mobile_number: mobileNumber.trim(),
+          is_verified: true, // Mark as verified since OTP was verified
         });
         console.log('👤 New user created:', currentUser);
       } else {
@@ -183,6 +209,22 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleOTPVerificationSuccess = async () => {
+    setShowOTPVerification(false);
+    setNeedsVerification(false);
+    
+    // Clear draft since registration is successful
+    localStorage.removeItem('qrunchy_menu_draft');
+    
+    // Proceed with restaurant creation
+    await proceedWithRestaurantCreation();
+  };
+
+  const handleCancelOTP = () => {
+    setShowOTPVerification(false);
+    setNeedsVerification(false);
   };
 
   const handleCopyLink = () => {
@@ -387,6 +429,14 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
           </div>
         </div>
       )}
+
+      {/* OTP Verification Modal */}
+      <OTPVerification
+        mobileNumber={mobileNumber}
+        onVerificationSuccess={handleOTPVerificationSuccess}
+        onCancel={handleCancelOTP}
+        isOpen={showOTPVerification}
+      />
     </div>
   );
 }
