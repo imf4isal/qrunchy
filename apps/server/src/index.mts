@@ -37,8 +37,14 @@ app.use(
 // Trust proxy for rate limiting (when behind reverse proxy)
 app.set('trust proxy', 1);
 
-// General rate limiting for all endpoints
-app.use(generalRateLimiter);
+// General rate limiting for all endpoints (excluding upload routes which have their own rate limiting)
+app.use((req, res, next) => {
+  // Skip general rate limiting for upload endpoints as they have their own
+  if (req.path.includes('/upload/')) {
+    return next();
+  }
+  return generalRateLimiter(req, res, next);
+});
 
 // CORS configuration
 app.use(

@@ -7,6 +7,7 @@ import QRCodeDisplay from "@/components/QRCodeDisplay";
 import { trpc } from "@/utils/trpc";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import { useAuth } from "@/contexts/AuthContext";
+import OTPVerification from "@/components/OTPVerification";
 import type { UploadedImage } from "./ImageUploader";
 
 interface QRCodeGeneratorProps {
@@ -25,7 +26,7 @@ const QRCodeGenerator = ({
   onQrGenerated 
 }: QRCodeGeneratorProps) => {
   const { setCurrentRestaurant } = useRestaurant();
-  const { user, addRestaurant, isAuthenticated } = useAuth();
+  const { user, addRestaurant, isAuthenticated, login } = useAuth();
   const [, setLocation] = useLocation();
   
   const [qrGenerated, setQrGenerated] = useState(false);
@@ -39,6 +40,10 @@ const QRCodeGenerator = ({
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [createdRestaurantId, setCreatedRestaurantId] = useState<number>(restaurantId);
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [showPasswordAuth, setShowPasswordAuth] = useState(false);
+  const [password, setPassword] = useState("");
+  const [userExists, setUserExists] = useState(false);
 
   // Update mobile number when user data changes
   useEffect(() => {
@@ -52,6 +57,7 @@ const QRCodeGenerator = ({
   const createRestaurantMutation = trpc.restaurant.create.useMutation();
   const createMultiplePhotoMenusMutation = trpc.photoMenu.createMultiple.useMutation();
   const generateQrMutation = trpc.photoMenu.generateQr.useMutation();
+  const checkUserExistsMutation = trpc.auth.login.useMutation();
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -64,17 +70,49 @@ const QRCodeGenerator = ({
 
     const mobileNumber = isAuthenticated ? (user?.mobile_number || "") : formData.phoneNumber.trim();
     
+    // Validate restaurant name
+    if (!restaurantName || !restaurantName.trim()) {
+      setError("Please provide a restaurant name to continue");
+      return;
+    }
+    
     if (!isAuthenticated && !mobileNumber) {
       setError("Please provide your mobile number to continue");
       return;
     }
 
+    // Check if user already exists or is logged in
+    if (!isAuthenticated || !user) {
+      try {
+        // Check if user already exists
+        await checkUserExistsMutation.mutateAsync({ mobile_number: mobileNumber });
+        // If we get here, user exists - show password/OTP options
+        setUserExists(true);
+        setShowPasswordAuth(true);
+        return;
+      } catch (error) {
+        // User doesn't exist, need OTP verification for new registration
+        setUserExists(false);
+        setShowOTPVerification(true);
+        return;
+      }
+    }
+
+    // Continue with restaurant creation if already authenticated
+    await proceedWithRestaurantCreation();
+  };
+
+  const proceedWithRestaurantCreation = async () => {
     setIsGenerating(true);
     setError(null);
 
     try {
+      const mobileNumber = isAuthenticated ? (user?.mobile_number || "") : formData.phoneNumber.trim();
+      
       console.log('🚀 Starting photomenu restaurant creation process:', {
-        restaurantName,
+        restaurantName: restaurantName,
+        restaurantNameLength: restaurantName.length,
+        restaurantNameTrimmed: restaurantName.trim(),
         restaurantId,
         selectedChain,
         imagesCount: images.length,
@@ -90,6 +128,7 @@ const QRCodeGenerator = ({
       if (!isAuthenticated || !user) {
         currentUser = await createUserMutation.mutateAsync({
           mobile_number: mobileNumber,
+          is_verified: true, // Mark as verified since authentication was completed
         });
         console.log('👤 New user created for photomenu:', currentUser);
       } else {
@@ -99,7 +138,7 @@ const QRCodeGenerator = ({
       // Step 2: Create restaurant if needed (restaurantId === 0 means new restaurant)
       if (finalRestaurantId === 0) {
         const restaurant = await createRestaurantMutation.mutateAsync({
-          name: restaurantName,
+          name: restaurantName.trim(), // Ensure we trim the name
           mobile: mobileNumber,
           address: (!isAuthenticated && formData.address) ? formData.address : "Not specified",
           user_id: currentUser!.id,
@@ -142,7 +181,7 @@ const QRCodeGenerator = ({
           formData.append('images', image.file);
         });
 
-        const uploadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://13.250.49.6:3000'}/api/upload/photomenu`, {
+        const uploadResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}/api/upload/photomenu`, {
           method: 'POST',
           body: formData,
         });
@@ -183,6 +222,16 @@ const QRCodeGenerator = ({
         onQrGenerated(finalRestaurantId);
       }
 
+      // Log the user in only if they weren't already authenticated
+      // This will also refresh the restaurants list from the server
+      if (!isAuthenticated || !user) {
+        await login(mobileNumber);
+      }
+
+      // Clear draft only after successful restaurant creation
+      localStorage.removeItem('qrunchy_photomenu_draft');
+      console.log('🧹 Cleared photomenu draft after successful restaurant creation');
+
       // Reset generating state
       setIsGenerating(false);
 
@@ -193,6 +242,63 @@ const QRCodeGenerator = ({
       setError(error instanceof Error ? error.message : 'Failed to generate QR code');
       setIsGenerating(false);
     }
+  };
+
+  const handlePasswordAuth = async () => {
+    if (!password.trim()) {
+      setError("Please enter your password");
+      return;
+    }
+
+    try {
+      setError("");
+      setIsGenerating(true);
+      
+      // Attempt login with password
+      await checkUserExistsMutation.mutateAsync({ 
+        mobile_number: formData.phoneNumber.trim(),
+        password: password.trim()
+      });
+      
+      console.log('🔑 Password authentication successful, restaurant name before proceeding:', restaurantName);
+      
+      // Auto-login the user after successful password authentication
+      await login(formData.phoneNumber.trim());
+      
+      setShowPasswordAuth(false);
+      await proceedWithRestaurantCreation();
+    } catch (error) {
+      setError("Invalid password. Please try again or use OTP verification.");
+      setIsGenerating(false);
+    }
+  };
+
+  const handleUseOTP = () => {
+    setShowPasswordAuth(false);
+    setShowOTPVerification(true);
+  };
+
+  const handleOTPVerificationSuccess = async () => {
+    setShowOTPVerification(false);
+    
+    console.log('🔐 OTP verification successful, restaurant name before proceeding:', restaurantName);
+    
+    // Auto-login the user after successful OTP verification
+    await login(formData.phoneNumber.trim());
+    
+    // Don't clear draft here - only clear after successful restaurant creation
+    // localStorage.removeItem('qrunchy_photomenu_draft');
+    
+    // Proceed with restaurant creation
+    await proceedWithRestaurantCreation();
+  };
+
+  const handleCancelAuth = () => {
+    setShowPasswordAuth(false);
+    setShowOTPVerification(false);
+    setUserExists(false);
+    setPassword("");
+    setError("");
   };
 
   const handleCopyLink = () => {
@@ -233,6 +339,80 @@ const QRCodeGenerator = ({
 
       {!qrGenerated ? (
         <>
+          {/* Password Authentication Modal */}
+          {showPasswordAuth && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">
+                    Account Verification
+                  </h2>
+                  <p className="text-gray-600 text-sm">
+                    This number is already registered with{" "}
+                    <span className="font-medium">{formData.phoneNumber}</span>
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Enter your password
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Your password"
+                      disabled={isGenerating}
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-red-600 text-sm">{error}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Button
+                      onClick={handlePasswordAuth}
+                      disabled={isGenerating || !password.trim()}
+                      className="w-full"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          Verifying...
+                        </>
+                      ) : (
+                        "Continue with Password"
+                      )}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={handleUseOTP}
+                      disabled={isGenerating}
+                      className="w-full"
+                    >
+                      Use OTP Verification Instead
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={handleCancelAuth}
+                      disabled={isGenerating}
+                      className="w-full"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {showForm && (
             <div className="mt-6 p-6 border rounded-lg">
               <h3 className="text-lg font-medium mb-4">Restaurant Details</h3>
@@ -396,6 +576,14 @@ const QRCodeGenerator = ({
           </div>
         </div>
       )}
+
+      {/* OTP Verification Modal */}
+      <OTPVerification
+        mobileNumber={formData.phoneNumber}
+        onVerificationSuccess={handleOTPVerificationSuccess}
+        onCancel={handleCancelAuth}
+        isOpen={showOTPVerification}
+      />
     </div>
   );
 };

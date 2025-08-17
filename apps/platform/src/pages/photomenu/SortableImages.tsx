@@ -95,7 +95,12 @@ const SortableImages = ({ images, setImages }: SortableImagesProps) => {
                   draggable={false}
                 />
               </div>
-              <span className="text-sm truncate">{image.file.name}</span>
+              <span 
+                className="text-sm truncate max-w-[200px] block" 
+                title={image.file.name}
+              >
+                {image.file.name}
+              </span>
             </div>
             <div className="ml-2 text-sm font-medium text-gray-500">
               {index + 1} / {images.length}

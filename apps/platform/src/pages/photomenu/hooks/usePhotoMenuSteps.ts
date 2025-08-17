@@ -12,6 +12,9 @@ export function usePhotoMenuSteps() {
         setCompletedSteps(prev => new Set([...prev, step]));
         
         if (step === "setup") {
+            // Clear any existing draft when proceeding from setup to start fresh
+            localStorage.removeItem('qrunchy_photomenu_draft');
+            console.log('🧹 Cleared old photomenu draft when proceeding from setup step');
             setStep("upload");
         } else if (step === "upload") {
             setStep("sort");

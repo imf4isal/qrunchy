@@ -1,13 +1,14 @@
 import express from 'express';
 import { uploadMultiple } from '../middleware/upload.mjs';
 import { StorageFactory } from '../storage/StorageFactory.mjs';
+import { uploadRateLimiter } from '../middleware/rateLimiter.mts';
 
 const router = express.Router();
 
 console.log('File routes module loaded - R2 storage only');
 
 // Upload endpoint for photo menu images
-router.post('/upload/photomenu', uploadMultiple, async (req, res) => {
+router.post('/upload/photomenu', uploadRateLimiter, uploadMultiple, async (req, res) => {
   try {
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
@@ -39,7 +40,7 @@ router.post('/upload/photomenu', uploadMultiple, async (req, res) => {
 });
 
 // Single file upload endpoint
-router.post('/upload/single', uploadMultiple, async (req, res) => {
+router.post('/upload/single', uploadRateLimiter, uploadMultiple, async (req, res) => {
   try {
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -67,7 +68,7 @@ router.post('/upload/single', uploadMultiple, async (req, res) => {
 });
 
 // Upload endpoint for menu item images
-router.post('/upload/menuitem', uploadMultiple, async (req, res) => {
+router.post('/upload/menuitem', uploadRateLimiter, uploadMultiple, async (req, res) => {
   try {
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
@@ -117,7 +118,7 @@ router.post('/upload/menuitem', uploadMultiple, async (req, res) => {
 });
 
 // Single menu item image upload endpoint
-router.post('/upload/menuitem/single', uploadMultiple, async (req, res) => {
+router.post('/upload/menuitem/single', uploadRateLimiter, uploadMultiple, async (req, res) => {
   try {
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: 'No file uploaded' });

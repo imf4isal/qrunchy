@@ -82,7 +82,7 @@ export default function ItemEditor({
       formData.append('images', file);
 
       // Step 1: Upload image to storage
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://13.250.49.6:3000'}/api/upload/menuitem/single`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}/api/upload/menuitem/single`, {
         method: 'POST',
         body: formData,
       });

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { QrCode, Download, Copy, Check, Eye } from "lucide-react";
+import { QrCode, Download, Copy, Check, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/utils/trpc";
 import { useRestaurant } from "@/contexts/RestaurantContext";
@@ -26,6 +26,10 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
   const [createdRestaurantId, setCreatedRestaurantId] = useState<number | null>(null);
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
+  const [showPasswordAuth, setShowPasswordAuth] = useState(false);
+  const [password, setPassword] = useState("");
+  const [userExists, setUserExists] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Update mobile number when user data changes
   useEffect(() => {
@@ -43,21 +47,24 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
 
   const handleGenerateQR = async () => {
     if (!mobileNumber.trim()) {
-      alert("Please provide your mobile number to continue");
+      setError("Please provide your mobile number to continue");
       return;
     }
+
+    setError(""); // Clear any previous errors
 
     // Check if user already exists or is logged in
     if (!isAuthenticated || !user) {
       try {
         // Check if user already exists
         await checkUserExistsMutation.mutateAsync({ mobile_number: mobileNumber.trim() });
-        // If we get here, user exists - they should login instead
-        alert("This mobile number is already registered. Please login instead.");
+        // If we get here, user exists - show password/OTP options
+        setUserExists(true);
+        setShowPasswordAuth(true);
         return;
       } catch (error) {
         // User doesn't exist, need OTP verification for new registration
-        setNeedsVerification(true);
+        setUserExists(false);
         setShowOTPVerification(true);
         return;
       }
@@ -212,9 +219,48 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
     }
   };
 
+  const handlePasswordAuth = async () => {
+    if (!password.trim()) {
+      setError("Please enter your password");
+      return;
+    }
+
+    try {
+      setError("");
+      setIsGenerating(true);
+      
+      // Attempt login with password
+      await checkUserExistsMutation.mutateAsync({ 
+        mobile_number: mobileNumber.trim(),
+        password: password.trim()
+      });
+      
+      console.log('🔑 Password authentication successful');
+      
+      // Auto-login the user after successful password authentication
+      await login(mobileNumber.trim());
+      
+      setShowPasswordAuth(false);
+      await proceedWithRestaurantCreation();
+    } catch (error) {
+      setError("Invalid password. Please try again or use OTP verification.");
+      setIsGenerating(false);
+    }
+  };
+
+  const handleUseOTP = () => {
+    setShowPasswordAuth(false);
+    setShowOTPVerification(true);
+  };
+
   const handleOTPVerificationSuccess = async () => {
     setShowOTPVerification(false);
     setNeedsVerification(false);
+    
+    console.log('🔐 OTP verification successful');
+    
+    // Auto-login the user after successful OTP verification
+    await login(mobileNumber.trim());
     
     // Clear draft since registration is successful
     localStorage.removeItem('qrunchy_menu_draft');
@@ -223,9 +269,12 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
     await proceedWithRestaurantCreation();
   };
 
-  const handleCancelOTP = () => {
+  const handleCancelAuth = () => {
+    setShowPasswordAuth(false);
     setShowOTPVerification(false);
-    setNeedsVerification(false);
+    setUserExists(false);
+    setPassword("");
+    setError("");
   };
 
   const handleCopyLink = () => {
@@ -254,7 +303,82 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
       </p>
 
       {!isGenerated ? (
-        <div className="space-y-6">
+        <>
+          {/* Password Authentication Modal */}
+          {showPasswordAuth && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">
+                    Account Verification
+                  </h2>
+                  <p className="text-gray-600 text-sm">
+                    This number is already registered with{" "}
+                    <span className="font-medium">{mobileNumber}</span>
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Enter your password
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Your password"
+                      disabled={isGenerating}
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-red-600 text-sm">{error}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Button
+                      onClick={handlePasswordAuth}
+                      disabled={isGenerating || !password.trim()}
+                      className="w-full"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          Verifying...
+                        </>
+                      ) : (
+                        "Continue with Password"
+                      )}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={handleUseOTP}
+                      disabled={isGenerating}
+                      className="w-full"
+                    >
+                      Use OTP Verification Instead
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={handleCancelAuth}
+                      disabled={isGenerating}
+                      className="w-full"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-6">
           <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="font-medium mb-2">Menu Summary</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -346,9 +470,16 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
                   : "By continuing, you agree to create a Qrunchy account. No spam, just menu management! 📱"
                 }
               </p>
+
+              {error && !showPasswordAuth && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
+        </>
       ) : (
         /* qr */
         <div className="text-center space-y-6">
@@ -435,7 +566,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
       <OTPVerification
         mobileNumber={mobileNumber}
         onVerificationSuccess={handleOTPVerificationSuccess}
-        onCancel={handleCancelOTP}
+        onCancel={handleCancelAuth}
         isOpen={showOTPVerification}
       />
     </div>
