@@ -964,108 +964,111 @@ const Workflows: React.FC = () => {
 };
 
 const QRDistribution: React.FC = () => {
-  const [value, setValue] = useState("qrunchy.menu/demo-restaurant");
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  const downloadSVG = () => {
-    if (!svgRef.current) return;
-    const blob = new Blob(
-      [new XMLSerializer().serializeToString(svgRef.current)],
-      { type: "image/svg+xml" }
-    );
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "qrunchy-qr.svg";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <Section
-      id="qr"
-      title="One QR, or a thousand. Instantly."
-      subtitle="Auto QR per venue/table/zone. Export in PNG/SVG, print templates, and track scans."
+      id="usp"
+      title="Built for chains, food courts & fast updates"
+      subtitle="Operational features that feel like magic at scale."
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div className="rounded-2xl border border-neutral-800 p-6">
-          <div className="flex items-center gap-4">
-            <div className="rounded-xl border border-neutral-800 p-3 bg-neutral-950">
-              <RealQRCode text={value} size={140} className="" />
-            </div>
-            <div className="flex-1">
-              <label className="text-xs uppercase tracking-widest text-neutral-400">
-                Short link
-              </label>
-              <input
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="mt-2 w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-neutral-600"
-              />
-              <div className="mt-3 flex gap-2">
-                <button
-                  onClick={downloadSVG}
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-black"
-                >
-                  <Download className="h-4 w-4" /> Download SVG
-                </button>
-                <button className="rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-900">
-                  Print template
-                </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {[
+          {
+            icon: <Building2 className="h-5 w-5 text-white" />,
+            title: "Chain control",
+            desc: "Global items with branch overrides, approval flows, and audit trails.",
+            bullets: [
+              "Roles & permissions",
+              "Global → branch sync",
+              "Change history",
+            ],
+          },
+          {
+            icon: <Smartphone className="h-5 w-5 text-white" />,
+            title: "Food court experience",
+            desc: "Per-table QR, stall discovery, and lightning-fast photo menus.",
+            bullets: [
+              "Per-table / zone QR",
+              "Instant load on mobile",
+              "Clear stall switching",
+            ],
+          },
+          {
+            icon: <Layers className="h-5 w-5 text-white" />,
+            title: "Global menu (customer-facing)",
+            desc: "One link for everything: multi-language, categories, and allergen tags.",
+            bullets: [
+              "Multi-language & RTL",
+              "Categories & search",
+              "Allergen tags",
+            ],
+          },
+          {
+            icon: <Sparkles className="h-5 w-5 text-white" />,
+            title: "Instant updates",
+            desc: "Update once, publish everywhere—no printing, no delays.",
+            bullets: [
+              "Publish in seconds",
+              "CDN caching",
+              "“Sold out” with one tap",
+            ],
+          },
+        ].map((card, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: i * 0.1 }}
+            viewport={{ once: true }}
+            className="rounded-2xl border border-neutral-800 bg-gradient-to-b from-neutral-950 to-neutral-900 p-6 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-start gap-4">
+              <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-neutral-800 border border-neutral-700 shadow-inner">
+                {card.icon}
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-neutral-100 font-medium tracking-tight">
+                  {card.title}
+                </h3>
+                <p className="mt-1 text-sm text-neutral-400">{card.desc}</p>
+                <ul className="mt-3 space-y-2 text-sm text-neutral-300">
+                  {card.bullets.map((b, j) => (
+                    <li key={j} className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-white/60" />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Highlight Row */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        viewport={{ once: true }}
+        className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3"
+      >
+        {[
+          { k: "500+", v: "restaurants" },
+          { k: "<60s", v: "to publish" },
+          { k: "∞", v: "menu updates" },
+          { k: "Multi-venue", v: "ready" },
+        ].map((m, i) => (
+          <div
+            key={i}
+            className="rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-center hover:scale-[1.015] transition-transform"
+          >
+            <div className="text-lg font-semibold text-white tracking-tight">
+              {m.k}
+            </div>
+            <div className="text-xs text-neutral-500 mt-0.5">{m.v}</div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            "Per-table codes",
-            "Short links",
-            "Printable toppers",
-            "Scan analytics",
-          ].map((t, i) => (
-            <div key={i} className="rounded-2xl border border-neutral-800 p-5">
-              <div className="mb-3 h-8 w-8 rounded bg-neutral-800" />
-              <div className="text-neutral-200 font-medium">{t}</div>
-              <div className="mt-2 text-sm text-neutral-400">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Section>
-  );
-};
-
-const Themes: React.FC = () => {
-  const [dark, setDark] = useState(true);
-  return (
-    <Section
-      id="themes"
-      title="Your brand, your vibe—kept minimal."
-      subtitle="Multi-theme presets, logo & accent, light/dark, RTL/LTR, and accessible contrast."
-    >
-      <div className="flex items-center justify-between mb-6">
-        <div className="text-sm text-neutral-400">Preview</div>
-        <div className="rounded-full border border-neutral-800 p-1">
-          <button
-            onClick={() => setDark(false)}
-            className={`px-3 py-1.5 text-sm rounded-full ${!dark ? "bg-white text-black" : "text-neutral-300 hover:bg-neutral-900"}`}
-          >
-            Light
-          </button>
-          <button
-            onClick={() => setDark(true)}
-            className={`px-3 py-1.5 text-sm rounded-full ${dark ? "bg-white text-black" : "text-neutral-300 hover:bg-neutral-900"}`}
-          >
-            Dark
-          </button>
-        </div>
-      </div>
-      <div className="flex items-center justify-center">
-        <PhonePreview theme={dark ? "dark" : "light"} mode={"digital"} />
-      </div>
+        ))}
+      </motion.div>
     </Section>
   );
 };
@@ -1321,41 +1324,6 @@ const SocialProof: React.FC = () => (
   </Section>
 );
 
-const Pricing: React.FC = () => (
-  <Section
-    id="pricing"
-    title="Simple, transparent pricing"
-    subtitle="Start free. Upgrade when you need more."
-  >
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {pricing.map((p, i) => (
-        <div
-          key={i}
-          className={`rounded-2xl border p-6 ${p.highlight ? "border-white bg-neutral-900" : "border-neutral-800"}`}
-        >
-          <div className="text-sm text-neutral-400">{p.name}</div>
-          <div className="mt-2 text-3xl font-semibold text-neutral-100">
-            {p.price}
-          </div>
-          <ul className="mt-4 space-y-2 text-sm text-neutral-300">
-            {p.features.map((f, j) => (
-              <li key={j} className="flex items-center gap-2">
-                <Check className="h-4 w-4" />
-                {f}
-              </li>
-            ))}
-          </ul>
-          <button
-            className={`mt-6 w-full rounded-full px-4 py-2 text-sm ${p.highlight ? "bg-white text-black" : "border border-neutral-800 text-neutral-300 hover:bg-neutral-900"}`}
-          >
-            {p.cta}
-          </button>
-        </div>
-      ))}
-    </div>
-  </Section>
-);
-
 const FAQ: React.FC = () => (
   <Section id="faq" title="Frequently asked" subtitle="Friction, removed.">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1473,13 +1441,12 @@ export default function LandingPageTest() {
       />
       <Workflows />
       <QRDistribution />
-      <Themes />
       <ImageManager />
       <ChainControl />
       <AuthRoles />
       <StructuredPower />
       <SocialProof />
-      <Pricing />
+
       <FAQ />
       <FinalCTA onCTAClick={onCTAClick} />
       <Footer />
