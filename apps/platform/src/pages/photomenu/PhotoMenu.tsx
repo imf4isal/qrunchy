@@ -25,7 +25,6 @@ export default function PhotoMenu() {
   const [restaurantName, setRestaurantName] = useState(currentRestaurant?.name || "");
   const [selectedChain, setSelectedChain] = useState<number | null>((currentRestaurant as any)?.group_res_id || null);
   const [createdRestaurantId, setCreatedRestaurantId] = useState<number | null>(currentRestaurant?.id || null);
-  const [restaurantImage, setRestaurantImage] = useState<File | null>(null);
   const [hasDraft, setHasDraft] = useState(false);
 
   const {
@@ -145,8 +144,6 @@ export default function PhotoMenu() {
                 selectedChain={selectedChain}
                 onChainChange={setSelectedChain}
                 chains={chains}
-                restaurantImage={restaurantImage}
-                onRestaurantImageChange={setRestaurantImage}
             />
         );
       case "upload":

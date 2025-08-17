@@ -56,10 +56,10 @@ export function usePhotoMenuSteps() {
 
     const getProgressWidth = () => {
         if (step === "setup") return "0%";
-        if (step === "upload") return "25%";
-        if (step === "sort") return "50%";
+        if (step === "upload") return "33.33%";
+        if (step === "sort") return "66.66%";
         if (qrGenerated) return "calc(100% - 25px)";
-        return "75%";
+        return "100%";
     };
 
     const getStepDescription = () => {
