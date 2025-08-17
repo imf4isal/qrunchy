@@ -206,7 +206,7 @@ const Chip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const PhonePreview: React.FC<{
   theme: "light" | "dark";
   mode: "photo" | "digital";
-  children?: React.ReactNode; // 👈 allow slotting custom content
+  children?: React.ReactNode;
 }> = ({ theme, mode, children }) => {
   const dark = theme === "dark";
 
@@ -223,7 +223,7 @@ const PhonePreview: React.FC<{
           dark ? "bg-neutral-800" : "bg-neutral-200"
         }`}
       />
-      {/* Make inner shell a column so content can flex & scroll */}
+      {/* Shell as column; content is clipped (no scrollbar) */}
       <div
         className={`flex h-full flex-col overflow-hidden rounded-2xl border ${
           dark
@@ -245,9 +245,8 @@ const PhonePreview: React.FC<{
           />
         </div>
 
-        {/* Content area (fills remaining height, scroll-safe) */}
-        <div className="flex-1 min-h-0 overflow-auto p-4 space-y-3">
-          {/* If children provided in Photo mode, use them; else fallback to defaults */}
+        {/* Content (no scrolling) */}
+        <div className="flex-1 min-h-0 overflow-hidden p-4 space-y-3">
           {mode === "photo" && children ? (
             children
           ) : mode === "photo" ? (
