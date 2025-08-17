@@ -1,5 +1,6 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import QRCode from "qrcode";
 import {
   QrCode,
   Upload,
@@ -9,6 +10,7 @@ import {
   Lock,
   Sparkles,
   Check,
+  Copy,
   X,
   Smartphone,
   Tags,
@@ -17,82 +19,55 @@ import {
 } from "lucide-react";
 
 // -------------------------------
-// Helpers: Pseudo QR (SVG grid)
+// Real QR Code Component
 // -------------------------------
-function mulberry32(a: number) {
-  return function () {
-    let t = (a += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
-function stringToSeed(str: string) {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++)
-    h = Math.imul(h ^ str.charCodeAt(i), 16777619);
-  return h >>> 0;
-}
-
-const QRPseudo: React.FC<{
+const RealQRCode: React.FC<{
   text: string;
   size?: number;
-  cell?: number;
   className?: string;
-}> = ({ text, size = 210, cell = 10, className }) => {
-  const dim = 21; // 21x21 grid (like QR v1 size)
-  const seed = stringToSeed(text || "qrunchy-demo");
-  const rnd = mulberry32(seed);
-  const cells: boolean[] = useMemo(
-    () => Array.from({ length: dim * dim }, () => rnd() > 0.56),
-    [text]
-  );
+}> = ({ text, size = 210, className }) => {
+  const [qrDataURL, setQrDataURL] = useState<string>("");
 
-  // Reserve finder patterns (top-left, top-right, bottom-left)
-  function inFinder(x: number, y: number) {
-    const inBox = (bx: number, by: number) =>
-      x >= bx && x < bx + 7 && y >= by && y < by + 7;
-    const ring = (bx: number, by: number) =>
-      (x === bx || x === bx + 6 || y === by || y === by + 6) && inBox(bx, by);
-    const dot = (bx: number, by: number) =>
-      x >= bx + 2 && x <= bx + 4 && y >= by + 2 && y <= by + 4;
-    if (inBox(0, 0)) return ring(0, 0) || dot(0, 0);
-    if (inBox(dim - 7, 0)) return ring(dim - 7, 0) || dot(dim - 7, 0);
-    if (inBox(0, dim - 7)) return ring(0, dim - 7) || dot(0, dim - 7);
-    return false;
+  useEffect(() => {
+    const generateQR = async () => {
+      try {
+        // Add https:// if not present for a valid URL
+        const url = text.startsWith('http') ? text : `https://${text}`;
+        const dataURL = await QRCode.toDataURL(url, {
+          width: size,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#ffffff'
+          }
+        });
+        setQrDataURL(dataURL);
+      } catch (error) {
+        console.error('Error generating QR code:', error);
+      }
+    };
+
+    generateQR();
+  }, [text, size]);
+
+  if (!qrDataURL) {
+    return (
+      <div 
+        className={`bg-neutral-200 animate-pulse ${className}`}
+        style={{ width: size, height: size }}
+      />
+    );
   }
 
-  const stroke = 0; // crisp
-  const view = dim * cell;
-
   return (
-    <svg
+    <img
+      src={qrDataURL}
+      alt={`QR code for ${text}`}
       width={size}
       height={size}
-      viewBox={`0 0 ${view} ${view}`}
       className={className}
-      aria-label="Pseudo QR code"
-      role="img"
-    >
-      <rect x={0} y={0} width={view} height={view} fill="#fff" />
-      {Array.from({ length: dim }).map((_, y) =>
-        Array.from({ length: dim }).map((_, x) => {
-          const i = y * dim + x;
-          const on = inFinder(x, y) || cells[i];
-          return on ? (
-            <rect
-              key={`${x}-${y}`}
-              x={x * cell}
-              y={y * cell}
-              width={cell - stroke}
-              height={cell - stroke}
-              fill="#000"
-            />
-          ) : null;
-        })
-      )}
-    </svg>
+    />
   );
 };
 
@@ -282,36 +257,67 @@ const PhonePreview: React.FC<{
 };
 
 const Navbar: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  const handleSignIn = () => {
+    window.location.href = '/login';
+  };
+
   return (
     <div className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/60 border-b border-neutral-900/50">
-      <Container className="flex h-14 items-center justify-between">
+      <Container className="flex h-16 items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-6 w-6 rounded bg-neutral-200" />
-          <span className="text-sm font-semibold tracking-wide text-neutral-200">
+          <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-white to-neutral-300 flex items-center justify-center shadow-sm">
+            <QrCode className="h-4 w-4 text-neutral-900" />
+          </div>
+          <span className="text-lg font-bold tracking-tight text-white">
             Qrunchy
           </span>
         </div>
-        <nav className="hidden md:flex items-center gap-6 text-sm text-neutral-400">
-          <a href="#workflows" className="hover:text-neutral-200">
+        <nav className="hidden md:flex items-center gap-8 text-sm text-neutral-400">
+          <button 
+            onClick={() => scrollToSection('workflows')} 
+            className="hover:text-white transition-colors cursor-pointer"
+          >
             Product
-          </a>
-          <a href="#chain" className="hover:text-neutral-200">
+          </button>
+          <button 
+            onClick={() => scrollToSection('chain')} 
+            className="hover:text-white transition-colors cursor-pointer"
+          >
             Solutions
-          </a>
-          <a href="#pricing" className="hover:text-neutral-200">
+          </button>
+          <button 
+            onClick={() => scrollToSection('pricing')} 
+            className="hover:text-white transition-colors cursor-pointer"
+          >
             Pricing
-          </a>
-          <a href="#faq" className="hover:text-neutral-200">
+          </button>
+          <button 
+            onClick={() => scrollToSection('faq')} 
+            className="hover:text-white transition-colors cursor-pointer"
+          >
             FAQ
-          </a>
+          </button>
         </nav>
         <div className="flex items-center gap-3">
-          <button className="hidden sm:inline-flex rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-900">
+          <button 
+            onClick={handleSignIn}
+            className="hidden sm:inline-flex rounded-full border border-neutral-700 px-5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 transition-all duration-200"
+          >
             Sign in
           </button>
           <button
             onClick={onCTAClick}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-200"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           >
             Get started free <ArrowRight className="h-4 w-4" />
           </button>
@@ -326,6 +332,8 @@ const Hero: React.FC<{
   setRestaurantName: (s: string) => void;
   onCTAClick: () => void;
 }> = ({ restaurantName, setRestaurantName, onCTAClick }) => {
+  const [copied, setCopied] = useState(false);
+  
   const short = useMemo(
     () =>
       restaurantName.trim()
@@ -333,7 +341,17 @@ const Hero: React.FC<{
         : "demo-restaurant",
     [restaurantName]
   );
-  const demoUrl = `qrunchy.app/${short}`;
+  const demoUrl = `qrunchy.menu/${short}`;
+
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(`https://${demoUrl}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy URL:', error);
+    }
+  };
 
   // Respect reduced-motion if possible (safe to read; falls back to animating)
   const prefersReducedMotion =
@@ -346,81 +364,80 @@ const Hero: React.FC<{
       aria-labelledby="hero-title"
       className="relative overflow-hidden bg-gradient-to-b from-neutral-950 to-neutral-950"
     >
-      {/* --- Tiny animated glows (background only) --- */}
+      {/* --- Subtle animated background --- */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 hidden md:block overflow-hidden"
       >
-        {/* Orb A – near the phone area */}
+        {/* Primary glow - more subtle and purposeful */}
         <motion.div
-          className="absolute h-36 w-36 rounded-full"
+          className="absolute h-96 w-96 rounded-full"
           style={{
             background:
-              "radial-gradient(closest-side, rgba(255,255,255,0.10), rgba(255,255,255,0))",
-            filter: "blur(14px)",
+              "radial-gradient(closest-side, rgba(255,255,255,0.04), rgba(255,255,255,0.01), transparent)",
+            filter: "blur(40px)",
+            top: "20%",
+            right: "10%",
           }}
-          initial={{ x: 120, y: 40, opacity: 0.8, scale: 1 }}
           animate={
             prefersReducedMotion
-              ? { opacity: 0.12 }
+              ? {}
               : {
-                  x: [120, 170, 90, 120],
-                  y: [40, 10, 70, 40],
-                  scale: [1, 1.06, 0.98, 1],
-                  opacity: [0.12, 0.16, 0.1, 0.12],
+                  scale: [1, 1.1, 1],
+                  opacity: [0.3, 0.5, 0.3],
                 }
           }
           transition={{
-            duration: 22,
+            duration: 8,
             ease: "easeInOut",
             repeat: Infinity,
-            repeatType: "mirror",
+            repeatType: "reverse",
           }}
         />
 
-        {/* Orb B – smaller, counter-moving near top-left of copy */}
+        {/* Secondary accent glow */}
         <motion.div
-          className="absolute h-20 w-20 rounded-full"
+          className="absolute h-64 w-64 rounded-full"
           style={{
             background:
-              "radial-gradient(closest-side, rgba(255,255,255,0.08), rgba(255,255,255,0))",
-            filter: "blur(10px)",
+              "radial-gradient(closest-side, rgba(59, 130, 246, 0.06), rgba(59, 130, 246, 0.02), transparent)",
+            filter: "blur(30px)",
+            top: "60%",
+            left: "20%",
           }}
-          initial={{ x: 40, y: 80, opacity: 0.7, scale: 1 }}
           animate={
             prefersReducedMotion
-              ? { opacity: 0.1 }
+              ? {}
               : {
-                  x: [40, -10, 20, 40],
-                  y: [80, 40, 100, 80],
-                  scale: [1, 0.96, 1.04, 1],
-                  opacity: [0.08, 0.12, 0.07, 0.08],
+                  scale: [1, 0.8, 1],
+                  opacity: [0.2, 0.4, 0.2],
                 }
           }
           transition={{
-            duration: 26,
+            duration: 12,
             ease: "easeInOut",
             repeat: Infinity,
-            repeatType: "mirror",
+            repeatType: "reverse",
+            delay: 2,
           }}
         />
       </div>
       {/* --- /glows --- */}
 
-      <Container className="pt-16 pb-10 sm:pt-24 sm:pb-16">
-        <div className="grid items-center gap-y-12 gap-x-16 md:grid-cols-2">
+      <Container className="pt-20 pb-16 sm:pt-32 sm:pb-20">
+        <div className="grid items-center gap-y-16 gap-x-16 lg:grid-cols-2">
           {/* LEFT */}
-          <div className="mx-auto w-full max-w-[42rem]">
+          <div className="mx-auto w-full max-w-[44rem] text-center lg:text-left">
             <motion.h1
               id="hero-title"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="
-                font-semibold tracking-tight
-                text-4xl sm:text-5xl md:text-6xl
+                font-bold tracking-tight
+                text-4xl sm:text-5xl md:text-6xl lg:text-7xl
                 leading-[1.05]
-                bg-gradient-to-b from-neutral-50 to-neutral-300 bg-clip-text text-transparent
+                bg-gradient-to-b from-white via-neutral-100 to-neutral-400 bg-clip-text text-transparent
                 [text-wrap:balance]
               "
               style={{ fontOpticalSizing: "auto" }}
@@ -428,88 +445,154 @@ const Hero: React.FC<{
               Your menu, one scan away.
             </motion.h1>
 
-            <p className="mt-4 text-[15.5px] sm:text-[16px] leading-7 text-neutral-400 [text-wrap:pretty]">
+            <motion.p 
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mt-6 text-base sm:text-lg leading-7 text-neutral-400 [text-wrap:pretty] max-w-2xl"
+            >
               Replace paper menus with delightful QR experiences. Photo or
               digital—publish in minutes and update anytime.
-            </p>
+            </motion.p>
 
-            <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+            <motion.div 
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4"
+            >
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => window.location.href = '/photo-menu'}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 transition-all duration-200"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  Photo Menu
+                </button>
+                <button
+                  onClick={() => window.location.href = '/digital-menu'}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 hover:border-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200"
+                >
+                  <Layers className="h-4 w-4" />
+                  Digital Menu
+                </button>
+              </div>
               <button
-                onClick={onCTAClick}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-black hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                onClick={() => window.open(`/demo/${short}`, '_blank')}
+                aria-label="Open live demo in new tab"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200"
               >
-                Create a menu
+                <QrCode className="h-4 w-4" /> View Demo
               </button>
-              <a
-                href="#live-demo"
-                aria-label="Scan the live demo QR code"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-neutral-800 px-5 py-3 text-sm text-neutral-200 hover:bg-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
-              >
-                <QrCode className="h-4 w-4" /> Scan live demo
-              </a>
-            </div>
+            </motion.div>
 
-            <ul role="list" className="mt-7 flex flex-wrap gap-2">
-              {["<1 min to publish", "Unlimited updates", "Chain-ready"].map(
-                (t, i) => (
-                  <li key={i}>
-                    <span className="inline-flex items-center gap-2 rounded-full bg-neutral-900/80 px-3 py-1 text-[11.5px] tracking-tight text-neutral-200 ring-1 ring-inset ring-neutral-800">
-                      {t}
-                    </span>
-                  </li>
-                )
-              )}
-            </ul>
+            <motion.ul 
+              role="list" 
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="mt-8 flex flex-wrap gap-3"
+            >
+              {[
+                { text: "< 1 min to publish", icon: <Check className="h-3 w-3" /> },
+                { text: "Unlimited updates", icon: <Layers className="h-3 w-3" /> }, 
+                { text: "Chain-ready", icon: <Building2 className="h-3 w-3" /> }
+              ].map((item, i) => (
+                <motion.li 
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.4 + (i * 0.1) }}
+                >
+                  <span className="inline-flex items-center gap-2 rounded-full bg-neutral-800/60 px-4 py-2 text-sm font-medium text-neutral-200 ring-1 ring-inset ring-neutral-700/80 backdrop-blur-sm">
+                    <span className="text-neutral-400">{item.icon}</span>
+                    {item.text}
+                  </span>
+                </motion.li>
+              ))}
+            </motion.ul>
 
-            <div className="mt-8 border-t border-neutral-900/70 pt-5">
-              <div className="mb-3 text-[11px] uppercase tracking-[0.18em] text-neutral-500">
-                Trusted by
+            <motion.div 
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="mt-10 border-t border-neutral-800/50 pt-6"
+            >
+              <div className="mb-4 text-xs uppercase tracking-widest text-neutral-500 font-medium">
+                Trusted by 500+ restaurants
               </div>
               <ul role="list" className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {logos.slice(0, 3).map((l, i) => (
-                  <li key={i}>
-                    <div className="rounded-lg border border-neutral-900 bg-neutral-950 px-3 py-2 text-[12.5px] text-neutral-500 grayscale-[60%] tracking-tight">
-                      {l}
+                {["Café Bistro", "Urban Grill", "Fresh Bowls"].map((name, i) => (
+                  <motion.li 
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.6 + (i * 0.1) }}
+                  >
+                    <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/50 px-4 py-3 text-sm text-neutral-400 font-medium tracking-tight backdrop-blur-sm hover:bg-neutral-800/50 hover:text-neutral-300 transition-all duration-200">
+                      {name}
                     </div>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           </div>
 
           {/* RIGHT */}
-          <div className="relative mx-auto flex w-full max-w-md items-center justify-center md:mx-0 md:justify-end">
+          <div className="relative mx-auto flex w-full max-w-md items-center justify-center lg:mx-0 lg:justify-end order-first lg:order-last">
             <div className="relative">
               <div aria-hidden="true">
                 <PhonePreview theme="dark" mode="digital" />
               </div>
 
-              <div
+              <motion.div
                 id="live-demo"
-                className="absolute -bottom-6 left-1/2 w-[320px] max-w-[88vw] -translate-x-1/2 rounded-2xl border border-neutral-800 bg-neutral-950 p-4 shadow-2xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="absolute -bottom-6 left-1/2 w-[340px] max-w-[90vw] -translate-x-1/2 rounded-2xl border border-neutral-700/80 bg-neutral-900/90 backdrop-blur-lg p-5 shadow-2xl"
               >
-                <div className="flex items-center gap-3">
-                  <QRPseudo text={demoUrl} size={80} className="shrink-0" />
+                <div className="flex items-start gap-4">
+                  <div className="relative">
+                    <RealQRCode text={demoUrl} size={85} className="shrink-0 rounded-lg border border-neutral-700/50" />
+                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500 border-2 border-neutral-900 animate-pulse"></div>
+                  </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[10.5px] uppercase tracking-[0.22em] text-neutral-500">
-                      Live QR
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">
+                        Live Demo
+                      </div>
+                      <Sparkles className="h-3 w-3 text-yellow-400" />
                     </div>
-                    <div className="font-medium text-neutral-100 truncate font-mono text-[13px] tracking-tight">
-                      {demoUrl}
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="font-semibold text-neutral-100 truncate font-mono text-sm tracking-tight flex-1">
+                        {demoUrl}
+                      </div>
+                      <button
+                        onClick={copyUrl}
+                        className="p-1.5 rounded-md border border-neutral-700 hover:bg-neutral-800 hover:border-neutral-600 transition-all text-neutral-400 hover:text-neutral-200"
+                        title="Copy URL"
+                      >
+                        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                      </button>
                     </div>
-                    <div className="mt-2 flex gap-2">
+                    <div className="space-y-2">
                       <input
                         aria-label="Restaurant name"
                         autoComplete="organization"
                         value={restaurantName}
                         onChange={(e) => setRestaurantName(e.target.value)}
-                        placeholder="Type your restaurant name"
-                        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-neutral-600"
+                        placeholder="Enter your restaurant name"
+                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800/50 px-3 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-neutral-600 transition-all"
                       />
+                      <div className="flex items-center justify-between text-xs text-neutral-500">
+                        <span>✨ Your URL updates instantly</span>
+                        {copied && <span className="text-green-400">Copied!</span>}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               <div className="h-10 md:h-0" />
             </div>
@@ -655,8 +738,7 @@ const QRDistribution: React.FC = () => {
         <div className="rounded-2xl border border-neutral-800 p-6">
           <div className="flex items-center gap-4">
             <div className="rounded-xl border border-neutral-800 p-3 bg-neutral-950">
-              {/* Clone QRPseudo to capture ref */}
-              <QRPseudo text={value} size={140} className="" />
+              <RealQRCode text={value} size={140} className="" />
             </div>
             <div className="flex-1">
               <label className="text-xs uppercase tracking-widest text-neutral-400">
@@ -1124,7 +1206,8 @@ export default function LandingPageTest() {
   const [restaurantName, setRestaurantName] = useState("");
 
   const onCTAClick = () => {
-    alert("Pretend signup modal → Create a menu");
+    // Navigate to photo menu creation as the primary CTA
+    window.location.href = '/photo-menu';
   };
 
   return (
@@ -1149,15 +1232,23 @@ export default function LandingPageTest() {
       <Footer />
 
       {/* Mobile sticky CTA */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-900/60 bg-neutral-950/80 backdrop-blur md:hidden">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="text-sm text-neutral-400">Ready to publish?</div>
-          <button
-            onClick={onCTAClick}
-            className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black"
-          >
-            Create a menu
-          </button>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-800/60 bg-neutral-950/95 backdrop-blur-lg lg:hidden">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <div className="text-sm text-neutral-300 font-medium">Ready to publish?</div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.location.href = '/photo-menu'}
+              className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 transition-colors"
+            >
+              Photo Menu
+            </button>
+            <button
+              onClick={() => window.location.href = '/digital-menu'}
+              className="rounded-xl border border-neutral-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 transition-colors"
+            >
+              Digital
+            </button>
+          </div>
         </div>
       </div>
     </div>

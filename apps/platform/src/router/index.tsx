@@ -16,6 +16,7 @@ import FoodCourtManager from "@/pages/dashboard/FoodCourtManager";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import HomeTest from "@/pages/test/HomeTest";
 import LandingPageTest from "@/pages/test/LandingPageTest";
+import MenuDemo from "@/pages/demo/MenuDemo";
 
 export default function Router() {
   return (
@@ -23,6 +24,9 @@ export default function Router() {
       <Route path="/" component={Home} />
       <Route path="/test" component={HomeTest} />
       <Route path="/test2" component={LandingPageTest} />
+      <Route path="/demo/:restaurantName">
+        {(params) => <MenuDemo />}
+      </Route>
       <Route path="/trpc-test" component={Hello} />
       <Route path="/photo-menu" component={PhotoMenu} />
       <Route path="/digital-menu" component={DigitalMenu} />
