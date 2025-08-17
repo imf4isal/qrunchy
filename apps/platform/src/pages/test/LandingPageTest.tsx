@@ -33,18 +33,18 @@ const RealQRCode: React.FC<{
     const generateQR = async () => {
       try {
         // Add https:// if not present for a valid URL
-        const url = text.startsWith('http') ? text : `https://${text}`;
+        const url = text.startsWith("http") ? text : `https://${text}`;
         const dataURL = await QRCode.toDataURL(url, {
           width: size,
           margin: 2,
           color: {
-            dark: '#000000',
-            light: '#ffffff'
-          }
+            dark: "#000000",
+            light: "#ffffff",
+          },
         });
         setQrDataURL(dataURL);
       } catch (error) {
-        console.error('Error generating QR code:', error);
+        console.error("Error generating QR code:", error);
       }
     };
 
@@ -53,7 +53,7 @@ const RealQRCode: React.FC<{
 
   if (!qrDataURL) {
     return (
-      <div 
+      <div
         className={`bg-neutral-200 animate-pulse ${className}`}
         style={{ width: size, height: size }}
       />
@@ -206,19 +206,51 @@ const Chip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const PhonePreview: React.FC<{
   theme: "light" | "dark";
   mode: "photo" | "digital";
-}> = ({ theme, mode }) => {
+  children?: React.ReactNode; // 👈 allow slotting custom content
+}> = ({ theme, mode, children }) => {
+  const dark = theme === "dark";
+
   return (
-    <div className="relative mx-auto h-[520px] w-[260px] rounded-[36px] border border-neutral-800 bg-neutral-900 p-4 shadow-2xl">
-      <div className="absolute inset-x-12 -top-2 h-6 rounded-full bg-neutral-800" />
-      <div className="h-full overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950">
+    <div
+      className={`relative mx-auto h-[520px] w-[260px] rounded-[36px] border p-4 shadow-2xl ${
+        dark
+          ? "border-neutral-800 bg-neutral-900"
+          : "border-neutral-200 bg-white"
+      }`}
+    >
+      <div
+        className={`absolute inset-x-12 -top-2 h-6 rounded-full ${
+          dark ? "bg-neutral-800" : "bg-neutral-200"
+        }`}
+      />
+      {/* Make inner shell a column so content can flex & scroll */}
+      <div
+        className={`flex h-full flex-col overflow-hidden rounded-2xl border ${
+          dark
+            ? "border-neutral-800 bg-neutral-950"
+            : "border-neutral-200 bg-neutral-50"
+        }`}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
-          <div className="h-4 w-20 rounded bg-neutral-800" />
-          <div className="h-6 w-6 rounded bg-neutral-800" />
+        <div
+          className={`flex items-center justify-between px-4 py-3 border-b ${
+            dark ? "border-neutral-800" : "border-neutral-200"
+          }`}
+        >
+          <div
+            className={`h-4 w-20 rounded ${dark ? "bg-neutral-800" : "bg-neutral-200"}`}
+          />
+          <div
+            className={`h-6 w-6 rounded ${dark ? "bg-neutral-800" : "bg-neutral-200"}`}
+          />
         </div>
-        {/* Content */}
-        <div className="p-4 space-y-3">
-          {mode === "photo" ? (
+
+        {/* Content area (fills remaining height, scroll-safe) */}
+        <div className="flex-1 min-h-0 overflow-auto p-4 space-y-3">
+          {/* If children provided in Photo mode, use them; else fallback to defaults */}
+          {mode === "photo" && children ? (
+            children
+          ) : mode === "photo" ? (
             <div className="grid grid-cols-2 gap-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
@@ -239,7 +271,7 @@ const PhonePreview: React.FC<{
                       <div key={j} className="flex items-start gap-3">
                         <div className="h-12 w-12 rounded bg-neutral-800" />
                         <div className="flex-1">
-                          <div className="h-4 w-32 rounded bg-neutral-800 mb-2" />
+                          <div className="mb-2 h-4 w-32 rounded bg-neutral-800" />
                           <div className="h-3 w-24 rounded bg-neutral-800" />
                         </div>
                         <div className="h-4 w-10 rounded bg-neutral-800" />
@@ -260,15 +292,15 @@ const Navbar: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
       });
     }
   };
 
   const handleSignIn = () => {
-    window.location.href = '/login';
+    window.location.href = "/login";
   };
 
   return (
@@ -283,33 +315,33 @@ const Navbar: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => {
           </span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm text-neutral-400">
-          <button 
-            onClick={() => scrollToSection('workflows')} 
+          <button
+            onClick={() => scrollToSection("workflows")}
             className="hover:text-white transition-colors cursor-pointer"
           >
             Product
           </button>
-          <button 
-            onClick={() => scrollToSection('chain')} 
+          <button
+            onClick={() => scrollToSection("chain")}
             className="hover:text-white transition-colors cursor-pointer"
           >
             Solutions
           </button>
-          <button 
-            onClick={() => scrollToSection('pricing')} 
+          <button
+            onClick={() => scrollToSection("pricing")}
             className="hover:text-white transition-colors cursor-pointer"
           >
             Pricing
           </button>
-          <button 
-            onClick={() => scrollToSection('faq')} 
+          <button
+            onClick={() => scrollToSection("faq")}
             className="hover:text-white transition-colors cursor-pointer"
           >
             FAQ
           </button>
         </nav>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={handleSignIn}
             className="hidden sm:inline-flex rounded-full border border-neutral-700 px-5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 transition-all duration-200"
           >
@@ -333,7 +365,7 @@ const Hero: React.FC<{
   onCTAClick: () => void;
 }> = ({ restaurantName, setRestaurantName, onCTAClick }) => {
   const [copied, setCopied] = useState(false);
-  
+
   const short = useMemo(
     () =>
       restaurantName.trim()
@@ -349,7 +381,7 @@ const Hero: React.FC<{
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy URL:', error);
+      console.error("Failed to copy URL:", error);
     }
   };
 
@@ -445,7 +477,7 @@ const Hero: React.FC<{
               Your menu, one scan away.
             </motion.h1>
 
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
@@ -455,7 +487,7 @@ const Hero: React.FC<{
               digital—publish in minutes and update anytime.
             </motion.p>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -463,14 +495,14 @@ const Hero: React.FC<{
             >
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => window.location.href = '/photo-menu'}
+                  onClick={() => (window.location.href = "/photo-menu")}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 transition-all duration-200"
                 >
                   <ImageIcon className="h-4 w-4" />
                   Photo Menu
                 </button>
                 <button
-                  onClick={() => window.location.href = '/digital-menu'}
+                  onClick={() => (window.location.href = "/digital-menu")}
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 hover:border-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200"
                 >
                   <Layers className="h-4 w-4" />
@@ -478,7 +510,7 @@ const Hero: React.FC<{
                 </button>
               </div>
               <button
-                onClick={() => window.open(`/demo/${short}`, '_blank')}
+                onClick={() => window.open(`/demo/${short}`, "_blank")}
                 aria-label="Open live demo in new tab"
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200"
               >
@@ -486,23 +518,32 @@ const Hero: React.FC<{
               </button>
             </motion.div>
 
-            <motion.ul 
-              role="list" 
+            <motion.ul
+              role="list"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               className="mt-8 flex flex-wrap gap-3"
             >
               {[
-                { text: "< 1 min to publish", icon: <Check className="h-3 w-3" /> },
-                { text: "Unlimited updates", icon: <Layers className="h-3 w-3" /> }, 
-                { text: "Chain-ready", icon: <Building2 className="h-3 w-3" /> }
+                {
+                  text: "< 1 min to publish",
+                  icon: <Check className="h-3 w-3" />,
+                },
+                {
+                  text: "Unlimited updates",
+                  icon: <Layers className="h-3 w-3" />,
+                },
+                {
+                  text: "Chain-ready",
+                  icon: <Building2 className="h-3 w-3" />,
+                },
               ].map((item, i) => (
-                <motion.li 
+                <motion.li
                   key={i}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.4 + (i * 0.1) }}
+                  transition={{ duration: 0.3, delay: 0.4 + i * 0.1 }}
                 >
                   <span className="inline-flex items-center gap-2 rounded-full bg-neutral-800/60 px-4 py-2 text-sm font-medium text-neutral-200 ring-1 ring-inset ring-neutral-700/80 backdrop-blur-sm">
                     <span className="text-neutral-400">{item.icon}</span>
@@ -512,7 +553,7 @@ const Hero: React.FC<{
               ))}
             </motion.ul>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
@@ -522,18 +563,20 @@ const Hero: React.FC<{
                 Trusted by 500+ restaurants
               </div>
               <ul role="list" className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {["Café Bistro", "Urban Grill", "Fresh Bowls"].map((name, i) => (
-                  <motion.li 
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.6 + (i * 0.1) }}
-                  >
-                    <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/50 px-4 py-3 text-sm text-neutral-400 font-medium tracking-tight backdrop-blur-sm hover:bg-neutral-800/50 hover:text-neutral-300 transition-all duration-200">
-                      {name}
-                    </div>
-                  </motion.li>
-                ))}
+                {["Café Bistro", "Urban Grill", "Fresh Bowls"].map(
+                  (name, i) => (
+                    <motion.li
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: 0.6 + i * 0.1 }}
+                    >
+                      <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/50 px-4 py-3 text-sm text-neutral-400 font-medium tracking-tight backdrop-blur-sm hover:bg-neutral-800/50 hover:text-neutral-300 transition-all duration-200">
+                        {name}
+                      </div>
+                    </motion.li>
+                  )
+                )}
               </ul>
             </motion.div>
           </div>
@@ -554,7 +597,11 @@ const Hero: React.FC<{
               >
                 <div className="flex items-start gap-4">
                   <div className="relative">
-                    <RealQRCode text={demoUrl} size={85} className="shrink-0 rounded-lg border border-neutral-700/50" />
+                    <RealQRCode
+                      text={demoUrl}
+                      size={85}
+                      className="shrink-0 rounded-lg border border-neutral-700/50"
+                    />
                     <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500 border-2 border-neutral-900 animate-pulse"></div>
                   </div>
                   <div className="min-w-0 flex-1">
@@ -573,7 +620,11 @@ const Hero: React.FC<{
                         className="p-1.5 rounded-md border border-neutral-700 hover:bg-neutral-800 hover:border-neutral-600 transition-all text-neutral-400 hover:text-neutral-200"
                         title="Copy URL"
                       >
-                        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                        {copied ? (
+                          <Check className="h-3 w-3" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
                       </button>
                     </div>
                     <div className="space-y-2">
@@ -587,7 +638,9 @@ const Hero: React.FC<{
                       />
                       <div className="flex items-center justify-between text-xs text-neutral-500">
                         <span>✨ Your URL updates instantly</span>
-                        {copied && <span className="text-green-400">Copied!</span>}
+                        {copied && (
+                          <span className="text-green-400">Copied!</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -606,11 +659,32 @@ const Hero: React.FC<{
 const Workflows: React.FC = () => {
   const [tab, setTab] = useState<"photo" | "digital">("photo");
   const [progress, setProgress] = useState(0);
+  const [activeStep, setActiveStep] = useState(0); // 0: Upload, 1: Arrange, 2: Publish (carousel)
+  const [zoom, setZoom] = useState(100); // step 3 only
+  const [slide, setSlide] = useState(0); // step 3 only
 
   const steps =
     tab === "photo"
       ? ["Upload images", "Arrange", "Publish"]
       : ["Add category", "Add item", "Publish"];
+
+  const percent = Math.round((progress / steps.length) * 100);
+
+  const handleStepClick = (i: number) => {
+    setActiveStep(i);
+    setProgress((p) => Math.max(p, i + 1));
+  };
+
+  const resetFlow = () => {
+    setProgress(0);
+    setActiveStep(0);
+    setZoom(100);
+    setSlide(0);
+  };
+
+  const totalSlides = 5;
+  const prevSlide = () => setSlide((s) => (s - 1 + totalSlides) % totalSlides);
+  const nextSlide = () => setSlide((s) => (s + 1) % totalSlides);
 
   return (
     <Section
@@ -618,7 +692,7 @@ const Workflows: React.FC = () => {
       title="Pick your flow: Photo or Digital"
       subtitle="Let your team self-select the simplest path. Inline demos require no account."
     >
-      <div className="flex items-center gap-2 rounded-full border border-neutral-800 p-1 w-fit mb-8">
+      <div className="mb-8 w-fit rounded-full border border-neutral-800 p-1 flex items-center gap-2">
         {(
           [
             {
@@ -637,9 +711,13 @@ const Workflows: React.FC = () => {
             key={t.key}
             onClick={() => {
               setTab(t.key);
-              setProgress(0);
+              resetFlow();
             }}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${tab === t.key ? "bg-white text-black" : "text-neutral-300 hover:bg-neutral-900"}`}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${
+              tab === t.key
+                ? "bg-white text-black"
+                : "text-neutral-300 hover:bg-neutral-900"
+            }`}
           >
             {t.icon}
             {t.label}
@@ -647,48 +725,221 @@ const Workflows: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <div>
-          <PhonePreview theme="dark" mode={tab} />
+      <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-8">
+        {/* Phone preview (renders step content INSIDE for Photo) */}
+        <div className="w-fit mx-auto">
+          <PhonePreview theme="dark" mode={tab}>
+            {tab === "photo" && (
+              <>
+                {/* STEP 1: Upload skeleton */}
+                {activeStep === 0 && (
+                  <div className="space-y-3">
+                    <div className="rounded-lg border-2 border-dashed border-neutral-800 bg-neutral-950/70 p-4 text-center">
+                      <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-800/60">
+                        <Upload className="h-4 w-4 text-neutral-300" />
+                      </div>
+                      <div className="text-[11px] text-neutral-300">
+                        Drag & drop images here
+                      </div>
+                      <div className="mt-0.5 text-[10px] text-neutral-500">
+                        or tap to browse
+                      </div>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 rounded-md border border-neutral-900 bg-neutral-950 p-2"
+                        >
+                          <div className="h-8 w-10 rounded bg-neutral-800 animate-pulse" />
+                          <div className="flex-1 space-y-1.5">
+                            <div className="h-2.5 w-28 rounded bg-neutral-800 animate-pulse" />
+                            <div className="h-2 w-16 rounded bg-neutral-900" />
+                          </div>
+                          <div className="h-5 w-12 rounded-full bg-neutral-900" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 2: Arrange list with drag grip + user avatar */}
+                {activeStep === 1 && (
+                  <div className="space-y-2.5">
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-950 p-2"
+                      >
+                        {/* Drag handle */}
+                        <span className="px-1.5 py-4 text-neutral-600 hover:text-neutral-400 cursor-grab active:cursor-grabbing select-none">
+                          <svg
+                            width="10"
+                            height="16"
+                            viewBox="0 0 10 16"
+                            fill="currentColor"
+                            aria-hidden="true"
+                          >
+                            <circle cx="2" cy="2" r="1.2" />
+                            <circle cx="8" cy="2" r="1.2" />
+                            <circle cx="2" cy="8" r="1.2" />
+                            <circle cx="8" cy="8" r="1.2" />
+                            <circle cx="2" cy="14" r="1.2" />
+                            <circle cx="8" cy="14" r="1.2" />
+                          </svg>
+                        </span>
+
+                        {/* Thumb */}
+                        <div className="h-10 w-12 rounded bg-neutral-800" />
+
+                        {/* Meta + user */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between">
+                            <div className="h-2.5 w-28 rounded bg-neutral-800" />
+                            <div className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-800 text-[9px] text-neutral-300">
+                              U
+                            </div>
+                          </div>
+                          <div className="mt-1.5 h-2 w-20 rounded bg-neutral-900" />
+                        </div>
+                      </div>
+                    ))}
+                    <div className="text-[10px] text-neutral-500">
+                      Tip: drag the handle to reorder images.
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 3: Carousel with arrows + zoom */}
+                {activeStep === 2 && (
+                  <div className="rounded-lg border border-neutral-800 bg-neutral-950 overflow-hidden">
+                    {/* Toolbar */}
+                    <div className="flex items-center justify-between gap-2 border-b border-neutral-900 px-2 py-1.5">
+                      <div className="text-[10px] text-neutral-400">
+                        Preview {slide + 1}/{totalSlides}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setZoom((z) => Math.max(50, z - 10))}
+                          className="rounded border border-neutral-800 px-1.5 text-[11px] text-neutral-300 hover:bg-neutral-900"
+                          aria-label="Zoom out"
+                        >
+                          −
+                        </button>
+                        <div className="min-w-[2.5rem] text-center text-[10px] text-neutral-400">
+                          {zoom}%
+                        </div>
+                        <button
+                          onClick={() => setZoom((z) => Math.min(200, z + 10))}
+                          className="rounded border border-neutral-800 px-1.5 text-[11px] text-neutral-300 hover:bg-neutral-900"
+                          aria-label="Zoom in"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Slide area */}
+                    <div className="relative h-60">
+                      <button
+                        onClick={prevSlide}
+                        className="absolute left-1.5 top-1/2 -translate-y-1/2 rounded-full border border-neutral-800 bg-neutral-900/70 p-1.5 text-neutral-200 hover:bg-neutral-900"
+                        aria-label="Previous"
+                      >
+                        <ArrowRight className="h-4 w-4 rotate-180" />
+                      </button>
+
+                      <div className="flex h-full items-center justify-center">
+                        <div
+                          className="rounded-md bg-neutral-800 transition-transform"
+                          style={{
+                            width: `${Math.min(95, 60 + (zoom - 100) * 0.25)}%`,
+                            height: "70%",
+                          }}
+                        />
+                      </div>
+
+                      <button
+                        onClick={nextSlide}
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full border border-neutral-800 bg-neutral-900/70 p-1.5 text-neutral-200 hover:bg-neutral-900"
+                        aria-label="Next"
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </PhonePreview>
         </div>
+
+        {/* Controls & progress (right column) */}
         <div>
           <div className="rounded-2xl border border-neutral-800 p-6">
-            <div className="text-sm text-neutral-400">Inline demo</div>
+            <div className="text-sm text-neutral-400">
+              Inline demo {tab === "photo" ? "(Photo)" : "(Digital soon)"}
+            </div>
             <h3 className="mt-1 text-xl font-semibold text-neutral-100">
               {tab === "photo"
                 ? "Upload → Arrange → Publish"
                 : "Structure → Preview → Publish"}
             </h3>
+
             <div className="mt-4 space-y-3">
-              {steps.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => setProgress((p) => Math.max(p, i + 1))}
-                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 ${progress > i ? "border-neutral-700 bg-neutral-900" : "border-neutral-900 hover:bg-neutral-950"}`}
-                >
-                  <span className="flex items-center gap-3 text-neutral-200">
-                    {progress > i ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <span className="h-4 w-4 rounded-full border border-neutral-700" />
-                    )}
-                    {s}
-                  </span>
-                  <span className="text-xs text-neutral-500">
-                    Click to complete
-                  </span>
-                </button>
-              ))}
+              {steps.map((s, i) => {
+                const done = progress > i;
+                const active = activeStep === i;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleStepClick(i)}
+                    className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 transition ${
+                      active
+                        ? "border-neutral-700 bg-neutral-900 ring-1 ring-neutral-700/60"
+                        : done
+                          ? "border-neutral-700 bg-neutral-900"
+                          : "border-neutral-900 hover:bg-neutral-950"
+                    }`}
+                  >
+                    <span className="flex items-center gap-3 text-neutral-200">
+                      {done ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <span className="h-4 w-4 rounded-full border border-neutral-700" />
+                      )}
+                      {s}
+                    </span>
+                    <span className="text-xs text-neutral-500">
+                      {done
+                        ? "Completed"
+                        : active
+                          ? "In progress (see phone)"
+                          : "Click to complete"}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+
+            {/* Digital placeholder */}
+            {tab === "digital" && (
+              <div className="mt-5 rounded-xl border border-neutral-800 p-6 text-sm text-neutral-400">
+                Digital flow preview coming soon.
+              </div>
+            )}
+
+            {/* Progress + actions */}
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between text-xs text-neutral-400">
                 <span>Publish in 60 seconds</span>
-                <span>{Math.round((progress / steps.length) * 100)}%</span>
+                <span>{percent}%</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-900">
                 <div
                   className="h-full bg-white"
-                  style={{ width: `${(progress / steps.length) * 100}%` }}
+                  style={{ width: `${percent}%` }}
                 />
               </div>
               <div className="mt-4 flex gap-2">
@@ -698,7 +949,10 @@ const Workflows: React.FC = () => {
                 >
                   Publish
                 </button>
-                <button className="rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-900">
+                <button
+                  onClick={resetFlow}
+                  className="rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-900"
+                >
                   Reset
                 </button>
               </div>
@@ -1207,7 +1461,7 @@ export default function LandingPageTest() {
 
   const onCTAClick = () => {
     // Navigate to photo menu creation as the primary CTA
-    window.location.href = '/photo-menu';
+    window.location.href = "/photo-menu";
   };
 
   return (
@@ -1234,16 +1488,18 @@ export default function LandingPageTest() {
       {/* Mobile sticky CTA */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-800/60 bg-neutral-950/95 backdrop-blur-lg lg:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="text-sm text-neutral-300 font-medium">Ready to publish?</div>
+          <div className="text-sm text-neutral-300 font-medium">
+            Ready to publish?
+          </div>
           <div className="flex gap-2">
             <button
-              onClick={() => window.location.href = '/photo-menu'}
+              onClick={() => (window.location.href = "/photo-menu")}
               className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 transition-colors"
             >
               Photo Menu
             </button>
             <button
-              onClick={() => window.location.href = '/digital-menu'}
+              onClick={() => (window.location.href = "/digital-menu")}
               className="rounded-xl border border-neutral-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 transition-colors"
             >
               Digital
