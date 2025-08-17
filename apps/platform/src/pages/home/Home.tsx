@@ -7,24 +7,24 @@ export default function Home() {
   return (
     <MainLayout>
       {/* Hero Section - Minimal & Elegant */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-white via-gray-50/50 to-white min-h-screen">
+      <div className="relative overflow-hidden bg-gradient-to-b from-white via-gray-50/30 to-white min-h-screen">
         {/* Subtle background elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-32 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"></div>
+          <div className="absolute -top-40 -right-32 w-96 h-96 bg-gray-400/3 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-gray-600/4 rounded-full blur-3xl"></div>
         </div>
 
         <div className="relative container mx-auto px-6 py-20 flex flex-col items-center justify-center min-h-screen text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900/5 border border-gray-200/50 rounded-full text-sm font-medium text-gray-700 mb-8 backdrop-blur-sm">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
             Trusted by 1000+ restaurants
           </div>
 
           {/* Main heading */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight text-gray-900 mb-6 max-w-5xl">
             Digital Menus
-            <span className="block font-medium bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent pb-2">
+            <span className="block font-medium bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent pb-2">
               Reimagined
             </span>
           </h1>

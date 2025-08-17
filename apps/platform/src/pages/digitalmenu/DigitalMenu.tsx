@@ -167,7 +167,7 @@ export default function DigitalMenu() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-2xl font-bold rounded-xl mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gray-800 to-gray-600 text-white text-2xl font-bold rounded-xl mb-4">
                 Q
               </div>
               <div className="text-sm text-gray-500 font-medium">QRUNCHY</div>
@@ -181,19 +181,19 @@ export default function DigitalMenu() {
             </p>
             
             {hasDraft && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-blue-800">Draft Restored</span>
+                  <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-800">Draft Restored</span>
                 </div>
-                <p className="text-sm text-blue-600 mb-3">
+                <p className="text-sm text-gray-700 mb-3">
                   Your previous work has been automatically restored. Continue where you left off or start fresh.
                 </p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleStartFresh}
-                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
                 >
                   <RefreshCw size={14} className="mr-2" />
                   Start from scratch
@@ -207,7 +207,7 @@ export default function DigitalMenu() {
             <div className="relative">
               <div className="absolute left-5 right-5 top-7 h-1 bg-gray-100 rounded-full"></div>
               <div
-                className="absolute left-5 top-7 h-1 bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
+                className="absolute left-5 top-7 h-1 bg-gray-700 rounded-full transition-all duration-500 ease-in-out"
                 style={{
                   width: getProgressWidth(),
                   maxWidth: "calc(100% - 25px)",
@@ -221,9 +221,9 @@ export default function DigitalMenu() {
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
                       ${
                         getStepState("setup") === "current"
-                          ? "border-blue-500 bg-white text-blue-500"
+                          ? "border-gray-800 bg-white text-gray-800"
                           : getStepState("setup") === "completed"
-                            ? "border-blue-500 bg-blue-500 text-white"
+                            ? "border-gray-800 bg-gray-800 text-white"
                             : "border-gray-200 bg-white text-gray-400"
                       }`}
                   >
@@ -260,7 +260,7 @@ export default function DigitalMenu() {
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300 ${
                       getStepState("setup") === "current" || getStepState("setup") === "completed"
-                        ? "text-blue-600"
+                        ? "text-gray-800"
                         : "text-gray-500"
                     }`}
                   >
@@ -274,9 +274,9 @@ export default function DigitalMenu() {
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
                       ${
                         getStepState("build") === "current"
-                          ? "border-blue-500 bg-white text-blue-500"
+                          ? "border-gray-800 bg-white text-gray-800"
                           : getStepState("build") === "completed"
-                            ? "border-blue-500 bg-blue-500 text-white"
+                            ? "border-gray-800 bg-gray-800 text-white"
                             : "border-gray-200 bg-white text-gray-400"
                       }`}
                   >
@@ -313,7 +313,7 @@ export default function DigitalMenu() {
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300 ${
                       getStepState("build") === "current" || getStepState("build") === "completed"
-                        ? "text-blue-600"
+                        ? "text-gray-800"
                         : "text-gray-500"
                     }`}
                   >
@@ -327,9 +327,9 @@ export default function DigitalMenu() {
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
                       ${
                         getStepState("qr") === "completed"
-                          ? "border-blue-500 bg-blue-500 text-white"
+                          ? "border-gray-800 bg-gray-800 text-white"
                           : getStepState("qr") === "current"
-                            ? "border-blue-500 bg-white text-blue-500"
+                            ? "border-gray-800 bg-white text-gray-800"
                             : "border-gray-200 bg-white text-gray-400"
                       }`}
                   >
@@ -366,7 +366,7 @@ export default function DigitalMenu() {
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300 ${
                       getStepState("qr") === "current" || getStepState("qr") === "completed"
-                        ? "text-blue-600"
+                        ? "text-gray-800"
                         : "text-gray-500"
                     }`}
                   >
@@ -429,7 +429,7 @@ export default function DigitalMenu() {
                                 value=""
                                 checked={selectedChain === null}
                                 onChange={() => setSelectedChain(null)}
-                                className="h-4 w-4 text-blue-600"
+                                className="h-4 w-4 text-gray-700"
                               />
                               <label htmlFor="no-chain" className="flex-1 text-sm font-medium text-gray-700">
                                 Individual restaurant (not part of a chain)
@@ -445,11 +445,11 @@ export default function DigitalMenu() {
                                   value={chain.id}
                                   checked={selectedChain === chain.id}
                                   onChange={() => setSelectedChain(chain.id)}
-                                  className="h-4 w-4 text-blue-600"
+                                  className="h-4 w-4 text-gray-700"
                                 />
                                 <div className="flex-1">
                                   <label htmlFor={`chain-${chain.id}`} className="flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer">
-                                    <Building2 className="w-4 h-4 text-blue-600" />
+                                    <Building2 className="w-4 h-4 text-gray-700" />
                                     <span>{chain.name}</span>
                                   </label>
                                   {chain.description && (

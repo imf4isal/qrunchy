@@ -72,13 +72,13 @@ export default function CustomerMenuViewerModern({
   // Handle loading and error states
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="relative mb-8">
-            <div className="w-24 h-24 bg-gradient-to-br from-white to-blue-50 rounded-2xl mx-auto flex items-center justify-center shadow-2xl border border-white/20 backdrop-blur-xl">
-              <Sparkles className="text-blue-600 animate-pulse" size={32} />
+            <div className="w-24 h-24 bg-gradient-to-br from-white to-gray-50 rounded-2xl mx-auto flex items-center justify-center shadow-2xl border border-white/20 backdrop-blur-xl">
+              <Sparkles className="text-gray-600 animate-pulse" size={32} />
             </div>
-            <div className="absolute inset-0 w-24 h-24 bg-blue-500/20 rounded-2xl mx-auto animate-ping"></div>
+            <div className="absolute inset-0 w-24 h-24 bg-gray-500/20 rounded-2xl mx-auto animate-ping"></div>
           </div>
           <p className="text-white text-xl font-semibold mb-2">
             Preparing your menu
@@ -87,7 +87,7 @@ export default function CustomerMenuViewerModern({
             Just a moment while we load everything...
           </p>
           <div className="w-48 h-1 bg-white/10 rounded-full mx-auto overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
+            <div className="h-full bg-gradient-to-r from-gray-400 to-gray-500 rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function CustomerMenuViewerModern({
 
   if (error || !menuData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center px-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-6">
         <div className="text-center max-w-md">
           <div className="w-24 h-24 bg-white/5 rounded-3xl mx-auto mb-8 flex items-center justify-center border border-white/10 backdrop-blur-xl">
             <span className="text-white text-4xl">😔</span>
@@ -110,7 +110,7 @@ export default function CustomerMenuViewerModern({
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 border border-white/10"
+            className="px-8 py-4 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-2xl font-semibold hover:from-gray-800 hover:to-gray-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 border border-white/10"
           >
             Try Again
           </button>
@@ -141,11 +141,11 @@ export default function CustomerMenuViewerModern({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Hero Header */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-600/10 to-gray-700/10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-500/5 via-transparent to-transparent" />
         <div className="relative px-6 py-16">
           <button
             onClick={handleShare}
@@ -159,7 +159,7 @@ export default function CustomerMenuViewerModern({
 
           <div className="text-center text-white max-w-2xl mx-auto">
             <div className="flex items-center justify-center mb-8">
-              <div className="w-14 h-14 bg-gradient-to-br from-white/20 to-blue-500/20 rounded-3xl mr-4 flex items-center justify-center backdrop-blur-xl border border-white/20 shadow-xl">
+              <div className="w-14 h-14 bg-gradient-to-br from-white/20 to-gray-500/20 rounded-3xl mr-4 flex items-center justify-center backdrop-blur-xl border border-white/20 shadow-xl">
                 <Sparkles className="text-white" size={24} />
               </div>
               <div className="text-left">
@@ -172,15 +172,15 @@ export default function CustomerMenuViewerModern({
               </div>
             </div>
 
-            <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent leading-tight">
+            <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-white via-gray-100 to-gray-200 bg-clip-text text-transparent leading-tight">
               {menuData.restaurant.name}
             </h1>
 
             <div className="flex flex-col items-center gap-4 mb-10">
               {menuData.restaurant.address && (
                 <div className="flex items-center gap-4 text-white/90 bg-white/5 px-4 py-3 rounded-2xl backdrop-blur-xl border border-white/10">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center">
-                    <MapPin size={18} className="text-blue-300" />
+                  <div className="w-10 h-10 bg-gradient-to-br from-gray-500/20 to-gray-600/20 rounded-xl flex items-center justify-center">
+                    <MapPin size={18} className="text-gray-300" />
                   </div>
                   <span className="text-sm">{menuData.restaurant.address}</span>
                 </div>
@@ -197,7 +197,7 @@ export default function CustomerMenuViewerModern({
 
             <div className="relative max-w-lg mx-auto">
               <Search
-                className="absolute left-5 top-1/2 transform -translate-y-1/2 text-blue-300"
+                className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-300"
                 size={22}
               />
               <input
@@ -221,7 +221,7 @@ export default function CustomerMenuViewerModern({
             onClick={() => setSelectedCategory("all")}
             className={`flex-shrink-0 px-6 py-3 rounded-3xl text-sm font-semibold transition-all transform hover:scale-105 ${
               selectedCategory === "all"
-                ? "bg-gradient-to-r from-white to-blue-50 text-slate-900 shadow-2xl border border-white/20"
+                ? "bg-gradient-to-r from-white to-gray-50 text-slate-900 shadow-2xl border border-white/20"
                 : "bg-white/5 text-white hover:bg-white/15 backdrop-blur-2xl border border-white/10 shadow-lg"
             }`}
           >
@@ -233,7 +233,7 @@ export default function CustomerMenuViewerModern({
               onClick={() => setSelectedCategory(category.id)}
               className={`flex-shrink-0 px-6 py-3 rounded-3xl text-sm font-semibold transition-all transform hover:scale-105 ${
                 selectedCategory === category.id
-                  ? "bg-gradient-to-r from-white to-blue-50 text-slate-900 shadow-2xl border border-white/20"
+                  ? "bg-gradient-to-r from-white to-gray-50 text-slate-900 shadow-2xl border border-white/20"
                   : "bg-white/5 text-white hover:bg-white/15 backdrop-blur-2xl border border-white/10 shadow-lg"
               }`}
             >
@@ -257,12 +257,12 @@ export default function CustomerMenuViewerModern({
                   <section key={category.id}>
                     <div className="mb-10">
                       <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
-                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-xl flex items-center justify-center">
-                          <Sparkles size={14} className="text-blue-300" />
+                        <div className="w-6 h-6 bg-gradient-to-br from-gray-500/30 to-gray-600/30 rounded-xl flex items-center justify-center">
+                          <Sparkles size={14} className="text-gray-300" />
                         </div>
                         {category.name}
                       </h2>
-                      <div className="w-20 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full shadow-lg"></div>
+                      <div className="w-20 h-1 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-lg"></div>
                     </div>
                     <div className="grid gap-6">
                       {categoryItems.map((item) => (
@@ -298,7 +298,7 @@ export default function CustomerMenuViewerModern({
                 setSearchTerm("");
                 setSelectedCategory("all");
               }}
-              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-3xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-xl transform hover:scale-105 border border-white/10"
+              className="px-8 py-3 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-3xl font-semibold hover:from-gray-800 hover:to-gray-700 transition-all shadow-xl transform hover:scale-105 border border-white/10"
             >
               Browse All Dishes
             </button>
@@ -310,7 +310,7 @@ export default function CustomerMenuViewerModern({
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-2xl shadow-2xl hover:shadow-3xl transition-all hover:scale-110 z-50 border border-white/20 backdrop-blur-xl"
+          className="fixed bottom-8 right-8 bg-gradient-to-r from-gray-700 to-gray-600 text-white p-4 rounded-2xl shadow-2xl hover:shadow-3xl transition-all hover:scale-110 z-50 border border-white/20 backdrop-blur-xl"
         >
           <ArrowUp size={24} />
         </button>
@@ -320,7 +320,7 @@ export default function CustomerMenuViewerModern({
       <div className="bg-black/10 backdrop-blur-2xl px-6 py-20 border-t border-white/5">
         <div className="text-center max-w-md mx-auto">
           <div className="flex items-center justify-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-white/10 to-blue-500/20 rounded-3xl mr-6 flex items-center justify-center backdrop-blur-xl border border-white/10">
+            <div className="w-16 h-16 bg-gradient-to-br from-white/10 to-gray-500/20 rounded-3xl mr-6 flex items-center justify-center backdrop-blur-xl border border-white/10">
               <Sparkles className="text-white" size={28} />
             </div>
             <div className="text-left">
@@ -399,7 +399,7 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
         </div>
 
         <div className="flex justify-between items-center mb-6">
-          <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <div className="text-3xl font-bold bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 bg-clip-text text-transparent">
             ৳{item.price.toFixed(2)}
           </div>
           <div className="flex items-center gap-2 text-gray-500 text-sm">
@@ -413,13 +413,13 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
             {item.variants.map((variant) => (
               <span
                 key={variant.id}
-                className="inline-flex items-center px-5 py-2 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-sm font-bold border border-blue-200 shadow-sm"
+                className="inline-flex items-center px-5 py-2 rounded-2xl bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-sm font-bold border border-gray-200 shadow-sm"
               >
                 ✨ {variant.title} ({variant.options.length})
               </span>
             ))}
             {item.addons.length > 0 && (
-              <span className="inline-flex items-center px-5 py-2 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 text-sm font-bold border border-emerald-200 shadow-sm">
+              <span className="inline-flex items-center px-5 py-2 rounded-2xl bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-sm font-bold border border-gray-200 shadow-sm">
                 🍽️ +{item.addons.length} add-on
                 {item.addons.length !== 1 ? "s" : ""}
               </span>
@@ -431,7 +431,7 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
           <div>
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="flex items-center gap-3 text-blue-600 font-bold hover:text-blue-800 transition-all hover:bg-blue-50 px-4 py-2 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50"
+              className="flex items-center gap-3 text-gray-600 font-bold hover:text-gray-800 transition-all hover:bg-gray-50 px-4 py-2 rounded-2xl border border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100"
             >
               {showDetails ? "🔼 Hide Options" : "🔽 View Options"}
               <ChevronDown
@@ -445,19 +445,19 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
                 {item.variants.map((variant) => (
                   <div key={variant.id}>
                     <h4 className="font-bold text-gray-900 mb-6 text-lg flex items-center gap-2">
-                      <Sparkles size={18} className="text-blue-500" />
+                      <Sparkles size={18} className="text-gray-500" />
                       {variant.title}
                     </h4>
                     <div className="space-y-4">
                       {variant.options.map((option) => (
                         <div
                           key={option.id}
-                          className="flex justify-between items-center p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl border border-blue-100 hover:from-blue-100 hover:to-indigo-100 transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+                          className="flex justify-between items-center p-5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-3xl border border-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                         >
                           <span className="font-semibold text-gray-800">
                             {option.name}
                           </span>
-                          <span className="font-bold text-blue-600 bg-white px-3 py-1 rounded-full text-sm">
+                          <span className="font-bold text-gray-600 bg-white px-3 py-1 rounded-full text-sm">
                             {option.price > 0
                               ? `+৳${option.price.toFixed(2)}`
                               : "Free"}
@@ -471,19 +471,19 @@ function ModernMenuItemCard({ item }: ModernMenuItemCardProps) {
                 {item.addons.length > 0 && (
                   <div>
                     <h4 className="font-bold text-gray-900 mb-6 text-lg flex items-center gap-2">
-                      <span className="text-emerald-500">🍽️</span>
+                      <span className="text-gray-500">🍽️</span>
                       Add-ons
                     </h4>
                     <div className="space-y-4">
                       {item.addons.map((addon) => (
                         <div
                           key={addon.id}
-                          className="flex justify-between items-center p-5 bg-gradient-to-r from-emerald-50 to-green-50 rounded-3xl border border-emerald-100 hover:from-emerald-100 hover:to-green-100 transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+                          className="flex justify-between items-center p-5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-3xl border border-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                         >
-                          <span className="font-semibold text-emerald-800">
+                          <span className="font-semibold text-gray-800">
                             {addon.name}
                           </span>
-                          <span className="font-bold text-emerald-600 bg-white px-3 py-1 rounded-full text-sm">
+                          <span className="font-bold text-gray-600 bg-white px-3 py-1 rounded-full text-sm">
                             +৳{addon.price.toFixed(2)}
                           </span>
                         </div>

@@ -12,7 +12,7 @@ export default function PhotoMenuLayout({ children, sidePanel }: PhotoMenuLayout
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-12">
                         <div className="mb-6">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-2xl font-bold rounded-xl mb-4">
+                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gray-800 to-gray-600 text-white text-2xl font-bold rounded-xl mb-4">
                                 Q
                             </div>
                             <div className="text-sm text-gray-500 font-medium">QRUNCHY</div>

@@ -409,18 +409,18 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
             </Button>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-8 h-8 bg-gradient-to-r from-gray-800 to-gray-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
                   Q
                 </div>
               </div>
               <div>
-                <p className="text-blue-800 font-medium mb-1">
+                <p className="text-gray-800 font-medium mb-1">
                   Next Steps with Qrunchy:
                 </p>
-                <p className="text-blue-700">
+                <p className="text-gray-700">
                   Print this QR code and place it on your tables, menu boards,
                   or anywhere customers can easily scan it. You can manage your
                   menu anytime from your Qrunchy dashboard.

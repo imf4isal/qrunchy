@@ -467,7 +467,7 @@ export default function ItemEditor({
                       size="sm"
                       variant="ghost"
                       onClick={() => handleDeleteVariant(variant.id)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-gray-500 hover:text-gray-700"
                     >
                       <Trash2 size={14} />
                     </Button>
@@ -511,7 +511,7 @@ export default function ItemEditor({
                           onClick={() =>
                             handleDeleteVariantOption(variant.id, option.id)
                           }
-                          className="text-red-500 hover:text-red-700"
+                          className="text-gray-500 hover:text-gray-700"
                         >
                           <Trash2 size={14} />
                         </Button>
@@ -585,7 +585,7 @@ export default function ItemEditor({
                     size="sm"
                     variant="ghost"
                     onClick={() => handleDeleteAddon(addon.id)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-gray-500 hover:text-gray-700"
                   >
                     <Trash2 size={14} />
                   </Button>

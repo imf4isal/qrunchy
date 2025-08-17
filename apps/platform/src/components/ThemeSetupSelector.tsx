@@ -17,9 +17,9 @@ const THEME_OPTIONS = [
   {
     id: "modern" as const, 
     name: "Modern",
-    description: "Bold, vibrant design with dynamic gradients",
-    preview: "bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900",
-    accent: "indigo",
+    description: "Bold, sophisticated design with elegant gradients",
+    preview: "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900",
+    accent: "gray",
   },
 ];
 
@@ -30,7 +30,7 @@ export default function ThemeSetupSelector({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+        <div className="w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg flex items-center justify-center">
           <Palette className="text-white" size={16} />
         </div>
         <div>

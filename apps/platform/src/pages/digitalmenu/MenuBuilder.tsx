@@ -1029,7 +1029,7 @@ export default function MenuBuilder({
                     size="sm"
                     variant="ghost"
                     onClick={() => handleDeleteCategory(category.id)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-gray-500 hover:text-gray-700"
                     disabled={deleteCategoryMutation.isPending}
                   >
                     {deleteCategoryMutation.isPending ? (
@@ -1122,13 +1122,13 @@ export default function MenuBuilder({
             <div className="text-sm text-gray-500">
               ${item.price.toFixed(2)}
               {item.variants && item.variants.length > 0 && (
-                <span className="ml-2 text-blue-500">
+                <span className="ml-2 text-gray-600">
                   {item.variants.length} variant
                   {item.variants.length !== 1 ? "s" : ""}
                 </span>
               )}
               {item.addons && item.addons.length > 0 && (
-                <span className="ml-2 text-green-500">
+                <span className="ml-2 text-gray-600">
                   {item.addons.length} addon
                   {item.addons.length !== 1 ? "s" : ""}
                 </span>
@@ -1148,7 +1148,7 @@ export default function MenuBuilder({
             size="sm"
             variant="ghost"
             onClick={() => handleDeleteItem(item.id)}
-            className="text-red-500 hover:text-red-700"
+            className="text-gray-500 hover:text-gray-700"
           >
             <Trash2 size={14} />
           </Button>
@@ -1161,7 +1161,7 @@ export default function MenuBuilder({
   if (categoriesLoading || itemsLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
         <span className="ml-2 text-gray-600">Loading menu data...</span>
       </div>
     );
@@ -1170,9 +1170,9 @@ export default function MenuBuilder({
   // Show error state if there's an error
   if (categoriesError || itemsError) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <h3 className="text-red-800 font-medium mb-2">Error Loading Menu</h3>
-        <p className="text-red-600 text-sm">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <h3 className="text-gray-800 font-medium mb-2">Error Loading Menu</h3>
+        <p className="text-gray-600 text-sm">
           {categoriesError?.message ||
             itemsError?.message ||
             "Failed to load menu data"}
@@ -1201,7 +1201,7 @@ export default function MenuBuilder({
         {!restaurantId && (
           <div className="text-right">
             {draftLoaded && (
-              <div className="text-sm text-blue-600 mb-1">
+              <div className="text-sm text-gray-700 mb-1">
                 📄 Draft loaded from previous session
               </div>
             )}
@@ -1229,7 +1229,7 @@ export default function MenuBuilder({
                   name="entryMethod"
                   checked={!bulkUploadMode}
                   onChange={() => setBulkUploadMode(false)}
-                  className="text-blue-600"
+                  className="text-gray-700"
                 />
                 <span className="text-sm">Manual Entry</span>
               </label>
@@ -1239,7 +1239,7 @@ export default function MenuBuilder({
                   name="entryMethod"
                   checked={bulkUploadMode}
                   onChange={() => setBulkUploadMode(true)}
-                  className="text-blue-600"
+                  className="text-gray-700"
                 />
                 <span className="text-sm">Upload JSON</span>
               </label>
@@ -1308,9 +1308,9 @@ export default function MenuBuilder({
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                   bulkImportMutation.isPending
-                    ? "border-blue-500 bg-blue-50 opacity-50"
+                    ? "border-gray-500 bg-gray-50 opacity-50"
                     : isDragging
-                      ? "border-blue-500 bg-blue-50"
+                      ? "border-gray-500 bg-gray-50"
                       : "border-gray-300 hover:border-gray-400"
                 }`}
                 onDragOver={handleDragOver}
@@ -1319,11 +1319,11 @@ export default function MenuBuilder({
               >
                 {bulkImportMutation.isPending ? (
                   <div className="flex flex-col items-center">
-                    <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-3" />
-                    <p className="text-blue-600 font-medium">
+                    <Loader2 className="w-12 h-12 text-gray-600 animate-spin mb-3" />
+                    <p className="text-gray-700 font-medium">
                       Importing menu...
                     </p>
-                    <p className="text-xs text-blue-500 mt-1">
+                    <p className="text-xs text-gray-600 mt-1">
                       Please wait while we process your menu data
                     </p>
                   </div>

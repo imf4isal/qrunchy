@@ -19,9 +19,9 @@ export default function ActivationScreen({ expiresAt }: ActivationScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
       <div className="text-center max-w-md">
-        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+        <div className="w-16 h-16 bg-gradient-to-r from-gray-700 to-gray-600 rounded-2xl mx-auto mb-6 flex items-center justify-center">
           <span className="text-white font-bold text-xl">Q</span>
         </div>
 
@@ -34,17 +34,17 @@ export default function ActivationScreen({ expiresAt }: ActivationScreenProps) {
             This QR code was created but hasn't been activated yet.
           </p>
 
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium text-blue-900 mb-2">
+          <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-medium text-gray-900 mb-2">
               Restaurant Owner?
             </h3>
-            <p className="text-sm text-blue-700 mb-3">
+            <p className="text-sm text-gray-700 mb-3">
               If you created this QR code, please create an account to activate
               your digital menu.
             </p>
             <button
               onClick={handleActivate}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+              className="w-full bg-gray-700 hover:bg-gray-800 text-white py-2 px-4 rounded-lg font-medium transition-colors"
             >
               Activate Menu
             </button>

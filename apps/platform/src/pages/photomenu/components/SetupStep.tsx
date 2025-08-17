@@ -43,7 +43,7 @@ export default function SetupStep({
                         placeholder="e.g. Mario's Pizza, Sunset Cafe, The Local Bistro"
                         value={restaurantName}
                         onChange={(e) => onRestaurantNameChange(e.target.value)}
-                        className="w-full px-3 py-3 text-lg border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-3 text-lg border rounded-md focus:ring-gray-500 focus:border-gray-500"
                     />
                 </div>
 
@@ -54,14 +54,14 @@ export default function SetupStep({
                             Restaurant Chain (Optional)
                         </label>
                         <div className="space-y-3">
-                            <div className="flex items-center space-x-3 p-3 border rounded-lg hover:border-blue-300 transition-colors">
+                            <div className="flex items-center space-x-3 p-3 border rounded-lg hover:border-gray-300 transition-colors">
                                 <input
                                     type="radio"
                                     id="no-chain"
                                     name="chain"
                                     checked={selectedChain === null}
                                     onChange={() => onChainChange(null)}
-                                    className="h-4 w-4 text-blue-600"
+                                    className="h-4 w-4 text-gray-600"
                                 />
                                 <label htmlFor="no-chain" className="flex-1 text-sm font-medium text-gray-700">
                                     Individual restaurant (not part of a chain)
@@ -69,18 +69,18 @@ export default function SetupStep({
                             </div>
                             
                             {chains.map((chain) => (
-                                <div key={chain.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:border-blue-300 transition-colors">
+                                <div key={chain.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:border-gray-300 transition-colors">
                                     <input
                                         type="radio"
                                         id={`chain-${chain.id}`}
                                         name="chain"
                                         checked={selectedChain === chain.id}
                                         onChange={() => onChainChange(chain.id)}
-                                        className="h-4 w-4 text-blue-600"
+                                        className="h-4 w-4 text-gray-600"
                                     />
                                     <div className="flex-1">
                                         <label htmlFor={`chain-${chain.id}`} className="flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer">
-                                            <Building2 className="w-4 h-4 text-blue-600" />
+                                            <Building2 className="w-4 h-4 text-gray-600" />
                                             <span>{chain.name}</span>
                                         </label>
                                         {chain.description && (

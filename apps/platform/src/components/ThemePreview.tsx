@@ -111,7 +111,7 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
                               {item.addons.map((addon) => (
                                 <span
                                   key={addon.id}
-                                  className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs"
+                                  className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs"
                                 >
                                   {addon.name} (+৳{addon.price.toFixed(2)})
                                 </span>
@@ -156,7 +156,7 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
 
   // Modern Theme
   return (
-    <div className="max-h-96 overflow-y-auto bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white">
+    <div className="max-h-96 overflow-y-auto bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Header */}
       <div className="p-4 sm:p-6 relative">
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
@@ -169,12 +169,12 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
         </div>
         
         <div className="mb-4 sm:mb-6 pr-12 sm:pr-16">
-          <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent mb-2">
+          <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent mb-2">
             {restaurant?.name || menu.restaurantName || "Restaurant Name"}
           </h1>
-          <p className="text-blue-100 text-xs sm:text-sm mb-2">Digital Menu</p>
+          <p className="text-gray-300 text-xs sm:text-sm mb-2">Digital Menu</p>
           {restaurant?.address && (
-            <div className="flex items-center text-blue-200 text-xs break-words">
+            <div className="flex items-center text-gray-400 text-xs break-words">
               <span>{restaurant.address}</span>
             </div>
           )}
@@ -199,7 +199,7 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
                   {categoryItems.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-gradient-to-r from-white/10 to-blue-50/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl"
+                      className="bg-gradient-to-r from-white/10 to-gray-50/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl"
                     >
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 sm:mb-4 gap-2">
                         <div className="flex-1">
@@ -207,7 +207,7 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
                             {item.name || "Untitled Item"}
                           </h3>
                           {item.description && (
-                            <p className="text-blue-100 leading-relaxed text-xs sm:text-sm">
+                            <p className="text-gray-300 leading-relaxed text-xs sm:text-sm">
                               {item.description}
                             </p>
                           )}
@@ -215,7 +215,7 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
                       </div>
 
                       <div className="flex justify-between items-center mb-3 sm:mb-4">
-                        <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-200 via-purple-200 to-indigo-200 bg-clip-text text-transparent">
+                        <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-200 via-gray-100 to-white bg-clip-text text-transparent">
                           ৳{item.price.toFixed(2)}
                         </div>
                       </div>
@@ -227,13 +227,13 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
                             {item.variants.map((variant) => (
                               <span
                                 key={variant.id}
-                                className="inline-flex items-center px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-50/10 to-indigo-50/10 text-blue-100 text-xs sm:text-sm font-medium border border-blue-200/20 shadow-sm"
+                                className="inline-flex items-center px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-gray-50/10 to-gray-100/10 text-gray-300 text-xs sm:text-sm font-medium border border-gray-200/20 shadow-sm"
                               >
                                 ✨ {variant.title} ({variant.options.length})
                               </span>
                             ))}
                             {item.addons.length > 0 && (
-                              <span className="inline-flex items-center px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-50/10 to-green-50/10 text-emerald-100 text-xs sm:text-sm font-medium border border-emerald-200/20 shadow-sm">
+                              <span className="inline-flex items-center px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-gray-50/10 to-gray-100/10 text-gray-300 text-xs sm:text-sm font-medium border border-gray-200/20 shadow-sm">
                                 🍽️ +{item.addons.length} add-on{item.addons.length !== 1 ? "s" : ""}
                               </span>
                             )}
@@ -248,23 +248,23 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
           })}
 
         {(!menu.categories || menu.categories.length === 0) && (
-          <div className="text-center py-12 text-blue-200">
+          <div className="text-center py-12 text-gray-400">
             <p>No categories added yet</p>
           </div>
         )}
 
         {(menu.categories && menu.categories.length > 0) && (!menu.items || menu.items.length === 0) && (
-          <div className="text-center py-12 text-blue-200">
+          <div className="text-center py-12 text-gray-400">
             <p>Add items to your categories to see them here</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="p-4 bg-gradient-to-r from-blue-950/50 to-indigo-950/50 border-t border-white/10">
-        <div className="flex items-center justify-center text-xs text-blue-200">
+      <div className="p-4 bg-gradient-to-r from-gray-950/50 to-gray-900/50 border-t border-white/10">
+        <div className="flex items-center justify-center text-xs text-gray-400">
           <div className="flex items-center">
-            <div className="w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded mr-2 flex items-center justify-center text-white font-bold text-xs">
+            <div className="w-4 h-4 bg-gradient-to-r from-gray-400 to-gray-500 rounded mr-2 flex items-center justify-center text-white font-bold text-xs">
               Q
             </div>
             <span className="font-medium">Powered by Qrunchy</span>

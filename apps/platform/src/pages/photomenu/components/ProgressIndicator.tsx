@@ -157,9 +157,9 @@ export default function ProgressIndicator({
     const getStepStyles = (state: string) => {
         switch (state) {
             case "current":
-                return "border-blue-500 bg-white text-blue-500";
+                return "border-gray-800 bg-white text-gray-800";
             case "completed":
-                return "border-blue-500 bg-blue-500 text-white";
+                return "border-gray-800 bg-gray-800 text-white";
             case "inactive":
             default:
                 return "border-gray-200 bg-white text-gray-400";
@@ -170,7 +170,7 @@ export default function ProgressIndicator({
         switch (state) {
             case "current":
             case "completed":
-                return "text-blue-600";
+                return "text-gray-800";
             case "inactive":
             default:
                 return "text-gray-500";
@@ -183,7 +183,7 @@ export default function ProgressIndicator({
                 <div className="absolute left-5 right-5 top-7 h-1 bg-gray-100 rounded-full"></div>
 
                 <div
-                    className="absolute left-5 top-7 h-1 bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
+                    className="absolute left-5 top-7 h-1 bg-gray-700 rounded-full transition-all duration-500 ease-in-out"
                     style={{
                         width: progressWidth,
                         maxWidth: "calc(100% - 25px)",
