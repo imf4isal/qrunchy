@@ -19,4 +19,7 @@ export const authRouter = router({
   // Password Authentication
   setPassword: authProcedures.setPassword,
   loginWithPassword: authProcedures.loginWithPassword,
+  
+  // Token Validation
+  validateToken: authProcedures.validateToken,
 });

@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { publicProcedure, withRateLimit } from "../index.mts";
+import { publicProcedure, withRateLimit, authenticatedProcedure } from "../index.mts";
 import { db } from "../../db/index.mts";
 import { smsService } from "../../services/smsService.mts";
 import { hashPassword, safeComparePassword } from "../../utils/password.mts";
+import { generateJWTToken } from "../../utils/jwt.mts";
 
 // Enhanced validation schemas with better security
 const loginSchema = z.object({
@@ -92,6 +93,9 @@ export const authProcedures = {
         .orderBy("created_at", "desc")
         .execute();
 
+      // Generate JWT token for the authenticated user
+      const token = generateJWTToken(user);
+
       return {
         user: {
           id: user.id,
@@ -108,6 +112,8 @@ export const authProcedures = {
           created_at: restaurant.created_at.toISOString(),
           updated_at: restaurant.updated_at.toISOString(),
         })),
+        // NEW: Include JWT token in response
+        token,
       };
     } catch (error) {
       console.error("Error during login:", error);
@@ -377,6 +383,9 @@ export const authProcedures = {
           .orderBy("created_at", "desc")
           .execute();
 
+        // Generate JWT token for the authenticated user
+        const token = generateJWTToken(user);
+
         console.log(`🔐 Password login successful for ${mobile_number}`);
 
         return {
@@ -395,9 +404,68 @@ export const authProcedures = {
             created_at: restaurant.created_at.toISOString(),
             updated_at: restaurant.updated_at.toISOString(),
           })),
+          // NEW: Include JWT token in response
+          token,
         };
       } catch (error) {
         console.error("Error during password login:", error);
+        throw error;
+      }
+    }),
+
+  // Validate JWT token and return current user info
+  validateToken: authenticatedProcedure
+    .query(async ({ ctx }) => {
+      try {
+        // The JWT middleware has already verified the token and added user to context
+        const { user } = ctx;
+
+        if (!user) {
+          throw new Error("User context not found");
+        }
+
+        // Fetch fresh user data from database
+        const dbUser = await db
+          .selectFrom("user")
+          .selectAll()
+          .where("id", "=", user.userId)
+          .executeTakeFirst();
+
+        if (!dbUser) {
+          throw new Error("User not found in database");
+        }
+
+        // Get user's restaurants
+        const restaurants = await db
+          .selectFrom("restaurant")
+          .selectAll()
+          .where("user_id", "=", user.userId)
+          .where("is_active", "=", true)
+          .orderBy("created_at", "desc")
+          .execute();
+
+        console.log(`✅ Token validated successfully for user ${user.mobile}`);
+
+        return {
+          user: {
+            id: dbUser.id,
+            mobile_number: dbUser.mobile_number,
+            created_at: dbUser.created_at.toISOString(),
+            updated_at: dbUser.updated_at.toISOString(),
+          },
+          restaurants: restaurants.map((restaurant) => ({
+            id: restaurant.id,
+            name: restaurant.name,
+            mobile: restaurant.mobile,
+            address: restaurant.address,
+            theme_id: restaurant.theme_id || "minimal",
+            created_at: restaurant.created_at.toISOString(),
+            updated_at: restaurant.updated_at.toISOString(),
+          })),
+          isValid: true,
+        };
+      } catch (error) {
+        console.error("Error validating token:", error);
         throw error;
       }
     }),

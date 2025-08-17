@@ -39,7 +39,9 @@ interface AuthContextType {
   chains: Chain[];
   isAuthenticated: boolean;
   isLoading: boolean;
+  token: string | null;
   login: (mobile_number: string) => Promise<void>;
+  loginWithPassword: (mobile_number: string, password: string) => Promise<void>;
   logout: () => void;
   refreshSession: () => Promise<void>;
   updateRestaurant: (restaurantId: number, updates: Partial<Restaurant>) => void;
@@ -56,30 +58,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [chains, setChains] = useState<Chain[]>([]);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // tRPC mutations
   const loginMutation = trpc.auth.login.useMutation();
+  const loginWithPasswordMutation = trpc.auth.loginWithPassword.useMutation();
   const logoutMutation = trpc.auth.logout.useMutation();
+  
+  // Get tRPC utils for manual query calls
+  const utils = trpc.useUtils();
 
   // Initialize auth state from localStorage on mount
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
-        const storedUser = localStorage.getItem('qrunchy_user');
-        const storedRestaurants = localStorage.getItem('qrunchy_restaurants');
-        const storedChains = localStorage.getItem('qrunchy_chains');
+        const storedToken = localStorage.getItem('qrunchy_token');
 
-        if (storedUser && storedRestaurants) {
-          const parsedUser = JSON.parse(storedUser);
-          const parsedRestaurants = JSON.parse(storedRestaurants);
-          const parsedChains = storedChains ? JSON.parse(storedChains) : [];
+        if (!storedToken) {
+          console.log('🔓 No stored token found');
+          setIsLoading(false);
+          return;
+        }
 
-          // For now, just trust localStorage data
-          // TODO: Add session verification when needed
-          setUser(parsedUser);
-          setRestaurants(parsedRestaurants);
-          setChains(parsedChains);
+        // Set token first so it's included in the validation request
+        setToken(storedToken);
+        
+        console.log('🔐 Found stored token, validating...');
+
+        try {
+          // Validate the token by making an API call
+          const result = await utils.auth.validateToken.fetch();
+          
+          if (result) {
+            // Token is valid, set auth state
+            setUser(result.user);
+            setRestaurants(result.restaurants);
+            
+            // Update localStorage with fresh data
+            localStorage.setItem('qrunchy_user', JSON.stringify(result.user));
+            localStorage.setItem('qrunchy_restaurants', JSON.stringify(result.restaurants));
+            
+            // Load chains from localStorage (not affected by token validation)
+            const storedChains = localStorage.getItem('qrunchy_chains');
+            if (storedChains) {
+              setChains(JSON.parse(storedChains));
+            }
+            
+            console.log('✅ Token validation successful - user authenticated');
+          } else {
+            throw new Error('No result returned from token validation');
+          }
+        } catch (validationError) {
+          // Token is invalid or expired
+          console.log('❌ Token validation failed:', validationError);
+          clearAuthData();
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -90,15 +123,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeAuth();
-  }, []);
+  }, []); // Only run on mount, not when validateTokenQuery changes
 
   const clearAuthData = () => {
     localStorage.removeItem('qrunchy_user');
     localStorage.removeItem('qrunchy_restaurants');
     localStorage.removeItem('qrunchy_chains');
+    localStorage.removeItem('qrunchy_token');
     setUser(null);
     setRestaurants([]);
     setChains([]);
+    setToken(null);
   };
 
   const login = async (mobile_number: string) => {
@@ -108,11 +143,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Store in state
       setUser(result.user);
       setRestaurants(result.restaurants);
+      setToken(result.token);
       
       // Store in localStorage
       localStorage.setItem('qrunchy_user', JSON.stringify(result.user));
       localStorage.setItem('qrunchy_restaurants', JSON.stringify(result.restaurants));
+      localStorage.setItem('qrunchy_token', result.token);
       
+      console.log('🔐 Login successful with JWT token');
+    } catch (error) {
+      clearAuthData();
+      throw error; // Re-throw so components can handle the error
+    }
+  };
+
+  const loginWithPassword = async (mobile_number: string, password: string) => {
+    try {
+      const result = await loginWithPasswordMutation.mutateAsync({ mobile_number, password });
+      
+      // Store in state
+      setUser(result.user);
+      setRestaurants(result.restaurants);
+      setToken(result.token);
+      
+      // Store in localStorage
+      localStorage.setItem('qrunchy_user', JSON.stringify(result.user));
+      localStorage.setItem('qrunchy_restaurants', JSON.stringify(result.restaurants));
+      localStorage.setItem('qrunchy_token', result.token);
+      
+      console.log('🔐 Password login successful with JWT token');
     } catch (error) {
       clearAuthData();
       throw error; // Re-throw so components can handle the error
@@ -140,13 +199,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         mobile_number: user.mobile_number 
       });
       
-      // Update state with fresh data
+      // Update state with fresh data including new token
       setUser(result.user);
       setRestaurants(result.restaurants);
+      setToken(result.token);
       
       // Update localStorage
       localStorage.setItem('qrunchy_user', JSON.stringify(result.user));
       localStorage.setItem('qrunchy_restaurants', JSON.stringify(result.restaurants));
+      localStorage.setItem('qrunchy_token', result.token);
       
       console.log('✅ Session refreshed successfully. Restaurant count:', result.restaurants.length);
     } catch (error) {
@@ -259,9 +320,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     restaurants,
     chains,
-    isAuthenticated: !!user,
+    token,
+    isAuthenticated: !!user && !!token,
     isLoading,
     login,
+    loginWithPassword,
     logout,
     refreshSession,
     updateRestaurant,

@@ -163,11 +163,6 @@ export default function OTPVerification({
                 />
               ))}
             </div>
-            <div className="text-center mt-2">
-              <p className="text-xs text-gray-500">
-                You can also enter "654321" for testing
-              </p>
-            </div>
           </div>
 
           {error && (
