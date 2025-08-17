@@ -54,9 +54,13 @@ const RealQRCode: React.FC<{
   if (!qrDataURL) {
     return (
       <div
-        className={`bg-neutral-200 animate-pulse ${className}`}
+        className={`bg-neutral-200 animate-pulse rounded-lg border border-neutral-700/50 flex items-center justify-center ${className}`}
         style={{ width: size, height: size }}
-      />
+      >
+        <div className="text-neutral-600 text-xs">
+          <QrCode className="h-6 w-6 animate-spin" />
+        </div>
+      </div>
     );
   }
 
@@ -66,7 +70,7 @@ const RealQRCode: React.FC<{
       alt={`QR code for ${text}`}
       width={size}
       height={size}
-      className={className}
+      className={`${className} animate-in fade-in duration-300`}
     />
   );
 };
@@ -314,41 +318,35 @@ const Navbar: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => {
           </span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm text-neutral-400">
-          <button
-            onClick={() => scrollToSection("workflows")}
+          <a
+            href="/how-it-works"
             className="hover:text-white transition-colors cursor-pointer"
           >
-            Product
-          </button>
-          <button
-            onClick={() => scrollToSection("chain")}
-            className="hover:text-white transition-colors cursor-pointer"
-          >
-            Solutions
-          </button>
-          <button
-            onClick={() => scrollToSection("pricing")}
-            className="hover:text-white transition-colors cursor-pointer"
-          >
-            Pricing
-          </button>
+            How It Works
+          </a>
           <button
             onClick={() => scrollToSection("faq")}
             className="hover:text-white transition-colors cursor-pointer"
           >
             FAQ
           </button>
+          <a
+            href="/contact"
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            Contact
+          </a>
         </nav>
         <div className="flex items-center gap-3">
           <button
             onClick={handleSignIn}
-            className="hidden sm:inline-flex rounded-full border border-neutral-700 px-5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 transition-all duration-200"
+            className="hidden sm:inline-flex rounded-full border border-neutral-700 px-5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 transition-all duration-200 active:scale-95"
           >
             Sign in
           </button>
           <button
             onClick={onCTAClick}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Get started free <ArrowRight className="h-4 w-4" />
           </button>
@@ -495,14 +493,14 @@ const Hero: React.FC<{
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => (window.location.href = "/photo-menu")}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 transition-all duration-200"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black hover:bg-neutral-100 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <ImageIcon className="h-4 w-4" />
                   Photo Menu
                 </button>
                 <button
                   onClick={() => (window.location.href = "/digital-menu")}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 hover:border-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 hover:border-neutral-600 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Layers className="h-4 w-4" />
                   Digital Menu
@@ -511,7 +509,7 @@ const Hero: React.FC<{
               <button
                 onClick={() => window.open(`/demo/${short}`, "_blank")}
                 aria-label="Open live demo in new tab"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 <QrCode className="h-4 w-4" /> View Demo
               </button>
@@ -583,9 +581,14 @@ const Hero: React.FC<{
           {/* RIGHT */}
           <div className="relative mx-auto flex w-full max-w-md items-center justify-center lg:mx-0 lg:justify-end order-first lg:order-last">
             <div className="relative">
-              <div aria-hidden="true">
+              <motion.div
+                aria-hidden="true"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
                 <PhonePreview theme="dark" mode="digital" />
-              </div>
+              </motion.div>
 
               <motion.div
                 id="live-demo"
@@ -616,11 +619,11 @@ const Hero: React.FC<{
                       </div>
                       <button
                         onClick={copyUrl}
-                        className="p-1.5 rounded-md border border-neutral-700 hover:bg-neutral-800 hover:border-neutral-600 transition-all text-neutral-400 hover:text-neutral-200"
+                        className="p-1.5 rounded-md border border-neutral-700 hover:bg-neutral-800 hover:border-neutral-600 transition-all duration-200 text-neutral-400 hover:text-neutral-200 active:scale-90"
                         title="Copy URL"
                       >
                         {copied ? (
-                          <Check className="h-3 w-3" />
+                          <Check className="h-3 w-3 text-green-400" />
                         ) : (
                           <Copy className="h-3 w-3" />
                         )}
@@ -633,7 +636,7 @@ const Hero: React.FC<{
                         value={restaurantName}
                         onChange={(e) => setRestaurantName(e.target.value)}
                         placeholder="Enter your restaurant name"
-                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800/50 px-3 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-neutral-600 transition-all"
+                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800/50 px-3 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-neutral-600 transition-all duration-200 hover:border-neutral-600"
                       />
                       <div className="flex items-center justify-between text-xs text-neutral-500">
                         <span>✨ Your URL updates instantly</span>
@@ -662,6 +665,30 @@ const Workflows: React.FC = () => {
   const [zoom, setZoom] = useState(100); // step 3 only
   const [slide, setSlide] = useState(0); // step 3 only
 
+  // Digital menu state
+  const [categories, setCategories] = useState<
+    Array<{
+      id: string;
+      name: string;
+      items: Array<{
+        id: string;
+        name: string;
+        price: string;
+        description: string;
+      }>;
+    }>
+  >([]);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  );
+  const [newItem, setNewItem] = useState({
+    name: "",
+    price: "",
+    description: "",
+  });
+  const [digitalMenuActiveCategory, setDigitalMenuActiveCategory] = useState(0);
+
   const steps =
     tab === "photo"
       ? ["Upload images", "Arrange", "Publish"]
@@ -679,11 +706,50 @@ const Workflows: React.FC = () => {
     setActiveStep(0);
     setZoom(100);
     setSlide(0);
+    // Reset digital menu state
+    setCategories([]);
+    setNewCategoryName("");
+    setSelectedCategoryId(null);
+    setNewItem({ name: "", price: "", description: "" });
+    setDigitalMenuActiveCategory(0);
   };
 
   const totalSlides = 5;
   const prevSlide = () => setSlide((s) => (s - 1 + totalSlides) % totalSlides);
   const nextSlide = () => setSlide((s) => (s + 1) % totalSlides);
+
+  // Digital menu helper functions
+  const addCategory = () => {
+    if (newCategoryName.trim()) {
+      const newCategory = {
+        id: Date.now().toString(),
+        name: newCategoryName.trim(),
+        items: [],
+      };
+      setCategories((prev) => [...prev, newCategory]);
+      setNewCategoryName("");
+      setSelectedCategoryId(newCategory.id);
+    }
+  };
+
+  const addItemToCategory = () => {
+    if (selectedCategoryId && newItem.name.trim() && newItem.price.trim()) {
+      const item = {
+        id: Date.now().toString(),
+        name: newItem.name.trim(),
+        price: newItem.price.trim(),
+        description: newItem.description.trim(),
+      };
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.id === selectedCategoryId
+            ? { ...cat, items: [...cat.items, item] }
+            : cat
+        )
+      );
+      setNewItem({ name: "", price: "", description: "" });
+    }
+  };
 
   return (
     <Section
@@ -712,10 +778,10 @@ const Workflows: React.FC = () => {
               setTab(t.key);
               resetFlow();
             }}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-all duration-200 active:scale-95 ${
               tab === t.key
-                ? "bg-white text-black"
-                : "text-neutral-300 hover:bg-neutral-900"
+                ? "bg-white text-black shadow-sm"
+                : "text-neutral-300 hover:bg-neutral-900 hover:text-neutral-200"
             }`}
           >
             {t.icon}
@@ -725,7 +791,7 @@ const Workflows: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-8">
-        {/* Phone preview (renders step content INSIDE for Photo) */}
+        {/* Phone preview (renders step content INSIDE for Photo & Digital) */}
         <div className="w-fit mx-auto">
           <PhonePreview theme="dark" mode={tab}>
             {tab === "photo" && (
@@ -871,6 +937,252 @@ const Workflows: React.FC = () => {
                 )}
               </>
             )}
+            {tab === "digital" && (
+              <>
+                {/* STEP 1: Add Category */}
+                {activeStep === 0 && (
+                  <div className="space-y-3">
+                    <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                      <div className="mb-3 text-[11px] text-neutral-400 uppercase tracking-widest">
+                        Create Category
+                      </div>
+                      <input
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        placeholder="e.g., Appetizers"
+                        className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-[13px] text-neutral-200 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-600/20 transition-all duration-200 hover:border-neutral-700"
+                        onKeyPress={(e) => e.key === "Enter" && addCategory()}
+                      />
+                      <button
+                        onClick={addCategory}
+                        disabled={!newCategoryName.trim()}
+                        className="mt-2 w-full rounded-md bg-white px-3 py-2 text-[12px] font-medium text-black disabled:opacity-50 transition-all duration-200 hover:bg-neutral-100 hover:shadow-sm active:scale-[0.98] disabled:hover:bg-white disabled:hover:shadow-none disabled:active:scale-100"
+                      >
+                        Add Category
+                      </button>
+                    </div>
+
+                    {/* Categories list */}
+                    <div className="space-y-2">
+                      {categories.map((cat, i) => (
+                        <div
+                          key={cat.id}
+                          className="flex items-center justify-between rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 transition-all duration-200 hover:bg-neutral-900 hover:border-neutral-700"
+                        >
+                          <span className="text-[12px] text-neutral-200">
+                            {cat.name}
+                          </span>
+                          <span className="text-[10px] text-neutral-500">
+                            {cat.items.length} items
+                          </span>
+                        </div>
+                      ))}
+                      {categories.length === 0 && (
+                        <div className="text-center py-6 text-[11px] text-neutral-500">
+                          Add categories to organize your menu
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 2: Add Item */}
+                {activeStep === 1 && (
+                  <div className="space-y-3">
+                    {categories.length > 0 ? (
+                      <>
+                        <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                          <div className="mb-3 text-[11px] text-neutral-400 uppercase tracking-widest">
+                            Add Menu Item
+                          </div>
+
+                          {/* Category selector */}
+                          <select
+                            value={selectedCategoryId || ""}
+                            onChange={(e) =>
+                              setSelectedCategoryId(e.target.value)
+                            }
+                            className="w-full mb-2 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-[12px] text-neutral-200 focus:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-600/20 transition-all duration-200 hover:border-neutral-700"
+                          >
+                            <option value="">Select category</option>
+                            {categories.map((cat) => (
+                              <option key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* Item form */}
+                          <input
+                            value={newItem.name}
+                            onChange={(e) =>
+                              setNewItem((prev) => ({
+                                ...prev,
+                                name: e.target.value,
+                              }))
+                            }
+                            placeholder="Item name"
+                            className="w-full mb-2 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-[12px] text-neutral-200 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-600/20 transition-all duration-200 hover:border-neutral-700"
+                          />
+                          <input
+                            value={newItem.price}
+                            onChange={(e) =>
+                              setNewItem((prev) => ({
+                                ...prev,
+                                price: e.target.value,
+                              }))
+                            }
+                            placeholder="Price (e.g., $12.99)"
+                            className="w-full mb-2 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-[12px] text-neutral-200 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-600/20 transition-all duration-200 hover:border-neutral-700"
+                          />
+                          <textarea
+                            value={newItem.description}
+                            onChange={(e) =>
+                              setNewItem((prev) => ({
+                                ...prev,
+                                description: e.target.value,
+                              }))
+                            }
+                            placeholder="Description (optional)"
+                            rows={2}
+                            className="w-full mb-2 resize-none rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-[12px] text-neutral-200 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-600/20 transition-all duration-200 hover:border-neutral-700"
+                          />
+                          <button
+                            onClick={addItemToCategory}
+                            disabled={
+                              !selectedCategoryId ||
+                              !newItem.name.trim() ||
+                              !newItem.price.trim()
+                            }
+                            className="w-full rounded-md bg-white px-3 py-2 text-[12px] font-medium text-black disabled:opacity-50 transition-all duration-200 hover:bg-neutral-100 hover:shadow-sm active:scale-[0.98] disabled:hover:bg-white disabled:hover:shadow-none disabled:active:scale-100"
+                          >
+                            Add Item
+                          </button>
+                        </div>
+
+                        {/* Preview categories with items */}
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {categories.map((cat) => (
+                            <div
+                              key={cat.id}
+                              className="rounded-md border border-neutral-800 bg-neutral-950"
+                            >
+                              <div className="px-3 py-2 text-[11px] font-medium text-neutral-200 border-b border-neutral-800">
+                                {cat.name}
+                              </div>
+                              {cat.items.length > 0 ? (
+                                <div className="p-2 space-y-1">
+                                  {cat.items.map((item) => (
+                                    <div
+                                      key={item.id}
+                                      className="flex justify-between items-start"
+                                    >
+                                      <div className="flex-1 min-w-0">
+                                        <div className="text-[10px] text-neutral-200 truncate">
+                                          {item.name}
+                                        </div>
+                                        {item.description && (
+                                          <div className="text-[9px] text-neutral-500 truncate">
+                                            {item.description}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="text-[10px] text-neutral-300 ml-2">
+                                        {item.price}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="p-2 text-[10px] text-neutral-500">
+                                  No items yet
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-8 text-[11px] text-neutral-500">
+                        Add categories first before adding items
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* STEP 3: Menu Preview */}
+                {activeStep === 2 && (
+                  <div className="space-y-2">
+                    {categories.length > 0 ? (
+                      <>
+                        {/* Category tabs */}
+                        <div className="flex gap-1 overflow-x-auto pb-1">
+                          {categories.map((cat, i) => (
+                            <button
+                              key={cat.id}
+                              onClick={() => setDigitalMenuActiveCategory(i)}
+                              className={`shrink-0 rounded-full px-3 py-1 text-[10px] transition-all duration-200 active:scale-95 ${
+                                digitalMenuActiveCategory === i
+                                  ? "bg-white text-black shadow-sm"
+                                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-neutral-200"
+                              }`}
+                            >
+                              {cat.name}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Active category content */}
+                        <div className="rounded-lg border border-neutral-800 bg-neutral-950 min-h-48">
+                          {categories[digitalMenuActiveCategory] && (
+                            <div className="p-3">
+                              <div className="mb-3 text-[12px] font-medium text-neutral-200">
+                                {categories[digitalMenuActiveCategory].name}
+                              </div>
+                              <div className="space-y-2">
+                                {categories[
+                                  digitalMenuActiveCategory
+                                ].items.map((item) => (
+                                  <div
+                                    key={item.id}
+                                    className="flex items-start gap-3 p-2 rounded-md bg-neutral-900/50"
+                                  >
+                                    <div className="h-8 w-8 rounded bg-neutral-800"></div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-[11px] font-medium text-neutral-200">
+                                        {item.name}
+                                      </div>
+                                      {item.description && (
+                                        <div className="text-[9px] text-neutral-400 mt-0.5">
+                                          {item.description}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="text-[10px] font-medium text-neutral-200">
+                                      {item.price}
+                                    </div>
+                                  </div>
+                                ))}
+                                {categories[digitalMenuActiveCategory].items
+                                  .length === 0 && (
+                                  <div className="text-center py-4 text-[10px] text-neutral-500">
+                                    No items in this category
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-8 text-[11px] text-neutral-500">
+                        Create categories and add items to see preview
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
           </PhonePreview>
         </div>
 
@@ -878,12 +1190,12 @@ const Workflows: React.FC = () => {
         <div>
           <div className="rounded-2xl border border-neutral-800 p-6">
             <div className="text-sm text-neutral-400">
-              Inline demo {tab === "photo" ? "(Photo)" : "(Digital soon)"}
+              Inline demo {tab === "photo" ? "(Photo)" : "(Digital)"}
             </div>
             <h3 className="mt-1 text-xl font-semibold text-neutral-100">
               {tab === "photo"
                 ? "Upload → Arrange → Publish"
-                : "Structure → Preview → Publish"}
+                : "Category → Items → Publish"}
             </h3>
 
             <div className="mt-4 space-y-3">
@@ -894,12 +1206,12 @@ const Workflows: React.FC = () => {
                   <button
                     key={i}
                     onClick={() => handleStepClick(i)}
-                    className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 transition ${
+                    className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 transition-all duration-200 active:scale-[0.98] ${
                       active
-                        ? "border-neutral-700 bg-neutral-900 ring-1 ring-neutral-700/60"
+                        ? "border-neutral-700 bg-neutral-900 ring-1 ring-neutral-700/60 shadow-sm"
                         : done
-                          ? "border-neutral-700 bg-neutral-900"
-                          : "border-neutral-900 hover:bg-neutral-950"
+                          ? "border-neutral-700 bg-neutral-900 hover:bg-neutral-800"
+                          : "border-neutral-900 hover:bg-neutral-950 hover:border-neutral-800"
                     }`}
                   >
                     <span className="flex items-center gap-3 text-neutral-200">
@@ -922,13 +1234,6 @@ const Workflows: React.FC = () => {
               })}
             </div>
 
-            {/* Digital placeholder */}
-            {tab === "digital" && (
-              <div className="mt-5 rounded-xl border border-neutral-800 p-6 text-sm text-neutral-400">
-                Digital flow preview coming soon.
-              </div>
-            )}
-
             {/* Progress + actions */}
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between text-xs text-neutral-400">
@@ -943,14 +1248,14 @@ const Workflows: React.FC = () => {
               </div>
               <div className="mt-4 flex gap-2">
                 <button
-                  className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                  className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-60 transition-all duration-200 hover:bg-neutral-100 hover:shadow-sm active:scale-95 disabled:hover:bg-white disabled:hover:shadow-none disabled:active:scale-100"
                   disabled={progress < steps.length}
                 >
                   Publish
                 </button>
                 <button
                   onClick={resetFlow}
-                  className="rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-900"
+                  className="rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-neutral-200 hover:border-neutral-700 transition-all duration-200 active:scale-95"
                 >
                   Reset
                 </button>
@@ -1073,60 +1378,6 @@ const QRDistribution: React.FC = () => {
   );
 };
 
-const ImageManager: React.FC = () => {
-  const [count, setCount] = useState(0);
-  return (
-    <Section
-      id="images"
-      title="Drop photos in. We handle the rest."
-      subtitle="Bulk upload, auto-optimization, alt text prompts, CDN, smart crops."
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div className="rounded-2xl border border-neutral-800 p-6">
-          <div className="flex items-center gap-3 text-neutral-300">
-            <Upload className="h-4 w-4" /> Drag & drop images here
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            {Array.from({ length: Math.max(6, count) }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-square rounded-lg bg-neutral-800"
-              />
-            ))}
-          </div>
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={() => setCount((c) => c + 3)}
-              className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black"
-            >
-              Upload sample
-            </button>
-            <button
-              onClick={() => setCount(0)}
-              className="rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-900"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-        <div className="space-y-4">
-          {[
-            "Auto-compress images",
-            "CDN delivery",
-            "Smart crops",
-            "Alt text prompts",
-          ].map((t, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="h-6 w-6 rounded bg-neutral-800" />
-              <div className="text-neutral-300">{t}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Section>
-  );
-};
-
 const ChainControl: React.FC = () => {
   return (
     <Section
@@ -1160,26 +1411,6 @@ const ChainControl: React.FC = () => {
     </Section>
   );
 };
-
-const AuthRoles: React.FC = () => (
-  <Section
-    id="auth"
-    title="Secure sign-ins without passwords."
-    subtitle="SMS OTP for staff, session expiry, restricted editor roles, optional approvals."
-  >
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {["SMS OTP", "Editor roles", "Approval flows"].map((t, i) => (
-        <div key={i} className="rounded-2xl border border-neutral-800 p-5">
-          <div className="mb-3 h-8 w-8 rounded bg-neutral-800" />
-          <div className="text-neutral-200 font-medium">{t}</div>
-          <div className="mt-2 text-sm text-neutral-400">
-            Keep teams fast and secure without passwords.
-          </div>
-        </div>
-      ))}
-    </div>
-  </Section>
-);
 
 const StructuredPower: React.FC = () => {
   const [itemName, setItemName] = useState("");
@@ -1376,43 +1607,27 @@ const FinalCTA: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => (
 );
 
 const Footer: React.FC = () => (
-  <footer className="border-t border-neutral-900/50 py-10">
+  <footer className="border-t border-neutral-900/50 py-8">
     <Container>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
-        {[
-          {
-            h: "Product",
-            i: ["Photo Menu", "Digital Menu", "Themes", "QR Codes"],
-          },
-          {
-            h: "Solutions",
-            i: ["Single Outlet", "Chain & Food Court", "Cafés & QSR", "Hotels"],
-          },
-          { h: "Resources", i: ["Demo", "Docs", "Templates", "Case Studies"] },
-          { h: "Company", i: ["About", "Careers", "Contact", "Legal"] },
-        ].map((c, i) => (
-          <div key={i}>
-            <div className="mb-3 font-medium text-neutral-200">{c.h}</div>
-            <ul className="space-y-2 text-neutral-400">
-              {c.i.map((s, j) => (
-                <li key={j}>
-                  <a href="#" className="hover:text-neutral-200">
-                    {s}
-                  </a>
-                </li>
-              ))}
-            </ul>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+        <div className="flex items-center gap-3">
+          <div className="relative h-6 w-6 rounded-md bg-gradient-to-br from-white to-neutral-300 flex items-center justify-center shadow-sm">
+            <QrCode className="h-3 w-3 text-neutral-900" />
           </div>
-        ))}
-      </div>
-      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
-        <div>© {new Date().getFullYear()} Qrunchy</div>
-        <div className="flex items-center gap-4">
-          <a href="#" className="hover:text-neutral-300">
+          <span className="font-semibold text-neutral-200">Qrunchy</span>
+          <span className="text-neutral-500">
+            © {new Date().getFullYear()}
+          </span>
+        </div>
+        <div className="flex items-center gap-6 text-neutral-400">
+          <a href="#" className="hover:text-neutral-200 transition-colors">
             Privacy
           </a>
-          <a href="#" className="hover:text-neutral-300">
+          <a href="#" className="hover:text-neutral-200 transition-colors">
             Terms
+          </a>
+          <a href="#" className="hover:text-neutral-200 transition-colors">
+            Contact
           </a>
         </div>
       </div>
@@ -1441,9 +1656,7 @@ export default function LandingPageTest() {
       />
       <Workflows />
       <QRDistribution />
-      <ImageManager />
       <ChainControl />
-      <AuthRoles />
       <StructuredPower />
       <SocialProof />
 
@@ -1460,13 +1673,13 @@ export default function LandingPageTest() {
           <div className="flex gap-2">
             <button
               onClick={() => (window.location.href = "/photo-menu")}
-              className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 transition-colors"
+              className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 hover:shadow-sm transition-all duration-200 active:scale-95"
             >
               Photo Menu
             </button>
             <button
               onClick={() => (window.location.href = "/digital-menu")}
-              className="rounded-xl border border-neutral-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 transition-colors"
+              className="rounded-xl border border-neutral-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 hover:border-neutral-500 transition-all duration-200 active:scale-95"
             >
               Digital
             </button>
