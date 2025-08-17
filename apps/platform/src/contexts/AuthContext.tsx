@@ -61,13 +61,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // tRPC mutations
+  // Get tRPC utils for manual query calls
+  const utils = trpc.useUtils();
+  
+  // tRPC mutations - use utils.client for safer access
   const loginMutation = trpc.auth.login.useMutation();
   const loginWithPasswordMutation = trpc.auth.loginWithPassword.useMutation();
   const logoutMutation = trpc.auth.logout.useMutation();
-  
-  // Get tRPC utils for manual query calls
-  const utils = trpc.useUtils();
 
   // Initialize auth state from localStorage on mount
   useEffect(() => {
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Validate the token by making an API call
           const result = await utils.auth.validateToken.fetch();
           
-          if (result) {
+          if (result && result.user) {
             // Token is valid, set auth state
             setUser(result.user);
             setRestaurants(result.restaurants);
@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             console.log('✅ Token validation successful - user authenticated');
           } else {
-            throw new Error('No result returned from token validation');
+            throw new Error('No user data returned from token validation');
           }
         } catch (validationError) {
           // Token is invalid or expired

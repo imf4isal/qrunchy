@@ -15,12 +15,14 @@ import RestaurantPhotoMenuManager from "@/pages/dashboard/RestaurantPhotoMenuMan
 import FoodCourtManager from "@/pages/dashboard/FoodCourtManager";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import HomeTest from "@/pages/test/HomeTest";
+import LandingPageTest from "@/pages/test/LandingPageTest";
 
 export default function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/test" component={HomeTest} />
+      <Route path="/test2" component={LandingPageTest} />
       <Route path="/trpc-test" component={Hello} />
       <Route path="/photo-menu" component={PhotoMenu} />
       <Route path="/digital-menu" component={DigitalMenu} />

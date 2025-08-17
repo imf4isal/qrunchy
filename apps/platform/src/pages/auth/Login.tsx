@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
 import OTPVerification from "@/components/OTPVerification";
+import TRPCTest from "@/components/TRPCTest";
 import { trpc } from "@/utils/trpc";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -18,10 +19,8 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loginMethod, setLoginMethod] = useState<"otp" | "password">("password");
   const [showOTPVerification, setShowOTPVerification] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithPassword } = useAuth();
 
-  // tRPC mutations
-  const loginWithPasswordMutation = trpc.auth.loginWithPassword.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,15 +40,8 @@ export default function Login() {
 
     try {
       if (loginMethod === "password") {
-        // Login with password
-        const result = await loginWithPasswordMutation.mutateAsync({
-          mobile_number: mobileNumber.trim(),
-          password: password.trim(),
-        });
-        
-        // Manually update auth context (since we're using a different login method)
-        await login(mobileNumber.trim());
-        
+        // Use AuthContext loginWithPassword method directly
+        await loginWithPassword(mobileNumber.trim(), password.trim());
         setLocation("/dashboard");
       } else {
         // OTP login - show OTP verification modal
@@ -78,6 +70,7 @@ export default function Login() {
     <MainLayout>
       <div className="min-h-[calc(100vh-200px)] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full">
+          <TRPCTest />
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gray-800 to-gray-600 text-white text-2xl font-bold rounded-xl mb-4">
               Q
