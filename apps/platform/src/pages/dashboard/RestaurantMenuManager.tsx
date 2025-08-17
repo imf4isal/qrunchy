@@ -11,6 +11,7 @@ import { trpc } from "@/utils/trpc";
 import ThemeSelector from "@/components/ThemeSelector";
 import QRCodeSection from "@/components/restaurant/QRCodeSection";
 import RestaurantSettings from "@/components/restaurant/RestaurantSettings";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function RestaurantMenuManager() {
@@ -30,6 +31,8 @@ export default function RestaurantMenuManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Keep track of the initial state to detect changes
   const initialMenuRef = useRef<DigitalMenu | null>(null);
@@ -231,11 +234,13 @@ export default function RestaurantMenuManager() {
     }
   };
 
-  const handleDeleteEntireMenu = async () => {
-    if (!confirm(
-      `Are you sure you want to delete the entire restaurant "${restaurant?.name}"? This action cannot be undone and will remove the restaurant from your dashboard along with all its digital menu data, photos, and QR codes.`
-    )) return;
+  const handleDeleteEntireMenu = () => {
+    setShowDeleteConfirm(true);
+  };
 
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    
     try {
       await updateRestaurantMutation.mutateAsync({ 
         id: restaurantId, 
@@ -245,14 +250,15 @@ export default function RestaurantMenuManager() {
       // Remove restaurant from context and localStorage
       deleteRestaurant(restaurantId);
       
-      alert('Restaurant deleted successfully!');
-      
       // Redirect to dashboard
       setLocation('/dashboard');
       
     } catch (error) {
       console.error('Delete restaurant error:', error);
       alert('Failed to delete restaurant');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -318,84 +324,49 @@ export default function RestaurantMenuManager() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            {/* Left section - Back button and title */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <Button variant="ghost" size="sm" asChild className="self-start">
-                <Link href="/dashboard">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Back to Dashboard</span>
-                  <span className="sm:hidden">Back</span>
-                </Link>
-              </Button>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
-                  Manage Menu - {restaurant.name}
+          <div className="flex items-center justify-between">
+            {/* Left section - Back arrow and restaurant name */}
+            <div className="flex items-center gap-3">
+              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {restaurant.name}
                 </h1>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  Edit your restaurant's digital menu
-                </p>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                  Digital Menu
+                </span>
               </div>
             </div>
             
             {/* Right section - Action buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowPreview(!showPreview)}
-                className="flex items-center justify-center gap-2 lg:hidden"
                 size="sm"
               >
                 <Eye className="w-4 h-4" />
-                {showPreview ? "Hide Preview" : "Show Preview"}
-              </Button>
-              
-              <Button
-                variant="outline"
-                onClick={() => setShowPreview(!showPreview)}
-                className="hidden lg:flex items-center gap-2"
-              >
-                <Eye className="w-4 h-4" />
-                {showPreview ? "Hide Preview" : "Show Preview"}
               </Button>
               
               <Button
                 onClick={handleSaveMenu}
                 disabled={isSaving || !hasUnsavedChanges}
-                className={`flex items-center justify-center gap-2 ${
+                className={`${
                   saveStatus === 'success' ? 'bg-green-600 hover:bg-green-700' :
                   saveStatus === 'error' ? 'bg-red-600 hover:bg-red-700' : ''
                 }`}
                 size="sm"
               >
                 {isSaving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="hidden sm:inline">Saving...</span>
-                    <span className="sm:hidden">Save</span>
-                  </>
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : saveStatus === 'success' ? (
-                  <>
-                    <CheckCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Saved!</span>
-                    <span className="sm:hidden">Saved</span>
-                  </>
+                  <CheckCircle className="w-4 h-4" />
                 ) : saveStatus === 'error' ? (
-                  <>
-                    <AlertCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Failed</span>
-                    <span className="sm:hidden">Error</span>
-                  </>
+                  <AlertCircle className="w-4 h-4" />
                 ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    <span className="hidden sm:inline">
-                      {hasUnsavedChanges ? 'Save Changes' : 'No Changes'}
-                    </span>
-                    <span className="sm:hidden">
-                      {hasUnsavedChanges ? 'Save' : 'Saved'}
-                    </span>
-                  </>
+                  <Save className="w-4 h-4" />
                 )}
               </Button>
               
@@ -403,11 +374,8 @@ export default function RestaurantMenuManager() {
                 variant="destructive"
                 onClick={handleDeleteEntireMenu}
                 size="sm"
-                className="flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Delete Menu</span>
-                <span className="sm:hidden">Delete</span>
               </Button>
             </div>
           </div>
@@ -481,6 +449,16 @@ export default function RestaurantMenuManager() {
           )}
         </div>
 
+        {/* Delete Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleConfirmDelete}
+          title="Delete Restaurant"
+          message={`Are you sure you want to delete "${restaurant?.name}"? This action cannot be undone and will remove the restaurant from your dashboard along with all its digital menu data, photos, and QR codes.`}
+          confirmText="Delete Restaurant"
+          isLoading={isDeleting}
+        />
       </div>
     </MainLayout>
   );

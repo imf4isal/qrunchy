@@ -603,7 +603,7 @@ export default function ItemEditor({
           </Card>
         </div>
 
-        <div className="flex items-center justify-end gap-2 p-6 border-t">
+        <div className="flex items-center justify-end gap-2 p-6 pb-8 border-t">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

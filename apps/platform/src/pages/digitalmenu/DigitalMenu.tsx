@@ -1,6 +1,6 @@
 // src/pages/digitalmenu/DigitalMenu.tsx
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, ArrowRight, Eye, Building2, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, Building2, RefreshCw, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,12 +10,25 @@ import QRGenerator from "./QRGenerator";
 import ThemeSetupSelector from "@/components/ThemeSetupSelector";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDigitalMenuSteps } from "./hooks/useDigitalMenuSteps";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 export default function DigitalMenu() {
   const { currentRestaurant, clearRestaurant } = useRestaurant();
   const { chains } = useAuth();
-  const [step, setStep] = useState<"setup" | "build" | "generate">("setup");
+  const {
+    step,
+    qrGenerated,
+    completedSteps,
+    handleNext,
+    handleBack,
+    handleQrGenerated,
+    getProgressWidth,
+    getStepDescription,
+    setStep,
+    setQrGenerated,
+    setCompletedSteps,
+  } = useDigitalMenuSteps();
   const [selectedChain, setSelectedChain] = useState<number | null>((currentRestaurant as any)?.group_res_id || null);
   const [menu, setMenu] = useState<DigitalMenu>({
     restaurantName: currentRestaurant?.name || "",
@@ -24,7 +37,7 @@ export default function DigitalMenu() {
   });
   const [selectedTheme, setSelectedTheme] = useState<"minimal" | "modern">("minimal");
   const [showPreview, setShowPreview] = useState(false);
-  const [qrGenerated, setQrGenerated] = useState(false);
+  const [restaurantImage, setRestaurantImage] = useState<File | null>(null);
   const [hasDraft, setHasDraft] = useState(false);
 
   // Save draft to localStorage whenever any form data changes
@@ -95,22 +108,6 @@ export default function DigitalMenu() {
     }
   }, [currentRestaurant]);
 
-  const handleNext = () => {
-    if (step === "setup") {
-      setStep("build");
-    } else if (step === "build") {
-      setStep("generate");
-    }
-  };
-
-  const handleBack = () => {
-    if (step === "build") {
-      setStep("setup");
-    } else if (step === "generate") {
-      setStep("build");
-      setQrGenerated(false);
-    }
-  };
 
   const handleRestaurantNameChange = (name: string) => {
     setMenu((prev) => ({ ...prev, restaurantName: name }));
@@ -123,10 +120,6 @@ export default function DigitalMenu() {
   const handleItemsChange = useCallback((items: MenuItem[]) => {
     setMenu((prev) => ({ ...prev, items }));
   }, []);
-
-  const handleQrGenerated = () => {
-    setQrGenerated(true);
-  };
 
   const handleStartFresh = () => {
     // Clear restaurant context
@@ -142,10 +135,55 @@ export default function DigitalMenu() {
     setSelectedTheme("minimal");
     setSelectedChain(null);
     setQrGenerated(false);
+    setCompletedSteps(new Set());
     setHasDraft(false);
     
     // Clear draft from localStorage
     localStorage.removeItem('qrunchy_menu_draft');
+  };
+
+  const getStepState = (stepKey: string) => {
+    if (stepKey === "qr") {
+      return qrGenerated ? "completed" : step === "generate" ? "current" : "inactive";
+    }
+    
+    // For regular steps, check if completed first
+    if (completedSteps.has(stepKey as any)) {
+      return "completed";
+    }
+    
+    // Then check if it's the current step
+    if (step === stepKey) {
+      return "current";
+    }
+    
+    // Otherwise it's inactive
+    return "inactive";
+  };
+
+  const [dragActive, setDragActive] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        setRestaurantImage(file);
+      }
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        setRestaurantImage(file);
+      }
+    }
   };
 
   return (
@@ -196,14 +234,7 @@ export default function DigitalMenu() {
               <div
                 className="absolute left-5 top-7 h-1 bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
                 style={{
-                  width:
-                    step === "setup"
-                      ? "0%"
-                      : step === "build"
-                        ? "50%"
-                        : qrGenerated
-                          ? "calc(100% - 25px)"
-                          : "67%",
+                  width: getProgressWidth(),
                   maxWidth: "calc(100% - 25px)",
                 }}
               ></div>
@@ -214,14 +245,14 @@ export default function DigitalMenu() {
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
                       ${
-                        step === "setup"
+                        getStepState("setup") === "current"
                           ? "border-blue-500 bg-white text-blue-500"
-                          : step === "build" || step === "generate"
+                          : getStepState("setup") === "completed"
                             ? "border-blue-500 bg-blue-500 text-white"
                             : "border-gray-200 bg-white text-gray-400"
                       }`}
                   >
-                    {step === "build" || step === "generate" ? (
+                    {getStepState("setup") === "completed" ? (
                       <svg
                         className="h-6 w-6"
                         fill="none"
@@ -253,9 +284,7 @@ export default function DigitalMenu() {
                   </div>
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300 ${
-                      step === "setup" ||
-                      step === "build" ||
-                      step === "generate"
+                      getStepState("setup") === "current" || getStepState("setup") === "completed"
                         ? "text-blue-600"
                         : "text-gray-500"
                     }`}
@@ -269,14 +298,14 @@ export default function DigitalMenu() {
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
                       ${
-                        step === "build"
+                        getStepState("build") === "current"
                           ? "border-blue-500 bg-white text-blue-500"
-                          : step === "generate"
+                          : getStepState("build") === "completed"
                             ? "border-blue-500 bg-blue-500 text-white"
                             : "border-gray-200 bg-white text-gray-400"
                       }`}
                   >
-                    {step === "generate" ? (
+                    {getStepState("build") === "completed" ? (
                       <svg
                         className="h-6 w-6"
                         fill="none"
@@ -308,7 +337,7 @@ export default function DigitalMenu() {
                   </div>
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300 ${
-                      step === "build" || step === "generate"
+                      getStepState("build") === "current" || getStepState("build") === "completed"
                         ? "text-blue-600"
                         : "text-gray-500"
                     }`}
@@ -322,14 +351,14 @@ export default function DigitalMenu() {
                   <div
                     className={`flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300
                       ${
-                        qrGenerated
+                        getStepState("qr") === "completed"
                           ? "border-blue-500 bg-blue-500 text-white"
-                          : step === "generate"
+                          : getStepState("qr") === "current"
                             ? "border-blue-500 bg-white text-blue-500"
                             : "border-gray-200 bg-white text-gray-400"
                       }`}
                   >
-                    {qrGenerated ? (
+                    {getStepState("qr") === "completed" ? (
                       <svg
                         className="h-6 w-6"
                         fill="none"
@@ -361,7 +390,9 @@ export default function DigitalMenu() {
                   </div>
                   <span
                     className={`font-medium text-sm mt-3 transition-colors duration-300 ${
-                      step === "generate" ? "text-blue-600" : "text-gray-500"
+                      getStepState("qr") === "current" || getStepState("qr") === "completed"
+                        ? "text-blue-600"
+                        : "text-gray-500"
                     }`}
                   >
                     QR Code
@@ -373,13 +404,7 @@ export default function DigitalMenu() {
             {/* Step Description */}
             <div className="mt-6 text-center">
               <p className="text-gray-600 text-sm">
-                {step === "setup"
-                  ? "Just tell us your restaurant name to get started"
-                  : step === "build"
-                    ? "Choose your theme and build your menu - add categories, items, variants and add-ons"
-                    : qrGenerated
-                      ? "Your QR code is ready! Share it with customers"
-                      : "Ready to go live? Create your account and generate QR code"}
+                {getStepDescription()}
               </p>
             </div>
           </div>
@@ -413,6 +438,61 @@ export default function DigitalMenu() {
                           }
                           className="w-full text-lg py-3"
                         />
+                      </div>
+
+                      {/* Restaurant Image */}
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Restaurant Image (Optional)
+                        </Label>
+                        <p className="text-xs text-gray-500 mb-3">
+                          Upload a logo or image that represents your restaurant. This will be displayed on your menu.
+                        </p>
+                        
+                        {!restaurantImage ? (
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                              dragActive 
+                                ? 'border-blue-500 bg-blue-50' 
+                                : 'border-gray-300 hover:border-gray-400'
+                            }`}
+                            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                            onDragLeave={() => setDragActive(false)}
+                            onDrop={handleDrop}
+                          >
+                            <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-600 mb-2">
+                              Drag and drop an image here, or click to select
+                            </p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileSelect}
+                              className="hidden"
+                              id="restaurant-image-upload-digital"
+                            />
+                            <label
+                              htmlFor="restaurant-image-upload-digital"
+                              className="inline-block px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 cursor-pointer"
+                            >
+                              Choose Image
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="relative inline-block">
+                            <img
+                              src={URL.createObjectURL(restaurantImage)}
+                              alt="Restaurant"
+                              className="w-32 h-32 object-cover rounded-lg border"
+                            />
+                            <button
+                              onClick={() => setRestaurantImage(null)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {chains && chains.length > 0 && (

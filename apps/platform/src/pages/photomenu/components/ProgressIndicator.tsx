@@ -11,6 +11,7 @@ interface StepConfig {
 interface ProgressIndicatorProps {
     step: Step;
     qrGenerated: boolean;
+    completedSteps: Set<Step>;
     progressWidth: string;
     description: string;
 }
@@ -103,6 +104,7 @@ const QRIcon = () => (
 export default function ProgressIndicator({
                                               step,
                                               qrGenerated,
+                                              completedSteps,
                                               progressWidth,
                                               description,
                                           }: ProgressIndicatorProps) {
@@ -134,23 +136,21 @@ export default function ProgressIndicator({
     ];
 
     const getStepState = (stepKey: string) => {
-        if (stepKey === "setup") {
-            return step === "setup"
-                ? "current"
-                : step === "upload" || step === "sort" || step === "generate"
-                    ? "completed"
-                    : "inactive";
-        } else if (stepKey === "upload") {
-            return step === "upload"
-                ? "current"
-                : step === "sort" || step === "generate"
-                    ? "completed"
-                    : "inactive";
-        } else if (stepKey === "sort") {
-            return step === "sort" ? "current" : step === "generate" ? "completed" : "inactive";
-        } else if (stepKey === "qr") {
+        if (stepKey === "qr") {
             return qrGenerated ? "completed" : step === "generate" ? "current" : "inactive";
         }
+        
+        // For regular steps, check if completed first
+        if (completedSteps.has(stepKey as Step)) {
+            return "completed";
+        }
+        
+        // Then check if it's the current step
+        if (step === stepKey) {
+            return "current";
+        }
+        
+        // Otherwise it's inactive
         return "inactive";
     };
 

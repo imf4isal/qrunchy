@@ -32,25 +32,17 @@ export default function PhotoMenuHeader({ restaurant, onShare }: PhotoMenuHeader
         </div>
 
         <div className="px-4 py-4 bg-white">
-          <h1 className="text-xl font-semibold text-slate-900 mb-3 tracking-tight">
-            {restaurant.name}
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+              {restaurant.name}
+            </h1>
 
-          <div className="flex flex-col gap-2">
             {restaurant.address && (
               <div className="flex items-center gap-2 text-slate-600">
-                <div className="w-6 h-6 bg-slate-100 rounded-md flex items-center justify-center flex-shrink-0">
-                  <MapPin size={14} className="text-slate-500" />
+                <div className="w-5 h-5 bg-slate-100 rounded-md flex items-center justify-center flex-shrink-0">
+                  <MapPin size={12} className="text-slate-500" />
                 </div>
                 <span className="text-xs leading-relaxed">{restaurant.address}</span>
-              </div>
-            )}
-            {restaurant.phone && (
-              <div className="flex items-center gap-2 text-slate-600">
-                <div className="w-6 h-6 bg-slate-100 rounded-md flex items-center justify-center flex-shrink-0">
-                  <Phone size={14} className="text-slate-500" />
-                </div>
-                <span className="text-xs">{restaurant.phone}</span>
               </div>
             )}
           </div>

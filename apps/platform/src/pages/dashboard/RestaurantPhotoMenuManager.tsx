@@ -7,7 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
 import QRCodeSection from "@/components/restaurant/QRCodeSection";
 import RestaurantSettings from "@/components/restaurant/RestaurantSettings";
-import { ArrowLeft, Upload, Trash2, GripVertical, Eye } from "lucide-react";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
+import { ArrowLeft, Upload, Trash2, GripVertical, Eye, Save } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -36,6 +37,8 @@ export default function RestaurantPhotoMenuManager() {
   const [images, setImages] = useState<any[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Get restaurant info
   const restaurant = restaurants.find(r => r.id === restaurantId);
@@ -192,11 +195,13 @@ export default function RestaurantPhotoMenuManager() {
     }
   };
 
-  const handleDeleteEntireMenu = async () => {
-    if (!confirm(
-      `Are you sure you want to delete the entire restaurant "${restaurant?.name}"? This action cannot be undone and will remove the restaurant from your dashboard along with all its photo menu data and QR codes.`
-    )) return;
+  const handleDeleteEntireMenu = () => {
+    setShowDeleteConfirm(true);
+  };
 
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    
     try {
       // First delete all photo menu entries for this restaurant
       await deleteAllMutation.mutateAsync({ 
@@ -212,14 +217,15 @@ export default function RestaurantPhotoMenuManager() {
       // Remove restaurant from context and localStorage
       deleteRestaurant(restaurantId);
       
-      alert('Restaurant deleted successfully!');
-      
       // Redirect to dashboard
       setLocation('/dashboard');
       
     } catch (error) {
       console.error('Delete restaurant error:', error);
       alert('Failed to delete restaurant');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -293,30 +299,37 @@ export default function RestaurantPhotoMenuManager() {
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={() => setLocation("/dashboard")}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Photo Menu Management
-              </h1>
-              <p className="text-gray-600">{restaurant.name}</p>
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            {/* Left section - Back arrow and restaurant name */}
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setLocation("/dashboard")} 
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {restaurant.name}
+                </h1>
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                  Photo Menu
+                </span>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex gap-2">
-            {hasUnsavedChanges && (
-              <Button onClick={handleSaveSortOrder}>
-                Save Order
+            
+            {/* Right section - Action buttons */}
+            <div className="flex items-center gap-2">
+              {hasUnsavedChanges && (
+                <Button onClick={handleSaveSortOrder} size="sm">
+                  <Save className="w-4 h-4" />
+                </Button>
+              )}
+              <Button onClick={handleDeleteEntireMenu} variant="destructive" size="sm">
+                <Trash2 className="w-4 h-4" />
               </Button>
-            )}
-            <Button onClick={handleDeleteEntireMenu} variant="destructive">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Menu
-            </Button>
+            </div>
           </div>
         </div>
 
@@ -414,6 +427,17 @@ export default function RestaurantPhotoMenuManager() {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleConfirmDelete}
+          title="Delete Restaurant"
+          message={`Are you sure you want to delete "${restaurant?.name}"? This action cannot be undone and will remove the restaurant from your dashboard along with all its photo menu data and QR codes.`}
+          confirmText="Delete Restaurant"
+          isLoading={isDeleting}
+        />
       </div>
     </MainLayout>
   );

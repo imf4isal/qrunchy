@@ -24,7 +24,7 @@ export default function Home() {
           {/* Main heading */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight text-gray-900 mb-6 max-w-5xl">
             Digital Menus
-            <span className="block font-medium bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="block font-medium bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent pb-2">
               Reimagined
             </span>
           </h1>
@@ -39,7 +39,7 @@ export default function Home() {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 mb-16 cta-buttons">
             <Button
               asChild
               className="group relative bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-0"
@@ -62,7 +62,6 @@ export default function Home() {
                   </svg>
                 </div>
                 Photo Menu
-                <div className="w-1 h-1 bg-white/60 rounded-full group-hover:w-2 transition-all duration-300"></div>
               </Link>
             </Button>
 
@@ -89,13 +88,18 @@ export default function Home() {
                   </svg>
                 </div>
                 Digital Menu
-                <div className="w-1 h-1 bg-gray-400 rounded-full group-hover:w-2 transition-all duration-300"></div>
               </Link>
             </Button>
           </div>
 
           {/* Visual indicator */}
-          <div className="animate-bounce">
+          <button 
+            onClick={() => {
+              const featuresSection = document.querySelector('.features-section');
+              featuresSection?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="animate-bounce hover:text-gray-600 transition-colors duration-300 cursor-pointer"
+          >
             <svg
               className="w-6 h-6 text-gray-400"
               fill="none"
@@ -109,12 +113,12 @@ export default function Home() {
                 d="M19 14l-7 7m0 0l-7-7m7 7V3"
               />
             </svg>
-          </div>
+          </button>
         </div>
       </div>
 
       {/* Features Section - Minimal Grid */}
-      <div className="py-24 bg-white">
+      <div className="py-24 bg-white features-section">
         <div className="container mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-4">
@@ -218,11 +222,14 @@ export default function Home() {
             customer experience.
           </p>
           <Button
-            asChild
-            className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+            onClick={() => {
+              const ctaButtons = document.querySelector('.cta-buttons');
+              ctaButtons?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}
+            className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer"
             size="lg"
           >
-            <Link href="/photo-menu">Start Free Today</Link>
+            Start Free Today
           </Button>
         </div>
       </div>

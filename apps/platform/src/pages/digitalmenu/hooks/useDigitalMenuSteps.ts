@@ -1,44 +1,34 @@
 import { useState } from "react";
 
-export type Step = "setup" | "upload" | "sort" | "generate";
+export type DigitalMenuStep = "setup" | "build" | "generate";
 
-export function usePhotoMenuSteps() {
-    const [step, setStep] = useState<Step>("setup");
+export function useDigitalMenuSteps() {
+    const [step, setStep] = useState<DigitalMenuStep>("setup");
     const [qrGenerated, setQrGenerated] = useState(false);
-    const [completedSteps, setCompletedSteps] = useState<Set<Step>>(new Set());
+    const [completedSteps, setCompletedSteps] = useState<Set<DigitalMenuStep>>(new Set());
 
     const handleNext = () => {
         // Mark current step as completed before moving to next
         setCompletedSteps(prev => new Set([...prev, step]));
         
         if (step === "setup") {
-            setStep("upload");
-        } else if (step === "upload") {
-            setStep("sort");
-        } else if (step === "sort") {
+            setStep("build");
+        } else if (step === "build") {
             setStep("generate");
         }
     };
 
     const handleBack = () => {
-        if (step === "upload") {
+        if (step === "build") {
             setStep("setup");
-            // Remove upload from completed steps when going back
+            // Remove build from completed steps when going back
             setCompletedSteps(prev => {
                 const newSet = new Set(prev);
-                newSet.delete("upload");
-                return newSet;
-            });
-        } else if (step === "sort") {
-            setStep("upload");
-            // Remove sort from completed steps when going back
-            setCompletedSteps(prev => {
-                const newSet = new Set(prev);
-                newSet.delete("sort");
+                newSet.delete("build");
                 return newSet;
             });
         } else if (step === "generate") {
-            setStep("sort");
+            setStep("build");
             // reset qr generation state when going back from a generate step
             setQrGenerated(false);
             // Remove generate from completed steps when going back
@@ -56,24 +46,21 @@ export function usePhotoMenuSteps() {
 
     const getProgressWidth = () => {
         if (step === "setup") return "0%";
-        if (step === "upload") return "25%";
-        if (step === "sort") return "50%";
+        if (step === "build") return "50%";
         if (qrGenerated) return "calc(100% - 25px)";
-        return "75%";
+        return "67%";
     };
 
     const getStepDescription = () => {
         switch (step) {
             case "setup":
-                return "Enter basic information about your restaurant";
-            case "upload":
-                return "Upload photos of your menu - you can add multiple pages";
-            case "sort":
-                return "Drag and drop to arrange your menu in the correct order";
+                return "Just tell us your restaurant name to get started";
+            case "build":
+                return "Choose your theme and build your menu - add categories, items, variants and add-ons";
             case "generate":
                 return qrGenerated
-                    ? "Your QR code is ready to share with customers"
-                    : "Generate your QR code and make it available to customers";
+                    ? "Your QR code is ready! Share it with customers"
+                    : "Ready to go live? Create your account and generate QR code";
             default:
                 return "";
         }
@@ -88,5 +75,8 @@ export function usePhotoMenuSteps() {
         handleQrGenerated,
         getProgressWidth,
         getStepDescription,
+        setStep,
+        setQrGenerated,
+        setCompletedSteps,
     };
 }

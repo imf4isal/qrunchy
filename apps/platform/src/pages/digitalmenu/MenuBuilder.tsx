@@ -1106,6 +1106,15 @@ export default function MenuBuilder({
           >
             <GripVertical size={14} className="text-gray-400" />
           </div>
+          {item.image_url && (
+            <div className="w-8 h-8 rounded overflow-hidden bg-gray-100 flex-shrink-0">
+              <img 
+                src={item.image_url} 
+                alt={item.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
           <div className="flex-1">
             <div className="font-medium">
               {item.name || "Untitled Item"}
