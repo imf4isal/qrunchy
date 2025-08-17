@@ -138,6 +138,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
             price: item.price,
             description: item.description || "",
             categoryName: menu.categories.find(cat => cat.id === item.categoryId)?.name || "Uncategorized",
+            image_url: item.image_url, // Include image URL in backend payload
             variants: item.variants.map(variant => ({
               title: variant.title,
               options: variant.options.map(option => ({

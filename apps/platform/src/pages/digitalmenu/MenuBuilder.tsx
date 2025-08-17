@@ -478,6 +478,7 @@ export default function MenuBuilder({
               description: item.description || "",
               categoryId: category?.id || categories[0]?.id || crypto.randomUUID(),
               sort_order: index,
+              image_url: item.image_url, // Preserve image URL from JSON
               variants: item.variants.map((variant: any) => ({
                 id: crypto.randomUUID(),
                 title: variant.title,
@@ -588,7 +589,7 @@ export default function MenuBuilder({
           price: 12.99,
           description: "Crispy chicken wings with your choice of sauce",
           categoryName: "Appetizers",
-          image_url: "https://example.com/images/chicken-wings.jpg",
+          image_url: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=1610&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           variants: [
             {
               title: "Size",
@@ -612,11 +613,51 @@ export default function MenuBuilder({
           ],
         },
         {
+          name: "Mozzarella Sticks",
+          price: 9.99,
+          description: "Golden fried mozzarella with marinara sauce",
+          categoryName: "Appetizers",
+          image_url: "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          variants: [
+            {
+              title: "Size",
+              options: [
+                { name: "6 pieces", price: 9.99 },
+                { name: "10 pieces", price: 14.99 },
+              ],
+            },
+          ],
+          addons: [
+            { name: "Extra Marinara", price: 0.5 },
+            { name: "Ranch Dip", price: 0.75 },
+          ],
+        },
+        {
+          name: "Caesar Salad",
+          price: 11.99,
+          description: "Fresh romaine lettuce with classic Caesar dressing",
+          categoryName: "Appetizers",
+          image_url: "https://plus.unsplash.com/premium_photo-1675252369719-dd52bc69c3df?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          variants: [
+            {
+              title: "Size",
+              options: [
+                { name: "Regular", price: 11.99 },
+                { name: "Large", price: 15.99 },
+              ],
+            },
+          ],
+          addons: [
+            { name: "Grilled Chicken", price: 4.0 },
+            { name: "Extra Parmesan", price: 1.5 },
+          ],
+        },
+        {
           name: "Grilled Salmon",
           price: 24.99,
           description: "Fresh Atlantic salmon with seasonal vegetables",
           categoryName: "Main Course",
-          image_url: "https://example.com/images/grilled-salmon.jpg",
+          image_url: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=1610&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           variants: [
             {
               title: "Cooking Style",
@@ -632,19 +673,83 @@ export default function MenuBuilder({
           ],
         },
         {
+          name: "Ribeye Steak",
+          price: 32.99,
+          description: "12oz premium ribeye cooked to perfection",
+          categoryName: "Main Course",
+          image_url: "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          variants: [
+            {
+              title: "Temperature",
+              options: [
+                { name: "Rare", price: 0 },
+                { name: "Medium Rare", price: 0 },
+                { name: "Medium", price: 0 },
+                { name: "Well Done", price: 0 },
+              ],
+            },
+          ],
+          addons: [
+            { name: "Mushroom Sauce", price: 3.5 },
+            { name: "Side Salad", price: 4.0 },
+          ],
+        },
+        {
+          name: "Chicken Alfredo",
+          price: 18.99,
+          description: "Creamy alfredo pasta with grilled chicken",
+          categoryName: "Main Course",
+          image_url: "https://plus.unsplash.com/premium_photo-1675252369719-dd52bc69c3df?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          variants: [
+            {
+              title: "Pasta Type",
+              options: [
+                { name: "Fettuccine", price: 0 },
+                { name: "Penne", price: 0 },
+                { name: "Linguine", price: 1.0 },
+              ],
+            },
+          ],
+          addons: [
+            { name: "Extra Chicken", price: 5.0 },
+            { name: "Garlic Bread", price: 2.5 },
+          ],
+        },
+        {
           name: "Chocolate Cake",
           price: 8.99,
           description: "Rich chocolate cake with vanilla ice cream",
           categoryName: "Desserts",
+          image_url: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=1610&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           variants: [],
           addons: [{ name: "Extra Ice Cream", price: 2.0 }],
+        },
+        {
+          name: "Cheesecake",
+          price: 7.99,
+          description: "Classic New York style cheesecake with berry compote",
+          categoryName: "Desserts",
+          image_url: "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          variants: [
+            {
+              title: "Topping",
+              options: [
+                { name: "Strawberry", price: 0 },
+                { name: "Blueberry", price: 0 },
+                { name: "Chocolate Drizzle", price: 1.0 },
+              ],
+            },
+          ],
+          addons: [
+            { name: "Whipped Cream", price: 1.0 },
+          ],
         },
         {
           name: "Fresh Juice",
           price: 4.99,
           description: "Freshly squeezed fruit juice",
           categoryName: "Beverages",
-          image_url: "https://example.com/images/fresh-juice.jpg",
+          image_url: "https://plus.unsplash.com/premium_photo-1675252369719-dd52bc69c3df?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           variants: [
             {
               title: "Flavor",
@@ -663,6 +768,64 @@ export default function MenuBuilder({
             },
           ],
           addons: [],
+        },
+        {
+          name: "Specialty Coffee",
+          price: 3.99,
+          description: "Premium coffee blends and specialty drinks",
+          categoryName: "Beverages",
+          image_url: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=1610&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          variants: [
+            {
+              title: "Type",
+              options: [
+                { name: "Espresso", price: 3.99 },
+                { name: "Cappuccino", price: 4.99 },
+                { name: "Latte", price: 5.49 },
+                { name: "Americano", price: 3.99 },
+              ],
+            },
+            {
+              title: "Size",
+              options: [
+                { name: "Small", price: 0 },
+                { name: "Medium", price: 0.75 },
+                { name: "Large", price: 1.25 },
+              ],
+            },
+          ],
+          addons: [
+            { name: "Extra Shot", price: 1.0 },
+            { name: "Oat Milk", price: 0.5 },
+          ],
+        },
+        {
+          name: "Soft Drinks",
+          price: 2.99,
+          description: "Refreshing carbonated beverages",
+          categoryName: "Beverages",
+          image_url: "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          variants: [
+            {
+              title: "Flavor",
+              options: [
+                { name: "Coca Cola", price: 0 },
+                { name: "Pepsi", price: 0 },
+                { name: "Sprite", price: 0 },
+                { name: "Orange Fanta", price: 0 },
+              ],
+            },
+            {
+              title: "Size",
+              options: [
+                { name: "Regular", price: 2.99 },
+                { name: "Large", price: 3.99 },
+              ],
+            },
+          ],
+          addons: [
+            { name: "Extra Ice", price: 0 },
+          ],
         },
       ],
     };
