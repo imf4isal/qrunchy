@@ -6,8 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
 import OTPVerification from "@/components/OTPVerification";
-import TRPCTest from "@/components/TRPCTest";
-import { trpc } from "@/utils/trpc";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
@@ -70,7 +68,6 @@ export default function Login() {
     <MainLayout>
       <div className="min-h-[calc(100vh-200px)] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full">
-          <TRPCTest />
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gray-800 to-gray-600 text-white text-2xl font-bold rounded-xl mb-4">
               Q
@@ -216,10 +213,8 @@ export default function Login() {
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
                   Don't have an account?{" "}
-                  <Link href="/digital-menu">
-                    <a className="font-medium text-blue-600 hover:text-blue-500">
-                      Create your first menu
-                    </a>
+                  <Link href="/digital-menu" className="font-medium text-blue-600 hover:text-blue-500">
+                    Create your first menu
                   </Link>
                 </p>
               </div>
