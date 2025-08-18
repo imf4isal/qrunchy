@@ -84,9 +84,9 @@ export const FAQ: React.FC = () => {
   const [openItems, setOpenItems] = useState<Record<number, boolean>>({});
 
   const toggleItem = (index: number) => {
-    setOpenItems(prev => ({
+    setOpenItems((prev) => ({
       ...prev,
-      [index]: !prev[index]
+      [index]: !prev[index],
     }));
   };
 
@@ -128,15 +128,13 @@ export const FAQ: React.FC = () => {
                   }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-3 text-neutral-400">
-                    {f.a}
-                  </div>
+                  <div className="pt-3 text-neutral-400">{f.a}</div>
                 </motion.div>
               </div>
             </div>
           ))}
         </div>
-        
+
         {/* Right Column */}
         <div className="flex-1 space-y-6">
           {faqs.slice(Math.ceil(faqs.length / 2)).map((f, i) => {
@@ -174,9 +172,7 @@ export const FAQ: React.FC = () => {
                     }}
                     className="overflow-hidden"
                   >
-                    <div className="pt-3 text-neutral-400">
-                      {f.a}
-                    </div>
+                    <div className="pt-3 text-neutral-400">{f.a}</div>
                   </motion.div>
                 </div>
               </div>

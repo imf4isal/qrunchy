@@ -5,12 +5,11 @@ import {
   Workflows,
   QRDistribution,
   StructuredPower,
-  SocialProof,
   FAQ,
   Navbar,
   Footer,
   FinalCTA,
-} from "./landing-page-components";
+} from "./components";
 
 // -------------------------------
 // Main Page
@@ -35,7 +34,6 @@ export default function LandingPageTest() {
       <QRDistribution />
       <RestaurantChainAndFoodCourtExperience />
       <StructuredPower />
-      <SocialProof />
       <FAQ />
       <FinalCTA onCTAClick={onCTAClick} />
       <Footer />

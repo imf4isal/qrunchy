@@ -11,7 +11,6 @@ export { Hero } from "./Hero";
 export { Workflows } from "./Workflows";
 export { QRDistribution } from "./QRDistribution";
 export { StructuredPower } from "./StructuredPower";
-export { SocialProof } from "./SocialProof";
 export { FAQ } from "./FAQ";
 
 // Layout components

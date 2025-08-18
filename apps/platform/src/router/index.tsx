@@ -15,7 +15,7 @@ import RestaurantPhotoMenuManager from "@/pages/dashboard/RestaurantPhotoMenuMan
 import FoodCourtManager from "@/pages/dashboard/FoodCourtManager";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import HomeTest from "@/pages/test/HomeTest";
-import LandingPageTest from "@/pages/test/LandingPageTest";
+import LandingPageTest from "@/pages/landing";
 import MenuDemo from "@/pages/demo/MenuDemo";
 import DummyDigitalMenu from "@/pages/demo/DummyDigitalMenu";
 
@@ -25,12 +25,8 @@ export default function Router() {
       <Route path="/" component={Home} />
       <Route path="/test" component={HomeTest} />
       <Route path="/test2" component={LandingPageTest} />
-      <Route path="/demo/:restaurantName">
-        {(params) => <MenuDemo />}
-      </Route>
-      <Route path="/d/:name">
-        {(params) => <DummyDigitalMenu />}
-      </Route>
+      <Route path="/demo/:restaurantName">{(params) => <MenuDemo />}</Route>
+      <Route path="/d/:name">{(params) => <DummyDigitalMenu />}</Route>
       <Route path="/trpc-test" component={Hello} />
       <Route path="/photo-menu" component={PhotoMenu} />
       <Route path="/digital-menu" component={DigitalMenu} />
@@ -38,37 +34,37 @@ export default function Router() {
       <Route path="/about" component={About} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/contact" component={Contact} />
-      
+
       {/* Protected Routes */}
       <Route path="/dashboard">
         <ProtectedRoute>
           <Dashboard />
         </ProtectedRoute>
       </Route>
-      
+
       <Route path="/dashboard/restaurant/:id/menu">
         <ProtectedRoute>
           <RestaurantMenuManager />
         </ProtectedRoute>
       </Route>
-      
+
       <Route path="/dashboard/restaurant/:id/photomenu">
         <ProtectedRoute>
           <RestaurantPhotoMenuManager />
         </ProtectedRoute>
       </Route>
-      
+
       <Route path="/dashboard/foodcourt/:id">
         <ProtectedRoute>
           <FoodCourtManager />
         </ProtectedRoute>
       </Route>
-      
+
       {/* Customer Menu Route (Public) */}
       <Route path="/menu/:qrCode">
         {(params) => <MenuHandler qrCode={params.qrCode} />}
       </Route>
-      
+
       <Route component={NotFound} />
     </Switch>
   );
