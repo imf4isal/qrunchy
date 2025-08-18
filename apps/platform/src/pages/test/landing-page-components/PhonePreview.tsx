@@ -49,7 +49,7 @@ export const PhonePreview: React.FC<{
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className={`aspect-square rounded-lg ${
+                  className={`aspect-[4/3] rounded-lg ${
                     dark ? "bg-neutral-800" : "bg-neutral-200"
                   }`}
                 />
