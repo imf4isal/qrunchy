@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import MainLayout from "@/components/layout/MainLayout";
+import QRCodeDisplay from "@/components/QRCodeDisplay";
 
 interface RestaurantSearchResult {
   id: number;
@@ -196,6 +197,28 @@ export default function FoodCourtManager() {
       await generateQrMutation.mutateAsync({ food_court_id: foodCourtId });
     } catch (error: any) {
       alert(`Error generating QR code: ${error.message}`);
+    }
+  };
+
+  const handleDownloadQR = async () => {
+    if (currentQrData?.menu_url && foodCourt?.name) {
+      try {
+        const canvas = document.createElement('canvas');
+        await import('qrcode').then(QRCode => {
+          QRCode.default.toCanvas(canvas, currentQrData.menu_url, {
+            width: 400,
+            margin: 2,
+          });
+        });
+        
+        const link = document.createElement('a');
+        link.download = `${foodCourt.name}-qr-code.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      } catch (error) {
+        console.error('Error downloading QR code:', error);
+        alert('Failed to download QR code');
+      }
     }
   };
 
@@ -448,6 +471,17 @@ export default function FoodCourtManager() {
                     </Button>
                   ) : (
                     <div className="space-y-4">
+                      {/* QR Code Visual Display */}
+                      <div className="flex justify-center">
+                        <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                          <QRCodeDisplay 
+                            value={currentQrData.menu_url} 
+                            size={120}
+                            className="rounded"
+                          />
+                        </div>
+                      </div>
+                      
                       <div className="space-y-2">
                         <div>
                           <div className="text-xs text-gray-500 mb-1">Code</div>
@@ -471,7 +505,7 @@ export default function FoodCourtManager() {
                         <div>
                           <div className="text-xs text-gray-500 mb-1">URL</div>
                           <div className="bg-gray-50 p-2 rounded text-xs font-mono break-all text-gray-600">
-                            {`/menu/${currentQrData.qr_code}`}
+                            {currentQrData.menu_url}
                           </div>
                         </div>
                       </div>
@@ -487,10 +521,10 @@ export default function FoodCourtManager() {
                         <Button 
                           variant="outline" 
                           className="w-full"
-                          onClick={() => navigator.clipboard.writeText(`${window.location.origin}/menu/${currentQrData.qr_code}`)}
+                          onClick={handleDownloadQR}
                         >
                           <Download className="w-4 h-4 mr-2" />
-                          Copy URL
+                          Download QR Code
                         </Button>
                       </div>
                     </div>
