@@ -39,7 +39,7 @@ export const Hero: React.FC<{
         : "demo-restaurant",
     [restaurantName]
   );
-  const demoUrl = `qrunchy.menu/${short}`;
+  const demoUrl = `qrunchy.menu/d/${short}`;
 
   const copyUrl = async () => {
     try {
@@ -266,21 +266,24 @@ export const Hero: React.FC<{
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="absolute -bottom-6 left-1/2 w-[340px] max-w-[90vw] -translate-x-1/2 rounded-2xl border border-neutral-700/80 bg-neutral-900/90 backdrop-blur-lg p-5 shadow-2xl"
               >
-                <div className="flex items-start gap-4">
-                  <div className="relative">
+                <div className="flex items-start gap-4 justify-center">
+                  <div className="relative flex flex-col items-center">
                     <RealQRCode
                       text={demoUrl}
                       size={85}
                       className="shrink-0 rounded-lg border border-neutral-700/50"
                     />
-                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500 border-2 border-neutral-900 animate-pulse"></div>
+                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-neutral-400 border-2 border-neutral-900 animate-pulse"></div>
+                    <div className="mt-2 text-[10px] text-neutral-400 font-mono tracking-widest">
+                      SCAN
+                    </div>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">
                         Live Demo
                       </div>
-                      <Sparkles className="h-3 w-3 text-yellow-400" />
+                      <Sparkles className="h-3 w-3 text-neutral-400" />
                     </div>
                     <div className="flex items-center gap-2 mb-3">
                       <div className="font-semibold text-neutral-100 truncate font-mono text-sm tracking-tight flex-1">
@@ -292,7 +295,7 @@ export const Hero: React.FC<{
                         title="Copy URL"
                       >
                         {copied ? (
-                          <Check className="h-3 w-3 text-green-400" />
+                          <Check className="h-3 w-3 text-neutral-300" />
                         ) : (
                           <Copy className="h-3 w-3" />
                         )}
@@ -308,10 +311,7 @@ export const Hero: React.FC<{
                         className="w-full rounded-lg border border-neutral-700 bg-neutral-800/50 px-3 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-neutral-600 transition-all duration-200 hover:border-neutral-600"
                       />
                       <div className="flex items-center justify-between text-xs text-neutral-500">
-                        <span>✨ Your URL updates instantly</span>
-                        {copied && (
-                          <span className="text-green-400">Copied!</span>
-                        )}
+                        <span>Your URL updates instantly</span>
                       </div>
                     </div>
                   </div>

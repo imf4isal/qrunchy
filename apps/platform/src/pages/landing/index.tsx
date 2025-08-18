@@ -33,7 +33,7 @@ export default function LandingPageTest() {
       <Workflows />
       <QRDistribution />
       <RestaurantChainAndFoodCourtExperience />
-      <StructuredPower />
+      {/* <StructuredPower /> */}
       <FAQ />
       <FinalCTA onCTAClick={onCTAClick} />
       <Footer />

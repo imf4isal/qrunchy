@@ -1,8 +1,11 @@
 import React from "react";
-import { QrCode, ArrowRight } from "lucide-react";
+import { QrCode, ArrowRight, LogOut, LayoutDashboard } from "lucide-react";
 import { Container } from "./shared/Container";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Navbar: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => {
+  const { isAuthenticated, logout } = useAuth();
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -17,6 +20,15 @@ export const Navbar: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => 
     window.location.href = "/login";
   };
 
+  const handleLogout = () => {
+    logout();
+    window.location.href = "/";
+  };
+
+  const handleDashboard = () => {
+    window.location.href = "/dashboard";
+  };
+
   return (
     <div className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/60 border-b border-neutral-900/50">
       <Container className="flex h-16 items-center justify-between">
@@ -29,6 +41,14 @@ export const Navbar: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => 
           </span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm text-neutral-400">
+          {isAuthenticated && (
+            <button
+              onClick={handleDashboard}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Dashboard
+            </button>
+          )}
           <a
             href="/how-it-works"
             className="hover:text-white transition-colors cursor-pointer"
@@ -49,18 +69,22 @@ export const Navbar: React.FC<{ onCTAClick: () => void }> = ({ onCTAClick }) => 
           </a>
         </nav>
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleSignIn}
-            className="hidden sm:inline-flex rounded-full border border-neutral-700 px-5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 transition-all duration-200 active:scale-95"
-          >
-            Sign in
-          </button>
-          <button
-            onClick={onCTAClick}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Get started free <ArrowRight className="h-4 w-4" />
-          </button>
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <LogOut className="h-4 w-4" />
+              Log out
+            </button>
+          ) : (
+            <button
+              onClick={handleSignIn}
+              className="inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-neutral-100 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Sign in
+            </button>
+          )}
         </div>
       </Container>
     </div>

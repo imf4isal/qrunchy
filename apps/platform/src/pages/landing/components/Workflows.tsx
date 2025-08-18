@@ -406,7 +406,7 @@ export const Workflows: React.FC = () => {
                         </div>
 
                         {/* Preview categories with items */}
-                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                        <div className="space-y-2 max-h-32 overflow-y-auto scrollbar-hide">
                           {categories.map((cat) => (
                             <div
                               key={cat.id}
