@@ -49,7 +49,7 @@ export const QRDistribution: React.FC = () => {
             bullets: [
               "Publish in seconds",
               "CDN caching",
-              ""Sold out" with one tap",
+              "'Sold out' with one tap",
             ],
           },
         ].map((card, i) => (

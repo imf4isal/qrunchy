@@ -123,16 +123,16 @@ export const FoodCourtExperienceSection: React.FC = () => {
             {/* Navigation buttons */}
             <button
               onClick={prevSlide}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 h-10 w-10 rounded-full border border-neutral-700 bg-neutral-900/80 backdrop-blur-sm text-neutral-300 hover:text-white hover:border-neutral-600 transition-all z-10"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 h-8 w-8 rounded-full border border-neutral-800/60 bg-neutral-950/60 backdrop-blur-sm text-neutral-400 hover:text-neutral-200 hover:border-neutral-700/80 transition-all z-10"
             >
-              <ArrowLeft className="h-4 w-4 mx-auto" />
+              <ArrowLeft className="h-3 w-3 mx-auto" />
             </button>
             
             <button
               onClick={nextSlide}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 h-10 w-10 rounded-full border border-neutral-700 bg-neutral-900/80 backdrop-blur-sm text-neutral-300 hover:text-white hover:border-neutral-600 transition-all z-10"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 h-8 w-8 rounded-full border border-neutral-800/60 bg-neutral-950/60 backdrop-blur-sm text-neutral-400 hover:text-neutral-200 hover:border-neutral-700/80 transition-all z-10"
             >
-              <ArrowRight className="h-4 w-4 mx-auto" />
+              <ArrowRight className="h-3 w-3 mx-auto" />
             </button>
 
             <FoodCourtPhonePreview

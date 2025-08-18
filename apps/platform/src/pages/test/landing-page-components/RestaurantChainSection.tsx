@@ -68,19 +68,19 @@ export const RestaurantChainSection: React.FC = () => {
         className="relative flex justify-center"
       >
         <div className="relative">
-          <div className="absolute -inset-8 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute -inset-8 bg-neutral-800/10 rounded-full blur-3xl"></div>
           <PhonePreview theme="dark" mode="digital">
             <div className="space-y-3">
               {/* Chain Brand Header */}
               <div className="flex items-center gap-3 p-3 rounded-lg border border-neutral-700 bg-gradient-to-r from-neutral-900 to-neutral-800">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                <div className="h-8 w-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-300 text-xs font-bold">
                   MC
                 </div>
                 <div className="flex-1">
                   <div className="text-[11px] font-semibold text-neutral-200">McDonald's</div>
                   <div className="text-[9px] text-neutral-400">Chain Restaurant</div>
                 </div>
-                <div className="text-[8px] text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full border border-green-400/20">
+                <div className="text-[8px] text-neutral-300 bg-neutral-800 px-2 py-0.5 rounded-full border border-neutral-700">
                   LIVE
                 </div>
               </div>
@@ -105,7 +105,7 @@ export const RestaurantChainSection: React.FC = () => {
                   { name: "Apple Pie", price: "$1.29", category: "Desserts" }
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-neutral-950 border border-neutral-800/50">
-                    <div className="h-10 w-10 rounded bg-gradient-to-br from-yellow-600/20 to-red-600/20 border border-yellow-600/30"></div>
+                    <div className="h-10 w-10 rounded bg-neutral-800 border border-neutral-700"></div>
                     <div className="flex-1">
                       <div className="text-[10px] font-medium text-neutral-200">{item.name}</div>
                       <div className="text-[8px] text-neutral-500">{item.category}</div>
@@ -116,8 +116,8 @@ export const RestaurantChainSection: React.FC = () => {
               </div>
 
               {/* Chain-wide promotion banner */}
-              <div className="p-2 rounded-lg bg-gradient-to-r from-red-600/10 to-yellow-600/10 border border-red-600/20">
-                <div className="text-[9px] text-red-400 font-medium">🎉 Chain Special</div>
+              <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800">
+                <div className="text-[9px] text-neutral-200 font-medium">Chain Special</div>
                 <div className="text-[8px] text-neutral-400">Valid at all locations</div>
               </div>
             </div>
