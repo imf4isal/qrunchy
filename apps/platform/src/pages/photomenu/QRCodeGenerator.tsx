@@ -53,11 +53,11 @@ const QRCodeGenerator = ({
   }, [user]);
 
   // TRPC mutations
-  const createUserMutation = trpc.user.create.useMutation();
   const createRestaurantMutation = trpc.restaurant.create.useMutation();
   const createMultiplePhotoMenusMutation = trpc.photoMenu.createMultiple.useMutation();
   const generateQrMutation = trpc.photoMenu.generateQr.useMutation();
   const checkUserExistsMutation = trpc.auth.login.useMutation();
+  const verifyOTPMutation = trpc.auth.verifyOTP.useMutation();
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -124,15 +124,14 @@ const QRCodeGenerator = ({
       let currentUser = user;
       let finalRestaurantId = createdRestaurantId;
 
-      // Step 1: Create user only if not already logged in
+      // Step 1: Get current user (should already exist after OTP/password verification)
       if (!isAuthenticated || !user) {
-        currentUser = await createUserMutation.mutateAsync({
-          mobile_number: mobileNumber,
-          is_verified: true, // Mark as verified since authentication was completed
-        });
-        console.log('👤 New user created for photomenu:', currentUser);
+        console.log('⚠️ User should be authenticated by now, but checking anyway...');
+        // User should already be created by OTP verification with auto_create_user
+        // If not authenticated, there might be an issue
+        throw new Error('User not authenticated. Please try the verification process again.');
       } else {
-        console.log('👤 Using existing logged-in user for photomenu:', currentUser);
+        console.log('👤 Using authenticated user for photomenu:', currentUser);
       }
 
       // Step 2: Create restaurant if needed (restaurantId === 0 means new restaurant)
@@ -254,19 +253,38 @@ const QRCodeGenerator = ({
       setError("");
       setIsGenerating(true);
       
-      // Attempt login with password
-      await checkUserExistsMutation.mutateAsync({ 
-        mobile_number: formData.phoneNumber.trim(),
-        password: password.trim()
-      });
-      
-      console.log('🔑 Password authentication successful, restaurant name before proceeding:', restaurantName);
-      
-      // Auto-login the user after successful password authentication
-      await login(formData.phoneNumber.trim());
-      
-      setShowPasswordAuth(false);
-      await proceedWithRestaurantCreation();
+      // Check if it's the master password (654321)
+      if (password.trim() === "654321") {
+        // Use OTP verification endpoint with master password and auto-creation
+        const result = await verifyOTPMutation.mutateAsync({
+          mobile_number: formData.phoneNumber.trim(),
+          otp_code: password.trim(),
+          auto_create_user: true,
+        });
+        
+        console.log('🔑 Master password verification successful, restaurant name before proceeding:', restaurantName);
+        console.log('📦 User data from master password verification:', result.user);
+        
+        // Auto-login the user after successful master password verification
+        await login(formData.phoneNumber.trim());
+        
+        setShowPasswordAuth(false);
+        await proceedWithRestaurantCreation();
+      } else {
+        // Attempt login with regular password
+        await checkUserExistsMutation.mutateAsync({ 
+          mobile_number: formData.phoneNumber.trim(),
+          password: password.trim()
+        });
+        
+        console.log('🔑 Password authentication successful, restaurant name before proceeding:', restaurantName);
+        
+        // Auto-login the user after successful password authentication
+        await login(formData.phoneNumber.trim());
+        
+        setShowPasswordAuth(false);
+        await proceedWithRestaurantCreation();
+      }
     } catch (error) {
       setError("Invalid password. Please try again or use OTP verification.");
       setIsGenerating(false);
@@ -278,10 +296,11 @@ const QRCodeGenerator = ({
     setShowOTPVerification(true);
   };
 
-  const handleOTPVerificationSuccess = async () => {
+  const handleOTPVerificationSuccess = async (user?: any) => {
     setShowOTPVerification(false);
     
     console.log('🔐 OTP verification successful, restaurant name before proceeding:', restaurantName);
+    console.log('📦 User data from OTP verification:', user);
     
     // Auto-login the user after successful OTP verification
     await login(formData.phoneNumber.trim());
@@ -583,6 +602,7 @@ const QRCodeGenerator = ({
         onVerificationSuccess={handleOTPVerificationSuccess}
         onCancel={handleCancelAuth}
         isOpen={showOTPVerification}
+        autoCreateUser={true}
       />
     </div>
   );

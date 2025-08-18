@@ -40,6 +40,7 @@ const verifyOTPSchema = z.object({
     .length(6, "OTP code must be exactly 6 digits")
     .regex(/^\d{6}$/, "OTP code must contain only digits")
     .transform((val) => val.trim()),
+  auto_create_user: z.boolean().optional().default(false),
 });
 
 const setPasswordSchema = z.object({
@@ -249,15 +250,48 @@ export const authProcedures = {
     .input(verifyOTPSchema)
     .mutation(async ({ input }) => {
       try {
-        const { mobile_number, otp_code } = input;
+        const { mobile_number, otp_code, auto_create_user } = input;
+        let user = null;
 
         // Check if it's the master password
         if (smsService.isMasterPassword(otp_code)) {
           console.log(`🔑 Master password used for ${mobile_number}`);
+          console.log(`🔄 auto_create_user parameter value: ${auto_create_user}`);
+          
+          // If auto_create_user is enabled, check if user exists and create if needed
+          if (auto_create_user) {
+            console.log('🔍 Checking if user exists for auto-creation...');
+            user = await db
+              .selectFrom("user")
+              .selectAll()
+              .where("mobile_number", "=", mobile_number)
+              .executeTakeFirst();
+
+            if (!user) {
+              // Create new user account
+              user = await db
+                .insertInto("user")
+                .values({
+                  mobile_number,
+                  is_verified: true,
+                })
+                .returningAll()
+                .executeTakeFirstOrThrow();
+              
+              console.log(`👤 Auto-created user account for ${mobile_number} via master password`);
+            }
+          }
+          
           return {
             success: true,
             message: "Verification successful",
             verified: true,
+            user: user ? {
+              id: user.id,
+              mobile_number: user.mobile_number,
+              created_at: user.created_at.toISOString(),
+              updated_at: user.updated_at.toISOString(),
+            } : undefined,
           };
         }
 
@@ -307,10 +341,39 @@ export const authProcedures = {
 
         console.log(`✅ OTP verified for ${mobile_number}`);
 
+        // If auto_create_user is enabled, check if user exists and create if needed
+        if (auto_create_user) {
+          user = await db
+            .selectFrom("user")
+            .selectAll()
+            .where("mobile_number", "=", mobile_number)
+            .executeTakeFirst();
+
+          if (!user) {
+            // Create new user account
+            user = await db
+              .insertInto("user")
+              .values({
+                mobile_number,
+                is_verified: true,
+              })
+              .returningAll()
+              .executeTakeFirstOrThrow();
+            
+            console.log(`👤 Auto-created user account for ${mobile_number} via OTP verification`);
+          }
+        }
+
         return {
           success: true,
           message: "OTP verified successfully",
           verified: true,
+          user: user ? {
+            id: user.id,
+            mobile_number: user.mobile_number,
+            created_at: user.created_at.toISOString(),
+            updated_at: user.updated_at.toISOString(),
+          } : undefined,
         };
       } catch (error) {
         console.error("Error verifying OTP:", error);

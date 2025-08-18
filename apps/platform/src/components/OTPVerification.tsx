@@ -6,9 +6,10 @@ import { trpc } from "@/utils/trpc";
 
 interface OTPVerificationProps {
   mobileNumber: string;
-  onVerificationSuccess: () => void;
+  onVerificationSuccess: (user?: any) => void;
   onCancel?: () => void;
   isOpen: boolean;
+  autoCreateUser?: boolean;
 }
 
 export default function OTPVerification({
@@ -16,6 +17,7 @@ export default function OTPVerification({
   onVerificationSuccess,
   onCancel,
   isOpen,
+  autoCreateUser = false,
 }: OTPVerificationProps) {
   const [otpCode, setOtpCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -106,12 +108,13 @@ export default function OTPVerification({
     setError("");
 
     try {
-      await verifyOTPMutation.mutateAsync({
+      const result = await verifyOTPMutation.mutateAsync({
         mobile_number: mobileNumber,
         otp_code: otpCode,
+        auto_create_user: autoCreateUser,
       });
       
-      onVerificationSuccess();
+      onVerificationSuccess(result.user);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");
     } finally {
@@ -152,7 +155,7 @@ export default function OTPVerification({
               {[0, 1, 2, 3, 4, 5].map((index) => (
                 <Input
                   key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
+                  ref={(el) => { inputRefs.current[index] = el; }}
                   type="text"
                   inputMode="numeric"
                   maxLength={6}

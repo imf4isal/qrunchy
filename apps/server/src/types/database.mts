@@ -17,11 +17,14 @@ export interface Database {
   variant: VariantTable;
   variant_option: VariantOptionTable;
   addon: AddonTable;
+  otp_verification: OtpVerificationTable;
 }
 
 export interface UserTable {
   id: Generated<number>;
   mobile_number: string;
+  is_verified: Generated<boolean>;
+  password: string | null;
   created_at: Generated<Date>;
   updated_at: Generated<Date>;
 }
@@ -109,4 +112,14 @@ export interface AddonTable {
   item_id: number;
   name: string;
   price: string;
+}
+
+export interface OtpVerificationTable {
+  id: Generated<number>;
+  mobile_number: string;
+  otp_code: string;
+  expires_at: Date;
+  attempts: Generated<number>;
+  verified_at: Date | null;
+  created_at: Generated<Date>;
 }
