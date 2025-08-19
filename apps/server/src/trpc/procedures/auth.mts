@@ -6,7 +6,7 @@ import { hashPassword, safeComparePassword } from "../../utils/password.mts";
 import { generateJWTToken } from "../../utils/jwt.mts";
 
 // Enhanced validation schemas with better security
-const loginSchema = z.object({
+const loginSchema = z.ob1ject({
   mobile_number: z
     .string()
     .min(1, "Mobile number is required")
