@@ -1,4 +1,4 @@
-name: qrunchy-server
+version: '3.8'
 services:
   qrunchy-server:
     container_name: qrunchy-server
