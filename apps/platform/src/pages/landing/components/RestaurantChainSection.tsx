@@ -40,29 +40,29 @@ export const RestaurantChainSection: React.FC = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
+      className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center"
     >
       {/* Left: Chain Features */}
-      <div className="space-y-8">
+      <div className="space-y-4 lg:space-y-8">
         {chainFeatures.map((feature, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: i * 0.1 }}
-            className="flex gap-4 p-6 rounded-2xl border border-neutral-800 bg-gradient-to-r from-neutral-950 to-neutral-900 hover:from-neutral-900 hover:to-neutral-850 transition-all duration-300"
+            className="flex gap-3 lg:gap-4 p-4 lg:p-6 rounded-xl lg:rounded-2xl border border-neutral-800 bg-gradient-to-r from-neutral-950 to-neutral-900 hover:from-neutral-900 hover:to-neutral-850 transition-all duration-300"
           >
-            <div className="h-12 w-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-neutral-800 border border-neutral-700 shadow-inner text-white">
+            <div className="h-10 w-10 lg:h-12 lg:w-12 flex items-center justify-center rounded-lg lg:rounded-xl bg-gradient-to-br from-white/10 to-neutral-800 border border-neutral-700 shadow-inner text-white">
               {feature.icon}
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-neutral-100 mb-2">
+              <h3 className="text-base lg:text-lg font-semibold text-neutral-100 mb-1 lg:mb-2">
                 {feature.title}
               </h3>
-              <p className="text-neutral-400 mb-3">
+              <p className="text-sm lg:text-base text-neutral-400 mb-2 lg:mb-3">
                 {feature.description}
               </p>
-              <p className="text-sm text-neutral-500">
+              <p className="text-xs lg:text-sm text-neutral-500 hidden sm:block">
                 {feature.details}
               </p>
             </div>

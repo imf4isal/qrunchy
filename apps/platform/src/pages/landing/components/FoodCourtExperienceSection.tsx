@@ -69,9 +69,9 @@ export const FoodCourtExperienceSection: React.FC = () => {
       </div>
 
       {/* Interactive Journey Steps */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
         {/* Left: Step Navigator */}
-        <div className="space-y-4">
+        <div className="space-y-3 lg:space-y-4">
           {foodCourtSteps.map((step, i) => (
             <motion.button
               key={i}
@@ -79,14 +79,14 @@ export const FoodCourtExperienceSection: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: i * 0.1 }}
-              className={`w-full text-left p-6 rounded-2xl border transition-all duration-300 ${
+              className={`w-full text-left p-4 lg:p-6 rounded-xl lg:rounded-2xl border transition-all duration-300 ${
                 activeStep === i
                   ? "border-white bg-gradient-to-r from-neutral-900 to-neutral-800 shadow-lg"
                   : "border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
               }`}
             >
-              <div className="flex items-center gap-4">
-                <div className={`h-10 w-10 rounded-full border-2 flex items-center justify-center text-sm font-bold transition-colors ${
+              <div className="flex items-center gap-3 lg:gap-4">
+                <div className={`h-8 w-8 lg:h-10 lg:w-10 rounded-full border-2 flex items-center justify-center text-xs lg:text-sm font-bold transition-colors ${
                   activeStep === i 
                     ? "border-white text-white bg-neutral-800" 
                     : "border-neutral-700 text-neutral-400"
@@ -94,12 +94,12 @@ export const FoodCourtExperienceSection: React.FC = () => {
                   {i + 1}
                 </div>
                 <div className="flex-1">
-                  <h4 className={`font-semibold mb-1 transition-colors ${
+                  <h4 className={`text-sm lg:text-base font-semibold mb-1 transition-colors ${
                     activeStep === i ? "text-white" : "text-neutral-200"
                   }`}>
                     {step.title}
                   </h4>
-                  <p className={`text-sm transition-colors ${
+                  <p className={`text-xs lg:text-sm transition-colors ${
                     activeStep === i ? "text-neutral-300" : "text-neutral-500"
                   }`}>
                     {step.description}
@@ -115,24 +115,24 @@ export const FoodCourtExperienceSection: React.FC = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="relative flex justify-center"
+          className="relative flex justify-center mt-6 lg:mt-0"
         >
           <div className="relative">
-            <div className="absolute -inset-8 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute -inset-4 lg:-inset-8 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-full blur-3xl"></div>
             
-            {/* Navigation buttons */}
+            {/* Navigation buttons - hidden on mobile */}
             <button
               onClick={prevSlide}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 h-8 w-8 rounded-full border border-neutral-800/60 bg-neutral-950/60 backdrop-blur-sm text-neutral-400 hover:text-neutral-200 hover:border-neutral-700/80 transition-all z-10"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 h-6 w-6 lg:h-8 lg:w-8 rounded-full border border-neutral-800/60 bg-neutral-950/60 backdrop-blur-sm text-neutral-400 hover:text-neutral-200 hover:border-neutral-700/80 transition-all z-10 hidden lg:flex items-center justify-center"
             >
-              <ArrowLeft className="h-3 w-3 mx-auto" />
+              <ArrowLeft className="h-3 w-3" />
             </button>
             
             <button
               onClick={nextSlide}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 h-8 w-8 rounded-full border border-neutral-800/60 bg-neutral-950/60 backdrop-blur-sm text-neutral-400 hover:text-neutral-200 hover:border-neutral-700/80 transition-all z-10"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 h-6 w-6 lg:h-8 lg:w-8 rounded-full border border-neutral-800/60 bg-neutral-950/60 backdrop-blur-sm text-neutral-400 hover:text-neutral-200 hover:border-neutral-700/80 transition-all z-10 hidden lg:flex items-center justify-center"
             >
-              <ArrowRight className="h-3 w-3 mx-auto" />
+              <ArrowRight className="h-3 w-3" />
             </button>
 
             <FoodCourtPhonePreview
@@ -142,12 +142,12 @@ export const FoodCourtExperienceSection: React.FC = () => {
             />
             
             {/* Step indicator */}
-            <div className="flex justify-center mt-4 gap-2">
+            <div className="flex justify-center mt-3 lg:mt-4 gap-1.5 lg:gap-2">
               {foodCourtSteps.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => handleStepClick(i)}
-                  className={`h-2 w-2 rounded-full transition-colors ${
+                  className={`h-1.5 w-1.5 lg:h-2 lg:w-2 rounded-full transition-colors ${
                     activeStep === i ? "bg-white" : "bg-neutral-700"
                   }`}
                 />

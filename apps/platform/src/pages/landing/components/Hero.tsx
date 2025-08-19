@@ -175,13 +175,6 @@ export const Hero: React.FC<{
                   Digital Menu
                 </button>
               </div>
-              <button
-                onClick={() => window.open(`/demo/${short}`, "_blank")}
-                aria-label="Open live demo in new tab"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white hover:border-neutral-600 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <QrCode className="h-4 w-4" /> View Demo
-              </button>
             </motion.div>
 
             <motion.ul
@@ -211,7 +204,7 @@ export const Hero: React.FC<{
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.4 + i * 0.1 }}
                 >
-                  <span className="inline-flex items-center gap-2 rounded-full bg-neutral-800/60 px-4 py-2 text-sm font-medium text-neutral-200 ring-1 ring-inset ring-neutral-700/80 backdrop-blur-sm">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-neutral-800/60 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-neutral-200 ring-1 ring-inset ring-neutral-700/80 backdrop-blur-sm">
                     <span className="text-neutral-400">{item.icon}</span>
                     {item.text}
                   </span>
@@ -266,7 +259,7 @@ export const Hero: React.FC<{
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="absolute -bottom-6 left-1/2 w-[340px] max-w-[90vw] -translate-x-1/2 rounded-2xl border border-neutral-700/80 bg-neutral-900/90 backdrop-blur-lg p-5 shadow-2xl"
               >
-                <div className="flex items-start gap-4 justify-center">
+                <div className="flex items-center gap-4 justify-center">
                   <div className="relative flex flex-col items-center">
                     <RealQRCode
                       text={demoUrl}
@@ -295,7 +288,7 @@ export const Hero: React.FC<{
                         title="Copy URL"
                       >
                         {copied ? (
-                          <Check className="h-3 w-3 text-neutral-300" />
+                          <Check className="h-3 w-3 text-green-300" />
                         ) : (
                           <Copy className="h-3 w-3" />
                         )}
@@ -307,8 +300,8 @@ export const Hero: React.FC<{
                         autoComplete="organization"
                         value={restaurantName}
                         onChange={(e) => setRestaurantName(e.target.value)}
-                        placeholder="Enter your restaurant name"
-                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800/50 px-3 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-neutral-600 transition-all duration-200 hover:border-neutral-600"
+                        placeholder="Your restaurant name"
+                        className="w-full rounded-lg border border-neutral-700 bg-neutral-800/50 px-3 py-2.5 text-xs text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-600 focus:border-neutral-600 transition-all duration-200 hover:border-neutral-600"
                       />
                       <div className="flex items-center justify-between text-xs text-neutral-500">
                         <span>Your URL updates instantly</span>
