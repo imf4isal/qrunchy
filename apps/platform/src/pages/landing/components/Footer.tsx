@@ -15,16 +15,8 @@ export const Footer: React.FC = () => (
             © {new Date().getFullYear()}
           </span>
         </div>
-        <div className="flex items-center gap-6 text-neutral-400">
-          <a href="#" className="hover:text-neutral-200 transition-colors">
-            Privacy
-          </a>
-          <a href="#" className="hover:text-neutral-200 transition-colors">
-            Terms
-          </a>
-          <a href="#" className="hover:text-neutral-200 transition-colors">
-            Contact
-          </a>
+        <div className="text-neutral-400">
+          <span>contact@+880 1918 411 315</span>
         </div>
       </div>
     </Container>

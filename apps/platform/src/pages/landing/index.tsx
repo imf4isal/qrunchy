@@ -41,7 +41,7 @@ export default function LandingPageTest() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-300">
-      <Navbar onCTAClick={onCTAClick} />
+      <Navbar />
       <Hero
         restaurantName={restaurantName}
         setRestaurantName={setRestaurantName}
