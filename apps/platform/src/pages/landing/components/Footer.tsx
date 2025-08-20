@@ -16,7 +16,13 @@ export const Footer: React.FC = () => (
           </span>
         </div>
         <div className="text-neutral-400">
-          <span>contact@+880 1918 411 315</span>
+          <span>contact@ </span>
+          <a 
+            href="tel:+8801918411315" 
+            className="hover:text-neutral-200 transition-colors duration-200 cursor-pointer"
+          >
+            +8801918 411 315
+          </a>
         </div>
       </div>
     </Container>
