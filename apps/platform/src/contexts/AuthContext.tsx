@@ -40,7 +40,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   token: string | null;
-  login: (mobile_number: string) => Promise<void>;
+  login: (mobile_number: string) => Promise<{user: User, restaurants: Restaurant[], token: string}>;
   loginWithPassword: (mobile_number: string, password: string) => Promise<void>;
   logout: () => void;
   refreshSession: () => Promise<void>;
@@ -151,6 +151,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('qrunchy_token', result.token);
       
       console.log('🔐 Login successful with JWT token');
+      
+      // Return the result so components can use it immediately
+      return result;
     } catch (error) {
       clearAuthData();
       throw error; // Re-throw so components can handle the error
