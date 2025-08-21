@@ -1191,3 +1191,40 @@ export function Component({ title, onSubmit }: ComponentProps) {
 ```
 
 ---
+
+## 🔗 Quick Navigation Index
+
+### Core Features by Files
+- **Photo Menu**: `/apps/platform/src/pages/photomenu/PhotoMenu.tsx:311` - Main photo menu creation flow
+- **Digital Menu**: `/apps/platform/src/pages/digitalmenu/DigitalMenu.tsx:576` - Digital menu builder
+- **Menu Builder**: `/apps/platform/src/pages/digitalmenu/MenuBuilder.tsx:1467` - Core menu editing component
+- **Food Court Management**: `/apps/platform/src/pages/dashboard/FoodCourtManager.tsx:750` - Food court admin interface
+- **Customer Menu Viewer**: `/apps/platform/src/pages/menu/theme/CustomerMenuViewer.tsx:531` - Customer-facing menu display
+- **QR Code Generation**: `/apps/platform/src/pages/digitalmenu/QRGenerator.tsx:574` - QR code creation
+
+### Authentication & Security
+- **Auth Context**: `/apps/platform/src/contexts/AuthContext.tsx:350` - Frontend authentication state
+- **Auth Procedures**: `/apps/server/src/trpc/procedures/auth.mts:535` - Backend authentication logic
+- **Password Utils**: `/apps/server/src/utils/password.mts:93` - Secure password hashing
+- **JWT Utils**: `/apps/server/src/utils/jwt.mts:152` - JWT token management
+- **Rate Limiting**: `/apps/server/src/middleware/rateLimiter.mts:199` - API rate limiting
+
+### Database & Backend
+- **tRPC Index**: `/apps/server/src/trpc/index.mts:122` - tRPC setup and middleware
+- **Food Court Queries**: `/apps/server/src/db/queries/foodCourt.mts:316` - Database operations for food courts
+- **Digital Menu Queries**: `/apps/server/src/db/queries/digitalMenu.mts:350` - Menu-related database operations
+- **Migration 017**: `/apps/server/src/db/migrations/017_add_foodcourt_qr_support.mts:65` - Food court database schema
+
+### File Storage & Uploads
+- **File Routes**: `/apps/server/src/restroutes/files.mts:166` - File upload endpoints
+- **Storage Factory**: `/apps/server/src/storage/StorageFactory.mts` - Storage abstraction layer
+- **R2 Provider**: `/apps/server/src/storage/providers/R2StorageProvider.mts` - Cloudflare R2 integration
+
+### Large Components (Refactoring Candidates)
+1. **MenuBuilder.tsx**: 1,467 lines - Menu building logic
+2. **FoodCourtManager.tsx**: 750 lines - Food court management interface
+3. **DummyDigitalMenu.tsx**: 691 lines - Demo menu display
+4. **ItemEditor.tsx**: 617 lines - Menu item editing interface
+5. **Workflows.tsx**: 613 lines - Landing page workflows section
+
+---

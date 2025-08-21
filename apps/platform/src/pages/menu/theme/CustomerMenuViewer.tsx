@@ -6,6 +6,8 @@ import {
   Phone,
   ChevronDown,
   ArrowUp,
+  X,
+  Plus,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import type { Category, MenuItem } from "@/types/digitalMenu";
@@ -187,39 +189,26 @@ export default function CustomerMenuViewer({
             </div>
           </div>
 
-          {/* Restaurant header */}
-          <div className="px-6 py-8 bg-white">
+          {/* Restaurant header - Compact version */}
+          <div className="px-6 py-6 bg-white">
             <div className="mx-auto max-w-5xl">
-              <div className="mb-8">
-                <h1 className="text-2xl font-semibold text-slate-900 mb-2 tracking-tight">
-                  {menuData.restaurant.name}
-                </h1>
-
-                <div className="flex flex-col gap-2">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex-1">
+                  <h1 className="text-2xl font-bold text-slate-900 mb-2 leading-tight">
+                    {menuData.restaurant.name}
+                  </h1>
                   {menuData.restaurant.address && (
-                    <div className="flex items-center gap-3 text-slate-600">
-                      <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                        <MapPin size={16} className="text-slate-500" />
-                      </div>
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <MapPin size={14} className="text-slate-400 flex-shrink-0" />
                       <span className="text-sm leading-relaxed">
                         {menuData.restaurant.address}
-                      </span>
-                    </div>
-                  )}
-                  {menuData.restaurant.phone && (
-                    <div className="flex items-center gap-3 text-slate-600">
-                      <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                        <Phone size={16} className="text-slate-500" />
-                      </div>
-                      <span className="text-sm">
-                        {menuData.restaurant.phone}
                       </span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Search */}
+              {/* Search - Better positioned */}
               <div className="relative">
                 <Search
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -227,13 +216,13 @@ export default function CustomerMenuViewer({
                 />
                 <input
                   type="text"
-                  placeholder="Search dishes..."
+                  placeholder="Search menu items..."
                   value={searchTerm}
-                  aria-label="Search dishes"
+                  aria-label="Search menu items"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setSearchTerm(e.target.value)
                   }
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all text-slate-900 placeholder:text-slate-400"
+                  className="w-full pl-12 pr-4 py-3.5 border border-slate-200 rounded-2xl bg-slate-50 focus:bg-white focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-200/50 transition-all text-sm placeholder:text-slate-400 shadow-sm"
                 />
               </div>
             </div>
@@ -292,12 +281,17 @@ export default function CustomerMenuViewer({
 
                   return (
                     <section key={category.id}>
-                      <div className="sticky top-[200px] bg-white/90 backdrop-blur-xl py-4 mb-6 z-40 -mx-6 px-6 border-b border-slate-100">
-                        <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
-                          {category.name}
-                        </h2>
+                      <div className="sticky top-[180px] bg-gradient-to-b from-white via-white to-white/95 backdrop-blur-sm py-4 mb-8 z-40 -mx-6 px-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-1 h-6 bg-gradient-to-b from-slate-900 to-slate-600 rounded-full"></div>
+                          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                            {category.name}
+                          </h2>
+                        </div>
+                        {/* Subtle fade line */}
+                        <div className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
                       </div>
-                      <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {categoryItems.map((item) => (
                           <MenuItemCard key={item.id} item={item} />
                         ))}
@@ -307,7 +301,7 @@ export default function CustomerMenuViewer({
                 })}
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredItems.map((item: MenuItem) => (
                 <MenuItemCard key={item.id} item={item} />
               ))}
@@ -350,27 +344,23 @@ export default function CustomerMenuViewer({
         </button>
       )}
 
-      {/* Footer */}
-      <div className="mt-16 bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-12">
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-10 h-10 bg-white/10 rounded-2xl mr-3 flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-sm">
-              <span className="font-bold text-white">Q</span>
+      {/* Footer - Consistent with landing page */}
+      <footer className="border-t border-slate-200 bg-white py-8 mt-16">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center shadow-sm">
+                <span className="text-white font-bold text-xs">Q</span>
+              </div>
+              <span className="font-semibold text-slate-900">Qrunchy</span>
+              <span className="text-slate-500">© {new Date().getFullYear()}</span>
             </div>
-            <div className="text-left">
-              <span className="font-semibold text-white text-lg block">
-                Qrunchy
-              </span>
-              <span className="text-white/60 text-sm">
-                Digital menus made simple
-              </span>
+            <div className="text-slate-400 text-xs">
+              Powered by digital menus
             </div>
           </div>
-          <p className="text-white/40 text-xs">
-            Scan. Browse. Order. The future of dining.
-          </p>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
@@ -380,131 +370,183 @@ interface MenuItemCardProps {
 }
 
 function MenuItemCard({ item }: MenuItemCardProps) {
-  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [showOptionsModal, setShowOptionsModal] = useState<boolean>(false);
 
   return (
-    <div className="group bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-xl hover:shadow-slate-900/10 transition-all duration-300 hover:-translate-y-1 ring-1 ring-transparent hover:ring-slate-200">
-      <div className={`${item.image_url ? "md:flex" : ""}`}>
+    <>
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg hover:border-slate-200 transition-all duration-200 group">
+        {/* Fixed aspect ratio image */}
         {item.image_url && (
-          <div className="md:w-2/5 lg:w-1/3 h-48 md:h-56 relative overflow-hidden">
-            <img
+          <div className="aspect-[4/3] relative overflow-hidden">
+            <img 
               src={item.image_url}
               alt={item.name}
               loading="lazy"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
             />
+            {/* Subtle overlay for better contrast */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
           </div>
         )}
-        <div
-          className={`p-6 md:p-8 ${item.image_url ? "md:w-3/5 lg:w-2/3" : "w-full"}`}
-        >
-          <div className="flex justify-between items-start mb-4 md:mb-6">
-            <div className="flex-1 pr-4 md:pr-6">
-              <h3 className="text-base md:text-lg font-semibold text-slate-900 mb-2 leading-tight">
+        
+        <div className="p-5">
+          {/* Compact item info */}
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex-1">
+              <h3 className="font-semibold text-slate-900 text-lg leading-tight mb-1">
                 {item.name}
               </h3>
               {item.description && (
-                <p className="text-slate-600 text-sm leading-relaxed">
+                <p className="text-slate-600 text-sm leading-relaxed line-clamp-2">
                   {item.description}
                 </p>
               )}
             </div>
-            <div className="text-right">
-              <div className="inline-flex items-center rounded-xl bg-slate-50 px-3 py-1.5 border border-slate-200 text-slate-900 text-sm font-semibold">
-                ৳{item.price.toFixed(2)}
-              </div>
+            <div className="ml-4 flex-shrink-0">
+              <span className="text-lg font-bold text-slate-900">
+                ৳{item.price.toFixed(0)}
+              </span>
             </div>
           </div>
-
+          
+          {/* Compact options indicators */}
           {(item.variants.length > 0 || item.addons.length > 0) && (
-            <div className="flex flex-wrap gap-2 md:gap-3 mb-6">
-              {item.variants.map((variant) => (
-                <span
-                  key={variant.id}
-                  className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200"
-                >
-                  {variant.title} ({variant.options.length})
-                </span>
-              ))}
-              {item.addons.length > 0 && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
-                  +{item.addons.length} add-on
-                  {item.addons.length !== 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-          )}
-
-          {(item.variants.length > 0 || item.addons.length > 0) && (
-            <div>
-              <button
-                onClick={() => setShowDetails(!showDetails)}
-                className="flex items-center gap-2 text-slate-600 text-sm font-medium hover:text-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 rounded-lg"
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div className="flex gap-2 flex-wrap">
+                {item.variants.length > 0 && (
+                  <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-100">
+                    {item.variants.length} option{item.variants.length > 1 ? 's' : ''}
+                  </span>
+                )}
+                {item.addons.length > 0 && (
+                  <span className="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-100">
+                    +{item.addons.length} add-on{item.addons.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+              <button 
+                onClick={() => setShowOptionsModal(true)}
+                className="text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors px-2 py-1 rounded-md hover:bg-slate-50"
               >
-                {showDetails ? "Hide options" : "View options"}
-                <ChevronDown
-                  size={16}
-                  className={`transition-transform ${showDetails ? "rotate-180" : ""}`}
-                />
+                View
               </button>
-
-              {showDetails && (
-                <div className="mt-6 pt-6 border-t border-slate-100 space-y-8">
-                  {item.variants.map((variant) => (
-                    <div key={variant.id}>
-                      <h4 className="font-semibold text-slate-900 mb-3 text-sm">
-                        {variant.title}
-                      </h4>
-                      <div className="space-y-3">
-                        {variant.options.map((option) => (
-                          <div
-                            key={option.id}
-                            className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-slate-100 transition-colors"
-                          >
-                            <span className="font-medium text-slate-700 text-sm">
-                              {option.name}
-                            </span>
-                            <span className="font-semibold text-slate-900 text-sm">
-                              {option.price > 0
-                                ? `+৳${option.price.toFixed(2)}`
-                                : "Free"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-
-                  {item.addons.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-slate-900 mb-3 text-sm">
-                        Add-ons
-                      </h4>
-                      <div className="space-y-3">
-                        {item.addons.map((addon) => (
-                          <div
-                            key={addon.id}
-                            className="flex justify-between items-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100 hover:bg-emerald-100 transition-colors"
-                          >
-                            <span className="font-medium text-emerald-800 text-sm">
-                              {addon.name}
-                            </span>
-                            <span className="font-semibold text-emerald-900 text-sm">
-                              +৳{addon.price.toFixed(2)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Options Modal */}
+      {showOptionsModal && (
+        <OptionsModal 
+          item={item} 
+          onClose={() => setShowOptionsModal(false)} 
+        />
+      )}
+    </>
+  );
+}
+
+interface OptionsModalProps {
+  item: MenuItem;
+  onClose: () => void;
+}
+
+function OptionsModal({ item, onClose }: OptionsModalProps) {
+  useEffect(() => {
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/30 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-sm max-h-[75vh] overflow-hidden flex flex-col shadow-xl transform animate-slide-up sm:animate-scale-in border border-slate-100"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Compact Header */}
+        <div className="flex items-center justify-between p-4 border-b border-slate-100">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-semibold text-slate-900 leading-tight truncate">
+              {item.name}
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Base: ৳{item.price.toFixed(0)}
+            </p>
+          </div>
+          <button 
+            onClick={onClose}
+            className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors ml-3 flex-shrink-0"
+          >
+            <X size={16} className="text-slate-400" />
+          </button>
+        </div>
+        
+        {/* Compact Content */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {item.variants.map((variant) => (
+            <div key={variant.id}>
+              <h4 className="font-medium text-slate-800 mb-2 text-xs uppercase tracking-wide">
+                {variant.title}
+              </h4>
+              <div className="space-y-1.5">
+                {variant.options.map((option) => (
+                  <div
+                    key={option.id}
+                    className="flex items-center justify-between py-2 px-3 bg-slate-50/80 hover:bg-slate-100/80 rounded-lg transition-colors"
+                  >
+                    <span className="text-slate-700 text-sm">
+                      {option.name}
+                    </span>
+                    <span className="font-medium text-slate-900 text-sm">
+                      {option.price > 0 ? `+৳${option.price.toFixed(0)}` : 'Free'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {item.addons.length > 0 && (
+            <div>
+              <h4 className="font-medium text-slate-800 mb-2 text-xs uppercase tracking-wide">
+                Add-ons
+              </h4>
+              <div className="space-y-1.5">
+                {item.addons.map((addon) => (
+                  <div
+                    key={addon.id}
+                    className="flex items-center justify-between py-2 px-3 bg-emerald-50/60 hover:bg-emerald-50 rounded-lg transition-colors"
+                  >
+                    <span className="text-emerald-700 text-sm">
+                      {addon.name}
+                    </span>
+                    <span className="font-medium text-emerald-800 text-sm">
+                      +৳{addon.price.toFixed(0)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Simple Close Area */}
+        <div className="p-3 bg-slate-50/50">
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -520,6 +562,52 @@ const styles = `
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { 
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from { 
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to { 
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
 }
 `;
 
