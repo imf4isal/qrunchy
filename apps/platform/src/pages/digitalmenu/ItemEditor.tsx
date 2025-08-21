@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
+import { generateId } from "@/lib/utils";
 import type {
   MenuItem,
   Category,
@@ -124,7 +125,7 @@ export default function ItemEditor({
 
   const handleAddVariant = () => {
     const newVariant: Variant = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       title: "",
       options: [],
     };
@@ -157,7 +158,7 @@ export default function ItemEditor({
 
   const handleAddVariantOption = (variantId: string) => {
     const newOption: VariantOption = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       name: "",
       price: 0,
     };
@@ -211,7 +212,7 @@ export default function ItemEditor({
 
   const handleAddAddon = () => {
     const newAddon: Addon = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       name: "",
       price: 0,
     };

@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemEditor from "./ItemEditor";
 import { trpc } from "@/utils/trpc";
+import { generateId } from "@/lib/utils";
 import type { DigitalMenu, Category, MenuItem } from "@/types/digitalMenu";
 
 interface MenuBuilderProps {
@@ -227,7 +228,7 @@ export default function MenuBuilder({
     if (!restaurantId) {
       // For new restaurants, add to local state only
       const newCategory = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         name: newCategoryName.trim(),
         sortOrder: menu.categories?.length || 0,
       };
@@ -315,7 +316,7 @@ export default function MenuBuilder({
 
   const handleAddItem = (categoryId: string) => {
     const newItem: MenuItem = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       name: "",
       price: 0,
       categoryId,
@@ -464,7 +465,7 @@ export default function MenuBuilder({
         } else {
           // New restaurant: Store in local state for later upload
           const categories = jsonData.categories.map((cat: any, index: number) => ({
-            id: crypto.randomUUID(),
+            id: generateId(),
             name: cat.name,
             sort_order: index,
           }));
@@ -472,24 +473,24 @@ export default function MenuBuilder({
           const items = jsonData.items.map((item: any, index: number) => {
             const category = categories.find((cat: any) => cat.name === item.categoryName);
             return {
-              id: crypto.randomUUID(),
+              id: generateId(),
               name: item.name,
               price: item.price,
               description: item.description || "",
-              categoryId: category?.id || categories[0]?.id || crypto.randomUUID(),
+              categoryId: category?.id || categories[0]?.id || generateId(),
               sort_order: index,
               image_url: item.image_url, // Preserve image URL from JSON
               variants: item.variants.map((variant: any) => ({
-                id: crypto.randomUUID(),
+                id: generateId(),
                 title: variant.title,
                 options: variant.options.map((option: any) => ({
-                  id: crypto.randomUUID(),
+                  id: generateId(),
                   name: option.name,
                   price: option.price,
                 })),
               })),
               addons: item.addons.map((addon: any) => ({
-                id: crypto.randomUUID(),
+                id: generateId(),
                 name: addon.name,
                 price: addon.price,
               })),
