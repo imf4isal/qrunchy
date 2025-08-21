@@ -399,6 +399,17 @@ export const itemsProcedures = {
     }))
     .mutation(async ({ input }) => {
       try {
+        // First check if the item exists
+        const existingItem = await db
+          .selectFrom("item")
+          .selectAll()
+          .where("id", "=", input.id)
+          .executeTakeFirst();
+
+        if (!existingItem) {
+          throw new Error(`Item with id ${input.id} not found`);
+        }
+
         const updatedItem = await db
           .updateTable("item")
           .set({ image_url: input.image_url })

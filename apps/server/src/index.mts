@@ -51,6 +51,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://192.168.107.3:5173",
       "https://qrunchy.menu",
       "https://www.qrunchy.menu",
       process.env.FRONTEND_URL,

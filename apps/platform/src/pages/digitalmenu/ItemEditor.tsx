@@ -100,8 +100,9 @@ export default function ItemEditor({
       handleBasicInfoChange('image_url', imageUrl);
       
       // Step 3: For existing items, immediately persist to database via tRPC
-      const isExistingItem = item.id && !isNaN(parseInt(item.id, 10));
-      if (isExistingItem) {
+      // Check if item.id is a numeric database ID (not a UUID from generateId)
+      const isNumericId = item.id && /^\d+$/.test(item.id.toString());
+      if (isNumericId) {
         console.log('📤 Persisting image to database for existing item:', parseInt(item.id, 10));
         await updateItemImageMutation.mutateAsync({
           id: parseInt(item.id, 10),
