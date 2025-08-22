@@ -154,35 +154,34 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
     );
   }
 
-  // Modern Theme
+  // Modern Theme - Sophisticated horizontal layout
   return (
-    <div className="max-h-96 overflow-y-auto bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      {/* Header */}
-      <div className="p-4 sm:p-6 relative">
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
-          <div className="flex items-center text-xs opacity-75">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-white bg-opacity-20 rounded mr-1 flex items-center justify-center text-white font-bold text-xs">
-              Q
-            </div>
-            <span className="hidden sm:inline">qrunchy</span>
+    <div className="max-h-96 overflow-y-auto bg-gray-50 text-gray-900">
+      {/* Clean Header */}
+      <div className="bg-white border-b border-gray-100 p-3">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-base font-bold text-gray-900 mb-1">
+              {restaurant?.name || menu.restaurantName || "Restaurant Name"}
+            </h1>
+            {restaurant?.address && (
+              <p className="text-gray-600 text-xs">{restaurant.address}</p>
+            )}
           </div>
         </div>
-        
-        <div className="mb-4 sm:mb-6 pr-12 sm:pr-16">
-          <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent mb-2">
-            {restaurant?.name || menu.restaurantName || "Restaurant Name"}
-          </h1>
-          <p className="text-gray-300 text-xs sm:text-sm mb-2">Digital Menu</p>
-          {restaurant?.address && (
-            <div className="flex items-center text-gray-400 text-xs break-words">
-              <span>{restaurant.address}</span>
-            </div>
-          )}
+
+        {/* Category Navigation */}
+        <div className="flex gap-1 text-xs">
+          <button className="px-3 py-2 text-orange-600 border-b-2 border-orange-600 font-medium">
+            All
+          </button>
+          <button className="px-3 py-2 text-gray-600">Pizza</button>
+          <button className="px-3 py-2 text-gray-600">Burgers</button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="px-3 sm:px-6 pb-4 sm:pb-6 space-y-6 sm:space-y-8">
+      {/* Content - Horizontal Layout */}
+      <div className="p-3 space-y-4">
         {(menu.categories || [])
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map((category) => {
@@ -191,55 +190,58 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
 
             return (
               <div key={category.id}>
-                <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 pb-3 border-b border-white/20">
+                <h2 className="text-sm font-bold text-gray-900 mb-2">
                   {category.name}
                 </h2>
+                <div className="w-6 h-0.5 bg-orange-500 mb-3"></div>
 
-                <div className="space-y-4 sm:space-y-6">
+                <div className="space-y-3">
                   {categoryItems.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-gradient-to-r from-white/10 to-gray-50/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl"
+                      className="flex gap-3 bg-white rounded-lg border border-gray-100 p-3 hover:shadow-md transition-shadow"
                     >
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 sm:mb-4 gap-2">
-                        <div className="flex-1">
-                          <h3 className="text-lg sm:text-xl font-bold text-white leading-tight mb-2">
-                            {item.name || "Untitled Item"}
-                          </h3>
-                          {item.description && (
-                            <p className="text-gray-300 leading-relaxed text-xs sm:text-sm">
-                              {item.description}
-                            </p>
+                      {/* Image placeholder */}
+                      <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                        <span className="text-gray-400 text-xs">🍕</span>
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="flex-1 min-w-0 pr-2">
+                            <h3 className="font-bold text-gray-900 text-sm leading-tight truncate">
+                              {item.name || "Untitled Item"}
+                            </h3>
+                            {item.description && (
+                              <p className="text-gray-600 text-xs leading-relaxed line-clamp-1">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                          
+                          {/* Price */}
+                          <div className="flex-shrink-0 text-right">
+                            <div className="text-sm font-bold text-gray-900">
+                              ৳{item.price.toFixed(0)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Options */}
+                        <div className="flex gap-1 mt-2">
+                          {item.variants.length > 0 && (
+                            <span className="px-2 py-0.5 bg-orange-50 text-orange-700 text-xs font-medium rounded border border-orange-200">
+                              {item.variants.length} size{item.variants.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                          {item.addons.length > 0 && (
+                            <span className="px-2 py-0.5 bg-gray-50 text-gray-700 text-xs font-medium rounded border border-gray-200">
+                              +{item.addons.length}
+                            </span>
                           )}
                         </div>
                       </div>
-
-                      <div className="flex justify-between items-center mb-3 sm:mb-4">
-                        <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-200 via-gray-100 to-white bg-clip-text text-transparent">
-                          ৳{item.price.toFixed(2)}
-                        </div>
-                      </div>
-
-                      {/* Variants */}
-                      {item.variants.length > 0 && (
-                        <div className="mb-3 sm:mb-4 space-y-2 sm:space-y-3">
-                          <div className="flex flex-wrap gap-1 sm:gap-2">
-                            {item.variants.map((variant) => (
-                              <span
-                                key={variant.id}
-                                className="inline-flex items-center px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-gray-50/10 to-gray-100/10 text-gray-300 text-xs sm:text-sm font-medium border border-gray-200/20 shadow-sm"
-                              >
-                                ✨ {variant.title} ({variant.options.length})
-                              </span>
-                            ))}
-                            {item.addons.length > 0 && (
-                              <span className="inline-flex items-center px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-gray-50/10 to-gray-100/10 text-gray-300 text-xs sm:text-sm font-medium border border-gray-200/20 shadow-sm">
-                                🍽️ +{item.addons.length} add-on{item.addons.length !== 1 ? "s" : ""}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -248,27 +250,22 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
           })}
 
         {(!menu.categories || menu.categories.length === 0) && (
-          <div className="text-center py-12 text-gray-400">
-            <p>No categories added yet</p>
+          <div className="text-center py-8 text-gray-500">
+            <p className="text-xs">No categories added yet</p>
           </div>
         )}
 
         {(menu.categories && menu.categories.length > 0) && (!menu.items || menu.items.length === 0) && (
-          <div className="text-center py-12 text-gray-400">
-            <p>Add items to your categories to see them here</p>
+          <div className="text-center py-8 text-gray-500">
+            <p className="text-xs">Add items to your categories to see them here</p>
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="p-4 bg-gradient-to-r from-gray-950/50 to-gray-900/50 border-t border-white/10">
-        <div className="flex items-center justify-center text-xs text-gray-400">
-          <div className="flex items-center">
-            <div className="w-4 h-4 bg-gradient-to-r from-gray-400 to-gray-500 rounded mr-2 flex items-center justify-center text-white font-bold text-xs">
-              Q
-            </div>
-            <span className="font-medium">Powered by Qrunchy</span>
-          </div>
+      {/* Clean Footer */}
+      <div className="bg-white border-t border-gray-100 p-2">
+        <div className="flex items-center justify-center text-xs text-gray-500">
+          <span>Powered by Qrunchy</span>
         </div>
       </div>
     </div>

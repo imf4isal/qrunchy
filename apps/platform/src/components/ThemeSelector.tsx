@@ -20,9 +20,9 @@ const THEME_OPTIONS = [
   {
     id: "modern" as const, 
     name: "Modern",
-    description: "Bold, sophisticated design with elegant gradients",
-    preview: "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900",
-    accent: "gray",
+    description: "Sophisticated horizontal layout inspired by premium restaurant menus",
+    preview: "bg-gray-50",
+    accent: "orange",
   },
 ];
 
@@ -127,6 +127,8 @@ export default function ThemeSelector({
                 isSelected
                   ? theme.accent === "slate" 
                     ? "border-slate-500 bg-slate-50" 
+                    : theme.accent === "orange"
+                    ? "border-orange-500 bg-orange-50"
                     : "border-indigo-500 bg-indigo-50"
                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
               } ${isUpdating && isSelected ? "opacity-50" : ""}`}
@@ -164,6 +166,8 @@ export default function ThemeSelector({
                   isSelected 
                     ? theme.accent === "slate"
                       ? "border-slate-500 bg-slate-500"
+                      : theme.accent === "orange"
+                      ? "border-orange-500 bg-orange-500"
                       : "border-indigo-500 bg-indigo-500"
                     : "border-gray-300"
                 }`}>

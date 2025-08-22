@@ -1,0 +1,225 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        project: [chromium, firefox, webkit]
+      fail-fast: false
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9.0.0
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: pnpm exec playwright install --with-deps ${{ matrix.project }}
+    
+    - name: Start development server
+      run: |
+        pnpm run dev &
+        sleep 30
+        curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:5173
+      env:
+        CI: true
+    
+    - name: Run Playwright tests
+      run: pnpm exec playwright test --project=${{ matrix.project }}
+      env:
+        CI: true
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: playwright-report-${{ matrix.project }}
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 7
+
+  mobile-test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9.0.0
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: pnpm exec playwright install --with-deps chromium
+    
+    - name: Start development server
+      run: |
+        pnpm run dev &
+        sleep 30
+        curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:5173
+      env:
+        CI: true
+    
+    - name: Run Mobile tests
+      run: pnpm exec playwright test --project="Mobile Chrome" --project="Mobile Safari"
+      env:
+        CI: true
+    
+    - name: Upload mobile test results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: playwright-report-mobile
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 7
+
+  performance-test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9.0.0
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: pnpm exec playwright install --with-deps chromium
+    
+    - name: Start development server
+      run: |
+        pnpm run dev &
+        sleep 30
+        curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:5173
+      env:
+        CI: true
+    
+    - name: Run Performance tests
+      run: pnpm exec playwright test e2e/tests/photo-menu-performance.spec.ts --project=chromium
+      env:
+        CI: true
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-report
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 14
+
+  visual-regression:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9.0.0
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: pnpm exec playwright install --with-deps chromium
+    
+    - name: Start development server
+      run: |
+        pnpm run dev &
+        sleep 30
+        curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:5173
+      env:
+        CI: true
+    
+    - name: Run Visual regression tests
+      run: pnpm exec playwright test e2e/tests/photo-menu-cross-browser.spec.ts --project=chromium --update-snapshots
+      env:
+        CI: true
+    
+    - name: Upload visual regression results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: visual-regression-report
+        path: |
+          playwright-report/
+          test-results/
+          e2e/tests/**/*-actual.png
+          e2e/tests/**/*-diff.png
+        retention-days: 14
+
+  test-summary:
+    if: always()
+    needs: [test, mobile-test, performance-test, visual-regression]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Test Summary
+      run: |
+        echo "## E2E Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Suite | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Cross-browser Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Mobile Tests | ${{ needs.mobile-test.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Performance Tests | ${{ needs.performance-test.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Visual Regression | ${{ needs.visual-regression.result }} |" >> $GITHUB_STEP_SUMMARY
+    
+    - name: Check all tests passed
+      if: needs.test.result != 'success' || needs.mobile-test.result != 'success' || needs.performance-test.result != 'success'
+      run: |
+        echo "Some tests failed. Check the individual job logs for details."
+        exit 1
