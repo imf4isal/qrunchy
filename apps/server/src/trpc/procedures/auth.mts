@@ -190,28 +190,41 @@ export const authProcedures = {
     .mutation(async ({ input }) => {
     try {
       const { mobile_number } = input;
+      console.log(`🎯 [AUTH] sendOTP called for: ${mobile_number}`);
 
-      // Check rate limiting - max 3 OTP requests per hour per mobile number
-      const hourAgo = new Date();
-      hourAgo.setHours(hourAgo.getHours() - 1);
+      // Check rate limiting - max 10 OTP requests per hour per mobile number
+      // Skip rate limiting in development mode
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      
+      if (isDevelopment) {
+        console.log(`🚫 [AUTH] Rate limiting bypassed for development environment`);
+      } else {
+        const hourAgo = new Date();
+        hourAgo.setHours(hourAgo.getHours() - 1);
 
-      const recentOTPs = await db
-        .selectFrom("otp_verification")
-        .selectAll()
-        .where("mobile_number", "=", mobile_number)
-        .where("created_at", ">", hourAgo)
-        .execute();
+        const recentOTPs = await db
+          .selectFrom("otp_verification")
+          .selectAll()
+          .where("mobile_number", "=", mobile_number)
+          .where("created_at", ">", hourAgo)
+          .execute();
 
-      if (recentOTPs.length >= 10) {
-        throw new Error(
-          "Too many OTP requests. Please try again after an hour."
-        );
+        console.log(`🔢 [AUTH] Recent OTPs in last hour: ${recentOTPs.length}/10`);
+
+        if (recentOTPs.length >= 10) {
+          console.warn(`🚫 [AUTH] Rate limit exceeded for ${mobile_number}`);
+          throw new Error(
+            "Too many OTP requests. Please try again after an hour."
+          );
+        }
       }
 
       // Generate OTP
       const otpCode = smsService.generateOTP();
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 5); // Expires in 5 minutes
+
+      console.log(`🎲 [AUTH] Generated OTP: ${otpCode} (expires at ${expiresAt.toISOString()})`);
 
       // Save OTP to database
       await db
@@ -224,15 +237,20 @@ export const authProcedures = {
         })
         .execute();
 
+      console.log(`💾 [AUTH] OTP saved to database for ${mobile_number}`);
+
       // Send SMS
+      console.log(`📤 [AUTH] Calling SMS service...`);
       const smsResult = await smsService.sendOTP(mobile_number, otpCode);
 
+      console.log(`📥 [AUTH] SMS service result:`, smsResult);
+
       if (!smsResult.success) {
-        console.error("Failed to send SMS:", smsResult.error);
+        console.error("❌ [AUTH] Failed to send SMS:", smsResult.error);
         throw new Error("Failed to send OTP. Please try again.");
       }
 
-      console.log(`📱 OTP sent to ${mobile_number}: ${otpCode}`);
+      console.log(`✅ [AUTH] OTP process completed for ${mobile_number}: ${otpCode}`);
 
       return {
         success: true,
@@ -240,7 +258,7 @@ export const authProcedures = {
         expires_in_minutes: 5,
       };
     } catch (error) {
-      console.error("Error sending OTP:", error);
+      console.error("💥 [AUTH] Error in sendOTP:", error);
       throw error;
     }
   }),

@@ -16,9 +16,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
     window.location.href = "/dashboard";
   };
 
-  const handleLogout = () => {
-    logout();
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // No manual redirect needed - auth state change will handle navigation
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback redirect on error
+      window.location.href = "/";
+    }
   };
 
   return (

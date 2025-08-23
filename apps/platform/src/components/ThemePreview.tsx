@@ -64,19 +64,34 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
                   <div className="space-y-3 sm:space-y-4">
                     {categoryItems.map((item) => (
                       <div key={item.id} className="border-b border-gray-100 pb-3 sm:pb-4 last:border-b-0">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-1 sm:gap-2">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-gray-900 text-sm sm:text-base">
-                              {item.name || "Untitled Item"}
-                            </h4>
-                            {item.description && (
-                              <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="sm:ml-3 font-semibold text-gray-900 text-sm sm:text-base shrink-0">
-                            ৳{item.price.toFixed(2)}
+                        <div className="flex gap-3 mb-2">
+                          {/* Item image if available */}
+                          {(item as any).image_url && (
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                              <img 
+                                src={(item as any).image_url}
+                                alt={item.name || "Menu item"}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-gray-900 text-sm sm:text-base">
+                                  {item.name || "Untitled Item"}
+                                </h4>
+                                {item.description && (
+                                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                                    {item.description}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="sm:ml-3 font-semibold text-gray-900 text-sm sm:text-base shrink-0">
+                                ৳{item.price.toFixed(2)}
+                              </div>
+                            </div>
                           </div>
                         </div>
 
@@ -175,8 +190,14 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
           <button className="px-3 py-2 text-orange-600 border-b-2 border-orange-600 font-medium">
             All
           </button>
-          <button className="px-3 py-2 text-gray-600">Pizza</button>
-          <button className="px-3 py-2 text-gray-600">Burgers</button>
+          {(menu.categories || [])
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .slice(0, 2)
+            .map((category) => (
+              <button key={category.id} className="px-3 py-2 text-gray-600">
+                {category.name}
+              </button>
+            ))}
         </div>
       </div>
 
@@ -201,9 +222,18 @@ export default function ThemePreview({ menu, theme, restaurant }: ThemePreviewPr
                       key={item.id}
                       className="flex gap-3 bg-white rounded-lg border border-gray-100 p-3 hover:shadow-md transition-shadow"
                     >
-                      {/* Image placeholder */}
-                      <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">🍕</span>
+                      {/* Image or placeholder */}
+                      <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                        {(item as any).image_url ? (
+                          <img 
+                            src={(item as any).image_url}
+                            alt={item.name || "Menu item"}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <span className="text-gray-400 text-xs">🍕</span>
+                        )}
                       </div>
                       
                       {/* Content */}
