@@ -345,6 +345,17 @@ export const authProcedures = {
           .where("id", "=", otpRecord.id)
           .execute();
 
+        // Debug OTP verification
+        console.log('🔍 [DEBUG] OTP Verification Debug:');
+        console.log('   - Database OTP:', JSON.stringify(otpRecord.otp_code));
+        console.log('   - Input OTP:', JSON.stringify(otp_code));
+        console.log('   - Database OTP type:', typeof otpRecord.otp_code);
+        console.log('   - Input OTP type:', typeof otp_code);
+        console.log('   - Length DB:', otpRecord.otp_code?.length);
+        console.log('   - Length Input:', otp_code?.length);
+        console.log('   - Strict equality:', otpRecord.otp_code === otp_code);
+        console.log('   - Trimmed comparison:', otpRecord.otp_code?.trim() === otp_code?.trim());
+
         // Verify OTP code
         if (otpRecord.otp_code !== otp_code) {
           throw new Error("Invalid OTP code. Please try again.");

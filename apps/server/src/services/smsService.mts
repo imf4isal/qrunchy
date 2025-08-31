@@ -89,8 +89,8 @@ export class SMSService {
           };
         }
 
-        // Check if API status indicates success (SMS Orbis uses "200" for success)
-        if (responseData.status === "200" || responseData.status === 200) {
+        // Check if API status indicates success (SMS Orbis uses "1" for success)
+        if (responseData.status === "1" || responseData.status === 1) {
           console.log(`✅ [SMS] OTP sent successfully to ${formattedNumber}`);
           return {
             success: true,
