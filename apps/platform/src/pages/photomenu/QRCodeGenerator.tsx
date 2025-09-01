@@ -26,7 +26,7 @@ const QRCodeGenerator = ({
   onQrGenerated 
 }: QRCodeGeneratorProps) => {
   const { setCurrentRestaurant } = useRestaurant();
-  const { user, addRestaurant, isAuthenticated, login } = useAuth();
+  const { user, addRestaurant, isAuthenticated, login, token } = useAuth();
   const [, setLocation] = useLocation();
   
   const [qrGenerated, setQrGenerated] = useState(false);

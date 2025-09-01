@@ -211,7 +211,7 @@ export const authProcedures = {
 
         console.log(`🔢 [AUTH] Recent OTPs in last hour: ${recentOTPs.length}/10`);
 
-        if (recentOTPs.length >= 10) {
+        if (recentOTPs.length >= 20) {
           console.warn(`🚫 [AUTH] Rate limit exceeded for ${mobile_number}`);
           throw new Error(
             "Too many OTP requests. Please try again after an hour."
