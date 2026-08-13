@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${HOST_BACKEND_PORT:-3001}:${PORT:-3001}"
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       # Database Configuration
@@ -16,6 +16,7 @@ services:
       DB_NAME: ${DB_NAME:-qrunchy_db}
       DB_USER: ${DB_USER:-qrunchy}
       DB_PASSWORD: ${DB_PASSWORD:-qrunchy_password}
+      PORT: ${PORT:-3001}
       # SMS Configuration
       SMS_ORBIS_API_KEY: ${SMS_ORBIS_API_KEY}
       SMS_ORBIS_SENDER_ID: ${SMS_ORBIS_SENDER_ID}
@@ -50,7 +51,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-qrunchy_password}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "${HOST_DB_PORT:-5434}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

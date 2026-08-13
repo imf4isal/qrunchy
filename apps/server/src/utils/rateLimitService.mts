@@ -21,7 +21,9 @@ class RateLimitService {
   private configs = {
     otp: {
       windowMs: 60 * 60 * 1000, // 1 hour
-      maxRequests: 3,
+      maxRequests: process.env.OTP_RATE_LIMIT_MAX
+        ? parseInt(process.env.OTP_RATE_LIMIT_MAX, 10)
+        : 20,
       errorMessage: 'Too many OTP requests. Please try again in 1 hour.'
     },
     login: {

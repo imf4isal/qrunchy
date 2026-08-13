@@ -8,23 +8,24 @@ services:
     working_dir: /app
     command: sh -c "pnpm install --force && pnpm dev"
     ports:
-      - target: 5173
-        published: 5173
-      - target: 3000
-        published: 3000
+      - "${HOST_FRONTEND_PORT:-5174}:5173"
+      - "${HOST_BACKEND_PORT:-3001}:${PORT:-3001}"
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
+      DB_HOST: postgres
+      DB_PORT: 5432
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      PORT: ${PORT:-3001}
       # Server Configuration
       FRONTEND_URL: ${FRONTEND_URL}
+      VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:3001}
       # JWT Configuration
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
       # OTP Configuration
+      OTP_RATE_LIMIT_MAX: ${OTP_RATE_LIMIT_MAX:-20}
       OTP_MASTER_PASSWORD: ${OTP_MASTER_PASSWORD}
       SMS_ORBIS_API_KEY: ${SMS_ORBIS_API_KEY}
       SMS_ORBIS_SENDER_ID: ${SMS_ORBIS_SENDER_ID}
@@ -51,8 +52,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - target: 5432
-        published: 5432
+      - "${HOST_DB_PORT:-5434}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

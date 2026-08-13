@@ -4,7 +4,7 @@ import { QrCode, Download, Copy, Check, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/utils/trpc";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, type User } from "@/contexts/AuthContext";
 import OTPVerification from "@/components/OTPVerification";
 import type { DigitalMenu } from "@/types/digitalMenu";
 
@@ -74,7 +74,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
     await proceedWithRestaurantCreation();
   };
 
-  const proceedWithRestaurantCreation = async () => {
+  const proceedWithRestaurantCreation = async (authenticatedUser: User | null = user) => {
     setIsGenerating(true);
     
     try {
@@ -83,13 +83,13 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
         selectedTheme: selectedTheme,
         mobileNumber: mobileNumber.trim(),
         isAuthenticated: isAuthenticated,
-        userId: user?.id
+        userId: authenticatedUser?.id
       });
 
-      let currentUser = user;
+      let currentUser = authenticatedUser;
 
       // Step 1: Create user only if not already logged in
-      if (!isAuthenticated || !user) {
+      if (!currentUser) {
         currentUser = await createUserMutation.mutateAsync({
           mobile_number: mobileNumber.trim(),
           is_verified: true, // Mark as verified since OTP was verified
@@ -185,7 +185,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
 
       // Log the user in only if they weren't already authenticated
       // This will also refresh the restaurants list from the server
-      if (!isAuthenticated || !user) {
+      if (!authenticatedUser) {
         await login(mobileNumber.trim());
       }
 
@@ -230,7 +230,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
       setIsGenerating(true);
       
       // Attempt login with password
-      await checkUserExistsMutation.mutateAsync({ 
+      await checkUserExistsMutation.mutateAsync({
         mobile_number: mobileNumber.trim(),
         password: password.trim()
       });
@@ -238,10 +238,10 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
       console.log('🔑 Password authentication successful');
       
       // Auto-login the user after successful password authentication
-      await login(mobileNumber.trim());
+      const loginResult = await login(mobileNumber.trim());
       
       setShowPasswordAuth(false);
-      await proceedWithRestaurantCreation();
+      await proceedWithRestaurantCreation(loginResult.user);
     } catch (error) {
       setError("Invalid password. Please try again or use OTP verification.");
       setIsGenerating(false);
@@ -253,20 +253,21 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
     setShowOTPVerification(true);
   };
 
-  const handleOTPVerificationSuccess = async () => {
+  const handleOTPVerificationSuccess = async (verifiedUser?: User) => {
     setShowOTPVerification(false);
     setNeedsVerification(false);
-    
+
     console.log('🔐 OTP verification successful');
-    
+
+    if (!verifiedUser) {
+      throw new Error("OTP was verified, but the user account was not created");
+    }
+
     // Auto-login the user after successful OTP verification
-    await login(mobileNumber.trim());
-    
-    // Clear draft since registration is successful
-    localStorage.removeItem('qrunchy_menu_draft');
-    
+    const loginResult = await login(mobileNumber.trim());
+
     // Proceed with restaurant creation
-    await proceedWithRestaurantCreation();
+    await proceedWithRestaurantCreation(loginResult.user);
   };
 
   const handleCancelAuth = () => {
@@ -568,6 +569,7 @@ export default function QRGenerator({ menu, selectedTheme = "minimal", selectedC
         onVerificationSuccess={handleOTPVerificationSuccess}
         onCancel={handleCancelAuth}
         isOpen={showOTPVerification}
+        autoCreateUser={true}
       />
     </div>
   );

@@ -3,10 +3,11 @@ import { Loader2, Shield, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/utils/trpc";
+import type { User } from "@/contexts/AuthContext";
 
 interface OTPVerificationProps {
   mobileNumber: string;
-  onVerificationSuccess: (user?: any) => void;
+  onVerificationSuccess: (user?: User) => void | Promise<void>;
   onCancel?: () => void;
   isOpen: boolean;
   autoCreateUser?: boolean;
@@ -114,7 +115,7 @@ export default function OTPVerification({
         auto_create_user: autoCreateUser,
       });
       
-      onVerificationSuccess(result.user);
+      await onVerificationSuccess(result.user);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");
     } finally {

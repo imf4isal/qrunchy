@@ -12,7 +12,7 @@ import { Request, Response } from 'express';
  */
 export const otpRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: process.env.OTP_RATE_LIMIT_MAX ? parseInt(process.env.OTP_RATE_LIMIT_MAX) : 3, // Configurable rate limit for OTP requests
+  max: process.env.OTP_RATE_LIMIT_MAX ? parseInt(process.env.OTP_RATE_LIMIT_MAX, 10) : 20, // Configurable rate limit for OTP requests
   message: {
     error: 'Too many OTP requests',
     message: 'You have exceeded the maximum number of OTP requests. Please try again in 1 hour.',

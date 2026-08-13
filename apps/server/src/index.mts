@@ -69,7 +69,7 @@ app.use(routes);
 
 app.use(trpcRouter);
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT} - CI/CD Test`);
   console.log(`tRPC API available at http://localhost:${PORT}/trpc`);
